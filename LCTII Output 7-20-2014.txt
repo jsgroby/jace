@@ -1,0 +1,1345 @@
+4 physical cores detected
+92954 entries found in book file
+92954 entries read in from book file
+64MB HashTable initialization complete with 2796200 entries
+
+"How about a nice game of chess?"
+
+Welcome to Jace! Type 'jace' for console mode...
+
+Game Board:
+
+8    r  .  .  .  k  b  .  r
+7    .  .  .  n  .  p  p  .
+6    p  .  .  .  .  .  .  p
+5    .  .  p  P  p  .  .  q
+4    P  p  .  .  N  .  .  .
+3    .  .  .  B  .  .  P  P
+2    .  P  Q  .  .  P  .  .
+1    R  .  .  .  K  .  .  R
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:KQkq
+PosKey:35CB26DA19F14CC0
+
+r3kb1r/3n1pp1/p6p/2pPp2q/Pp2N3/3B2PP/1PQ2P2/R3K2R w KQkq - bm d6; id "LCTII.POS.01"; c0 "Chernin - Miles, Tunis 1985";
+
+time:1140000 start:1348701739 stop:1349841739 depth:64 timeset:1
+info score cp -27 depth 1 nodes 92 time 10 pv d5d6
+info score cp -27 depth 2 nodes 1171 time 10 pv d5d6 h5f3
+info score cp -27 depth 3 nodes 6374 time 11 pv g3g4 h5h4 d5d6
+info score cp -32 depth 4 nodes 22129 time 17 pv g3g4 h5h4 d5d6 d7f6
+info score cp -17 depth 5 nodes 48005 time 25 pv g3g4 h5h4 d5d6 h6h5 g4g5
+info score cp -17 depth 6 nodes 141306 time 53 pv g3g4 h5h4 d5d6 h6h5 g4g5 h8g8
+info score cp -12 depth 7 nodes 300208 time 103 pv g3g4 h5h4 d5d6 d7f6 e1c1 f6e4 d3e4
+info score cp -17 depth 8 nodes 1026537 time 316 pv g3g4 h5h4 d5d6 h4d8 e1c1 d8b6 d3c4 a8d8
+info score cp -12 depth 9 nodes 1799162 time 554 pv g3g4 h5h4 d5d6 h4d8 e1c1 d8a5 d3c4 d7b6
+info score cp -5 depth 10 nodes 10411047 time 3131 pv d5d6 h5f3 e1g1 f3h5 a4a5 h5h3 c2a4 a8d8 d3a6 f7f5
+info score cp 0 depth 11 nodes 31230781 time 9457 pv d5d6 h5f3 e4c5 f3h1
+info score cp 15 depth 12 nodes 154519962 time 46297 pv d5d6 f7f5
+info score cp 35 depth 13 nodes 469297125 time 139790 pv d5d6 h5g6 e4c5
+info score cp 50 depth 14 nodes 1291824038 time 383302 pv d5d6 e8d8 e4c5 f8d6
+bestmove d5d6
+
+Game Board:
+
+8    .  k  .  r  .  .  .  r
+7    p  p  .  .  q  p  p  .
+6    .  .  .  b  .  n  .  p
+5    .  .  .  p  N  Q  .  .
+4    .  .  p  P  .  P  .  .
+3    .  .  N  .  P  .  .  .
+2    P  P  .  .  .  .  P  P
+1    .  K  .  R  R  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:BD1365B6E5A70D62
+
+1k1r3r/pp2qpp1/3b1n1p/3pNQ2/2pP1P2/2N1P3/PP4PP/1K1RR3 b - - bm Bb4; id "LCTII.POS.02"; c0 "Lilienthal - Botvinnik, Moskau 1945";
+
+time:1140000 start:1349841740 stop:1350981740 depth:64 timeset:1
+info score cp -12 depth 1 nodes 134 time 9 pv h8e8
+info score cp -25 depth 2 nodes 2375 time 9 pv h8e8 e3e4
+info score cp -20 depth 3 nodes 7212 time 11 pv d6b4 f5c2 h8e8
+info score cp -20 depth 4 nodes 27622 time 17 pv d6b4 f5c2 h8e8 d1c1
+info score cp -15 depth 5 nodes 50490 time 23 pv d6b4 f5c2 h8e8 d1c1 b4d6
+info score cp -20 depth 6 nodes 280310 time 89 pv d6b4 f5c2 h8e8 d1c1 b4c3 c2c3
+info score cp -17 depth 7 nodes 624394 time 179 pv d6b4 d1c1 b4c3 c1c3 f6e4 c3c2 h8f8
+info score cp -12 depth 8 nodes 1098681 time 305 pv d6b4 d1c1 b4c3 c1c3 f6e4 c3c2
+info score cp -5 depth 9 nodes 3372047 time 924 pv d6b4 f5c2 b4c3 c2c3 h8e8 c3c2 f6e4 f4f5 d8d6
+info score cp -2 depth 10 nodes 5808174 time 1588 pv d6b4 d1c1 g7g6 f5h3 f6e4 c1c2 b4c3 b2c3 d8e8 c2c1
+info score cp -2 depth 11 nodes 13591871 time 3738 pv d6b4 d1c1 g7g6
+info score cp 0 depth 12 nodes 26323333 time 7145 pv d6b4 d1c1
+info score cp 0 depth 13 nodes 85719951 time 23178 pv d6b4 f5c2 h8e8 e1e2 b4c3
+info score cp 0 depth 14 nodes 147322337 time 39835 pv d6b4 f5c2 b4c3 c2c3 e7e5 d4e5 f6e4 d1c1 e4c3
+info score cp 3 depth 15 nodes 408601479 time 110508 pv d6b4 f5c2 b4c3
+info score cp 0 depth 16 nodes 1405858515 time 378983 pv d6b4
+bestmove d6b4
+
+Game Board:
+
+8    r  .  .  .  .  .  .  k
+7    p  p  .  .  .  .  p  .
+6    .  .  p  .  b  .  .  .
+5    .  .  .  p  P  .  .  .
+4    .  .  .  .  .  .  .  q
+3    P  .  .  B  .  .  .  r
+2    .  P  P  .  .  Q  .  P
+1    .  .  K  .  R  .  R  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:5DDE1C40C229271B
+
+r6k/pp4p1/2p1b3/3pP3/7q/P2B3r/1PP2Q1P/2K1R1R1 w - - bm Qc5; id "LCTII.POS.03"; c0 "Boissel - Boulard, corr. 1994";
+
+time:1140000 start:1350981741 stop:1352121741 depth:64 timeset:1
+info score cp 22 depth 1 nodes 138 time 9 pv e1e2
+info score cp 20 depth 2 nodes 789 time 9 pv f2h4 h3h4
+info score cp 15 depth 3 nodes 4144 time 10 pv e1e2 h4h6 c1b1
+info score cp 15 depth 4 nodes 13573 time 13 pv f2h4 h3h4 e1e2 a8e8
+info score cp 15 depth 5 nodes 63495 time 27 pv e1e2 h4f2 e2f2 h3e3 g1g5
+info score cp 10 depth 6 nodes 171058 time 62 pv e1e2 h4f2 e2f2 h3e3 f2e2 e3f3
+info score cp 10 depth 7 nodes 506635 time 162 pv g1g2 a8e8 e1e2 h4f2 g2f2 c6c5 e2d2
+info score cp 5 depth 8 nodes 1190927 time 372 pv g1g2 c6c5 f2h4 h3h4 g2f2 c5c4 d3g6 a8d8
+info score cp 5 depth 9 nodes 2339872 time 712 pv f2h4 h3h4 e1e2 c6c5 g1f1 a8e8 e2d2 h8g8 d3f5
+info score cp 10 depth 10 nodes 8665025 time 2536 pv e1e2 h4f2 e2f2 a8e8 g1g3 h3g3 h2g3
+info score cp 10 depth 11 nodes 17115459 time 5044 pv e1e2
+info score cp 5 depth 12 nodes 52490763 time 15391 pv e1e2 h4f2 e2f2 h3h5 f2g2 h5e5 g2g7 a8b8
+info score cp 5 depth 13 nodes 162684084 time 47236 pv e1e2
+info score cp 5 depth 14 nodes 378208168 time 109447 pv e1e2 h4f2 e2f2 h3d3
+info score cp 5 depth 15 nodes 1328571431 time 383257 pv e1e2 h4f2
+info score cp 0 depth 16 nodes 3283034889 time 947749 pv e1e2
+bestmove e1e2
+
+Game Board:
+
+8    .  n  r  .  .  .  .  .
+7    .  .  r  b  k  p  p  p
+6    p  .  .  .  p  .  .  .
+5    N  p  .  .  .  .  .  .
+4    .  .  P  R  P  P  .  .
+3    .  .  .  .  .  .  .  .
+2    P  K  P  .  B  .  P  P
+1    .  .  .  R  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:DC4B338FE7459010
+
+1nr5/2rbkppp/p3p3/Np6/2PRPP2/8/PKP1B1PP/3R4 b - - bm e5; id "LCTII.POS.04"; c0 "Kaplan - Kopec, USA 1975";
+
+time:1140000 start:1352121742 stop:1353261742 depth:64 timeset:1
+info score cp -120 depth 1 nodes 281 time 9 pv e7f8
+info score cp -145 depth 2 nodes 1002 time 9 pv b8c6 a5c6
+info score cp -135 depth 3 nodes 3830 time 10 pv b5c4 a5c4 e7f8
+info score cp -145 depth 4 nodes 16438 time 14 pv b5c4 a5c4 b8c6 d4d3
+info score cp -135 depth 5 nodes 40693 time 21 pv b5c4 d4c4 c7c4 e2c4 e7e8
+info score cp -145 depth 6 nodes 254707 time 88 pv b5c4 d4c4 b8c6 a5c6 d7c6 c4d4
+info score cp -130 depth 7 nodes 460216 time 151 pv b5c4 d4c4 f7f5 e4f5 e6f5 b2b1 e7f8
+info score cp -130 depth 8 nodes 1221484 time 378 pv b8c6 a5c6 d7c6 b2b1 c6a8 c4b5 c7c2 d4d7
+info score cp -130 depth 9 nodes 3428498 time 1035 pv b5c4 d4c4 f7f5 e4f5 e6f5
+info score cp -115 depth 10 nodes 5386366 time 1578 pv b5c4 d4c4 c7c4 a5c4 d7b5 d1d4 c8c5 b2b3 b8c6 d4d2
+info score cp -100 depth 11 nodes 11617757 time 3361 pv b5c4 d4c4
+info score cp -125 depth 12 nodes 31011578 time 8870 pv b5c4 d4c4 c7c4 a5c4 d7b5
+info score cp -110 depth 13 nodes 132308622 time 37752 pv e6e5 f4e5 d7e6 b2a1
+info score cp -85 depth 14 nodes 219446951 time 62660 pv e6e5 f4e5 b5c4 a5c4 c7c4 e2c4 c8c4 d4c4 e7f8
+info score cp -95 depth 15 nodes 797559845 time 228859 pv e6e5 f4e5 b5c4
+info score cp -85 depth 16 nodes 2227582945 time 627403 pv e6e5 f4e5 b5c4 a5c4
+bestmove e6e5
+
+Game Board:
+
+8    .  .  r  .  .  r  k  .
+7    .  p  .  b  q  .  .  .
+6    p  .  .  .  p  .  .  p
+5    .  .  .  p  P  p  p  .
+4    .  P  .  Q  .  .  .  .
+3    P  .  .  .  .  .  .  .
+2    .  .  P  .  .  P  P  P
+1    .  .  R  .  R  B  K  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:28C4709F90F1B8A3
+
+2r2rk1/1p1bq3/p3p2p/3pPpp1/1P1Q4/P7/2P2PPP/2R1RBK1 b - - bm Bb5; id "LCTII.POS.05"; c0 "Estrin - Pytel, Albena 1973";
+
+time:1140000 start:1353261743 stop:1354401743 depth:64 timeset:1
+info score cp 42 depth 1 nodes 84 time 8 pv f8e8
+info score cp 17 depth 2 nodes 672 time 8 pv f8e8 f1d3
+info score cp 22 depth 3 nodes 2619 time 9 pv f8e8 f1d3 g5g4
+info score cp 10 depth 4 nodes 24080 time 15 pv f8d8 c2c4 d7a4 c4d5
+info score cp 12 depth 5 nodes 144866 time 47 pv c8c7 f1d3 g5g4 c2c4 f8c8
+info score cp 13 depth 6 nodes 348276 time 105 pv f8d8 d4a7 d7c6 f1d3 e7c7 c2c4
+info score cp 12 depth 7 nodes 808996 time 219 pv c8c7 f1d3 f8c8 c2c3 g5g4 c3c4 e7g5
+info score cp 12 depth 8 nodes 1963467 time 556 pv c8c7 f1d3 f8c8 c2c3 g5g4 e1d1 a6a5 d1d2
+info score cp 10 depth 9 nodes 3867251 time 1056 pv c8c7 c2c4 f8c8 c1c3 d5c4 c3c4
+info score cp 10 depth 10 nodes 9916098 time 2713 pv c8c7
+info score cp 12 depth 11 nodes 24568907 time 6695 pv c8c7 c2c4 f8c8 c1c3 g5g4 f1d3 e7g5 e1d1 d7a4
+info score cp 10 depth 12 nodes 68921484 time 18723 pv c8c7 c2c4
+info score cp 15 depth 13 nodes 213927323 time 58356 pv c8c7 f1a6 b7a6 d4d5 e6d5 c1d1
+info score cp 10 depth 14 nodes 886948243 time 240305 pv f8d8 c2c4
+info score cp 10 depth 15 nodes 1638423007 time 446243 pv f8d8
+bestmove f8d8
+
+Game Board:
+
+8    .  .  .  r  .  b  k  .
+7    p  .  .  .  .  p  p  p
+6    Q  p  .  .  p  .  .  .
+5    .  .  .  .  .  .  .  .
+4    .  P  .  B  .  .  .  .
+3    P  q  .  .  P  .  P  .
+2    .  .  r  .  .  P  .  P
+1    R  .  .  .  R  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:FAA50815D24686B3
+
+3r1bk1/p4ppp/Qp2p3/8/1P1B4/Pq2P1P1/2r2P1P/R3R1K1 b - - bm e5; id "LCTII.POS.06"; c0 "Nimzowitsch - Capablanca, New York 1927";
+
+time:1140000 start:1354401744 stop:1355541744 depth:64 timeset:1
+info score cp 30 depth 1 nodes 906 time 9 pv d8d7
+info score cp 10 depth 2 nodes 2441 time 9 pv d8d7 a1d1
+info score cp 25 depth 3 nodes 6531 time 10 pv d8d7 a1c1 f8d6
+info score cp 20 depth 4 nodes 28826 time 16 pv d8d7 a1d1 f8d6 e3e4
+info score cp 25 depth 5 nodes 98646 time 32 pv d8d7 a1d1 f8e7 e3e4 f7f5
+info score cp 13 depth 6 nodes 474644 time 132 pv d8d7 a1b1 b3a2
+info score cp 15 depth 7 nodes 946102 time 247 pv d8d7 a1b1 b3a2 b1a1 a2d5 e1e2 c2c7
+info score cp 15 depth 8 nodes 2422627 time 641 pv d8d7
+info score cp 20 depth 9 nodes 11092594 time 2816 pv d8d7 e1d1 c2a2 d1c1 a2a1 c1a1 b3d5 a6c8 e6e5
+info score cp 10 depth 10 nodes 22601801 time 5845 pv d8d7 e1d1
+info score cp 15 depth 11 nodes 63652913 time 16504 pv d8d7 e1d1
+info score cp 15 depth 12 nodes 242552442 time 63647 pv e6e5 d4e5
+info score cp 15 depth 13 nodes 580984859 time 152831 pv e6e5 d4e5 f8b4
+info score cp 25 depth 14 nodes 1137104435 time 300697 pv e6e5 d4e5 f8b4
+bestmove e6e5
+
+Game Board:
+
+8    r  .  b  .  .  r  .  k
+7    p  p  .  .  q  .  p  p
+6    .  .  p  .  .  p  .  .
+5    .  .  p  .  n  .  .  N
+4    .  .  .  .  P  .  .  .
+3    .  P  N  P  .  .  Q  P
+2    .  P  P  .  .  R  P  .
+1    .  .  .  .  .  R  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:5793157A6F43E59A
+
+r1b2r1k/pp2q1pp/2p2p2/2p1n2N/4P3/1PNP2QP/1PP2RP1/5RK1 w - - bm Nd1; id "LCTII.POS.07"; c0 "Tartakower - Rubinstein, Moskau 1925";
+
+time:1140000 start:1355541745 stop:1356681745 depth:64 timeset:1
+info score cp 27 depth 1 nodes 236 time 8 pv h5f4
+info score cp 7 depth 2 nodes 1299 time 9 pv h5f4 c8d7
+info score cp 7 depth 3 nodes 4342 time 9 pv h5f4 c8d7 f2e2
+info score cp 2 depth 4 nodes 37340 time 18 pv g3e3 c8d7 d3d4 c5d4
+info score cp 2 depth 5 nodes 106251 time 35 pv g3e3 c8d7 d3d4 c5d4 e3d4
+info score cp 85 depth 6 nodes 311366 time 89 pv h5g7 e5d3 c2d3 e7g7 g3g7 h8g7
+info score cp 2 depth 7 nodes 2096763 time 561 pv c3a4 b7b5 a4c3 c8d7 h5f4 a8d8 g3e3
+info score cp 0 depth 8 nodes 6970799 time 1866 pv g3e3 f8d8 c3a4 b7b6 a4c3 c8d7 e3f4 d7e6
+info score cp 2 depth 9 nodes 10063403 time 2680 pv g3e3 c8d7 h5f4 a8d8 c3a4 b7b6 c2c4
+info score cp -3 depth 10 nodes 28528804 time 7613 pv g3e3 c8d7 h5f4
+info score cp 0 depth 11 nodes 85157383 time 23032 pv g3e3 c8d7
+info score cp -3 depth 12 nodes 301955194 time 81381 pv g3e3 f8d8 h5f6 g7f6 f2f6 h8g8 f6c6
+info score cp 0 depth 13 nodes 961908746 time 260566 pv g3e3 e5d3
+info score cp 0 depth 14 nodes 2972109505 time 801677 pv g3e3 e5d3 c2d3 c8h3
+bestmove g3e3
+
+Game Board:
+
+8    r  .  .  q  r  n  k  .
+7    p  p  .  .  .  p  p  b
+6    .  .  .  b  .  n  .  p
+5    .  P  p  .  p  .  .  .
+4    .  .  P  .  P  .  .  N
+3    P  .  .  .  .  .  P  .
+2    .  B  .  N  Q  P  B  P
+1    R  .  .  .  .  R  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:8455FC9A1839F2AE
+
+r2qrnk1/pp3ppb/3b1n1p/1Pp1p3/2P1P2N/P5P1/1B1NQPBP/R4RK1 w - - bm Bh3; id "LCTII.POS.08"; c0 "Polugaevsky - Unzicker, Kislovodsk 1972";
+
+time:1140000 start:1356681746 stop:1357821746 depth:64 timeset:1
+info score cp -25 depth 1 nodes 486 time 9 pv a1d1
+info score cp -27 depth 2 nodes 1594 time 9 pv h4f5 h7f5
+info score cp -20 depth 3 nodes 6536 time 11 pv a1d1 f8e6 h4f5
+info score cp -27 depth 4 nodes 34285 time 20 pv h4f5 h7f5 e4f5 a8b8
+info score cp -7 depth 5 nodes 44717 time 23 pv h4f5 h7f5 e4f5 a8b8 a1d1
+info score cp -17 depth 6 nodes 136028 time 50 pv h4f5 h7f5 e4f5 d8e7 d2e4 a8d8
+info score cp -7 depth 7 nodes 417043 time 132 pv h4f5 h7f5 e4f5 d8e7 d2e4 a8d8 a1d1
+info score cp -20 depth 8 nodes 1275057 time 384 pv h4f5 f8e6 f5d6 d8d6 a1d1 e6d4 e2e1 a8d8
+info score cp -10 depth 9 nodes 2365987 time 710 pv h4f5 f8e6 f5d6 d8d6 a1d1 e6d4 e2e1 a8d8 b2c3
+info score cp -20 depth 10 nodes 11590676 time 3359 pv h4f5 f8e6 f5d6 d8d6
+info score cp -15 depth 11 nodes 36424962 time 10355 pv h4f5 d6b8 a1d1
+info score cp -20 depth 12 nodes 118557033 time 33298 pv h4f5
+info score cp -20 depth 13 nodes 533900323 time 149275 pv h4f5
+info score cp -18 depth 14 nodes 1936808719 time 535436 pv h4f5 h7f5 e4f5
+bestmove h4f5
+
+Game Board:
+
+8    .  .  .  .  .  n  k  .
+7    Q  .  .  .  .  b  p  p
+6    .  .  .  .  .  p  .  .
+5    .  .  .  .  .  .  .  .
+4    P  .  n  .  P  N  .  .
+3    q  .  .  .  .  P  .  .
+2    .  .  .  .  .  .  P  P
+1    .  R  .  .  .  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:91D7A05401CE6985
+
+5nk1/Q4bpp/5p2/8/P1n1PN2/q4P2/6PP/1R4K1 w - - bm Qd4; id "LCTII.POS.09"; c0 "Boissel - Del Gobbo, corr. 1994";
+
+time:1140000 start:1357821747 stop:1358961747 depth:64 timeset:1
+info score cp 157 depth 1 nodes 82 time 9 pv b1b7
+info score cp 152 depth 2 nodes 459 time 9 pv b1b7 c4e5
+info score cp 137 depth 3 nodes 4600 time 10 pv b1d1 f7e6 f4d5
+info score cp 137 depth 4 nodes 21590 time 14 pv f4e2 f7e6 b1b7 a3e3
+info score cp 135 depth 5 nodes 91035 time 34 pv f4d5 f7d5 e4d5 a3e3 a7e3
+info score cp 137 depth 6 nodes 295523 time 90 pv f4d5 f7e6 f3f4 e6d5 e4d5 f6f5
+info score cp 115 depth 7 nodes 1551355 time 426 pv f4e2 a3d3 b1e1 d3d2 a7f2 d2b4 e1a1
+info score cp 107 depth 8 nodes 3298083 time 916 pv f4d5 f7d5 e4d5 a3d3 b1b5
+info score cp 135 depth 9 nodes 7517474 time 2078 pv a7d4 a3a4 f4d5 f8e6 b1b8
+info score cp 135 depth 10 nodes 11148857 time 3058 pv a7d4 a3a4 f4d5 f8e6 b1b8
+info score cp 135 depth 11 nodes 21644435 time 5966 pv a7d4 a3a4 f4d5
+info score cp 135 depth 12 nodes 53865823 time 14585 pv a7d4 a3a4
+info score cp 135 depth 13 nodes 286715901 time 77041 pv a7d4 a3a4 d4c4
+info score cp 137 depth 14 nodes 898832730 time 240690 pv a7d4 a3a4 d4c4 f7c4 g1h1
+info score cp 135 depth 15 nodes 2181451458 time 586440 pv a7d4 a3a4 d4c4 f7c4 g1f2
+bestmove a7d4
+
+Game Board:
+
+8    r  .  .  .  k  .  .  r
+7    .  .  .  b  b  p  .  p
+6    p  .  n  p  p  p  .  .
+5    .  .  .  .  .  P  .  .
+4    .  p  .  N  P  .  .  .
+3    .  .  .  .  .  N  P  .
+2    P  P  P  K  .  .  .  P
+1    .  .  .  R  .  B  .  R
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:--kq
+PosKey:1D5C2C11F4103EA6
+
+r3k2r/3bbp1p/p1nppp2/5P2/1p1NP3/5NP1/PPPK3P/3R1B1R b kq - bm Bf8; id "LCTII.POS.10"; c0 "Cucka - Jansa, Brno 1960";
+
+time:1140000 start:1358961749 stop:1360101749 depth:64 timeset:1
+info score cp 35 depth 1 nodes 222 time 8 pv e8g8
+info score cp 35 depth 2 nodes 978 time 8 pv e6e5 d4c6
+info score cp 35 depth 3 nodes 1762 time 9 pv e6e5 d4c6 d7c6
+info score cp 35 depth 4 nodes 8608 time 11 pv c6d4 f3d4 e6e5 d4f3
+info score cp 60 depth 5 nodes 16044 time 13 pv c6d4 f3d4 e6e5 d4f3 e8g8
+info score cp 35 depth 6 nodes 44301 time 22 pv c6d4 f3d4 e6e5 d4f3 d6d5 f1d3
+info score cp 35 depth 7 nodes 148113 time 53 pv c6d4 f3d4 e6e5 d4f3 d6d5 f1d3 d5e4
+info score cp 20 depth 8 nodes 545886 time 170 pv c6d4 f3d4 e6e5 d4f3 d7c6 f1d3 d6d5 h1e1
+info score cp 30 depth 9 nodes 974482 time 297 pv c6d4 f3d4 e6e5 d4b3 d6d5 e4d5 d7f5 f1d3 e5e4
+info score cp 20 depth 10 nodes 3323068 time 945 pv c6d4 f3d4 e6e5
+info score cp 30 depth 11 nodes 5377593 time 1546 pv c6d4 f3d4 e6e5
+info score cp 25 depth 12 nodes 12719137 time 3644 pv c6d4 f3d4
+info score cp 30 depth 13 nodes 36918048 time 10412 pv c6d4 f3d4 e6e5
+info score cp 15 depth 14 nodes 165509504 time 46917 pv c6d4
+info score cp 20 depth 15 nodes 415413427 time 116417 pv c6d4 f3d4 e6e5
+info score cp 20 depth 16 nodes 1086755291 time 305787 pv c6d4
+info score cp 25 depth 17 nodes 2562069008 time 718402 pv c6d4
+bestmove c6d4
+
+Game Board:
+
+8    b  n  .  .  .  .  .  .
+7    .  q  .  .  .  .  n  .
+6    .  p  .  p  .  k  p  .
+5    .  .  p  P  p  .  p  p
+4    .  P  P  .  P  .  P  .
+3    .  .  .  N  .  P  .  P
+2    .  .  .  .  B  .  K  .
+1    .  .  Q  .  .  N  .  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:E5FDE386DA6F3082
+
+bn6/1q4n1/1p1p1kp1/2pPp1pp/1PP1P1P1/3N1P1P/4B1K1/2Q2N2 w - - bm h4; id "LCTII.POS.11"; c0 "Landau - Schmidt, Noordwijk 1938";
+
+time:1140000 start:1360101750 stop:1361241750 depth:64 timeset:1
+info score cp 100 depth 1 nodes 483 time 9 pv g2g1
+info score cp 85 depth 2 nodes 1685 time 9 pv g2g1 b8d7
+info score cp 95 depth 3 nodes 4374 time 10 pv g2g1 b8d7 f1e3
+info score cp 85 depth 4 nodes 18405 time 14 pv g2g1 b8d7 b4b5 b7a7
+info score cp 95 depth 5 nodes 38870 time 19 pv g2g1 b8d7 b4b5 b7a7 f1e3
+info score cp 85 depth 6 nodes 219729 time 68 pv g2g1 b8d7 f1e3 f6f7 e3c2 h5g4
+info score cp 85 depth 7 nodes 402421 time 116 pv g2g1 b8d7 f1e3 f6f7 e3c2 h5g4 f3g4
+info score cp 90 depth 8 nodes 1429939 time 392 pv g2g1 b8d7 f1e3 f6f7
+info score cp 85 depth 9 nodes 2481020 time 677 pv g2g1 b8d7 f1e3 b7a7 b4c5 b6c5 g4h5 g6h5 c1b1
+info score cp 85 depth 10 nodes 18174948 time 4886 pv g2h1 b8d7 f1e3 f6f7 e3c2 f7f6 c2a3 c5b4 d3b4 b7a7
+info score cp 80 depth 11 nodes 36335175 time 9821 pv g2h1 b8d7 f1e3 d7f8 b4c5
+info score cp 85 depth 12 nodes 91928894 time 24833 pv g2h1
+info score cp 80 depth 13 nodes 785377716 time 213709 pv h3h4
+info score cp 85 depth 14 nodes 1154499604 time 316327 pv h3h4
+info score cp 110 depth 15 nodes 2330059039 time 645738 pv h3h4 g5h4 b4c5 b6c5 g4h5 g6h5
+bestmove h3h4
+
+Game Board:
+
+8    .  .  .  r  .  .  k  .
+7    p  p  .  .  n  p  p  .
+6    .  .  r  q  p  .  .  p
+5    .  .  .  .  .  .  .  .
+4    .  .  .  P  Q  .  .  .
+3    .  B  R  .  .  .  P  .
+2    P  P  .  .  .  P  .  P
+1    .  .  .  R  .  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:BFBE835418E8788E
+
+3r2k1/pp2npp1/2rqp2p/8/3PQ3/1BR3P1/PP3P1P/3R2K1 b - - bm Rb6; id "LCTII.POS.12"; c0 "Korchnoi - Karpov, Meran 1981";
+
+time:1140000 start:1361241751 stop:1362381751 depth:64 timeset:1
+info score cp 20 depth 1 nodes 107 time 9 pv c6c3
+info score cp 20 depth 2 nodes 511 time 9 pv c6c3 b2c3
+info score cp 25 depth 3 nodes 2566 time 9 pv c6c3 b2c3 e7c6
+info score cp 20 depth 4 nodes 15910 time 13 pv c6c3 b2c3 d6c6 f2f3
+info score cp 20 depth 5 nodes 34484 time 18 pv c6c3 b2c3 d6c6 f2f3 d8d7
+info score cp 12 depth 6 nodes 302080 time 84 pv e7f5 c3c6 d6c6 d4d5 c6c8 d5e6
+info score cp 15 depth 7 nodes 785020 time 211 pv c6c3 b2c3 d6c6 e4c6 e7c6 f2f4 d8d7
+info score cp 22 depth 8 nodes 4164018 time 1072 pv d6b4 e4h4 d8d7 c3d3 e7f5 h4e4 c6d6 a2a3
+info score cp 15 depth 9 nodes 11582074 time 3047 pv c6c3 b2c3 e7d5 e4e1 d6c6 c3c4 d5b6 c4c5 b6d7
+info score cp 20 depth 10 nodes 36375514 time 9620 pv d6b4 b3c2 f7f5
+info score cp 15 depth 11 nodes 68442641 time 18245 pv d6b4 e4h4 c6c3 b2c3
+info score cp 10 depth 12 nodes 247147558 time 65351 pv d6b4 f2f4
+info score cp 10 depth 13 nodes 781405598 time 207405 pv c6c3 b2c3
+info score cp 10 depth 14 nodes 1468651623 time 390108 pv c6c3 b2c3 e7d5 b3d5 e6d5
+bestmove c6c3
+
+Game Board:
+
+8    .  r  .  .  r  .  k  .
+7    .  .  .  .  p  p  b  p
+6    B  .  .  .  .  .  p  .
+5    .  .  .  P  .  .  .  .
+4    p  p  .  q  P  B  .  .
+3    .  .  n  .  .  Q  .  P
+2    P  .  .  .  .  P  P  .
+1    .  .  .  .  R  R  K  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:635317495DCF6972
+
+1r2r1k1/4ppbp/B5p1/3P4/pp1qPB2/2n2Q1P/P4PP1/4RRK1 b - - bm Nxa2; id "LCTII.POS.13"; c0 "Barbero - Kouatly, Budapest 1987";
+
+time:1140000 start:1362381752 stop:1363521752 depth:64 timeset:1
+info score cp -52 depth 1 nodes 133 time 9 pv g7e5
+info score cp -30 depth 2 nodes 1043 time 9 pv g7e5 f4e5
+info score cp -30 depth 3 nodes 3573 time 9 pv g7e5 f4e5 d4e5
+info score cp 75 depth 4 nodes 23269 time 14 pv b8d8 f4e3 d4e4 f3e4
+info score cp -30 depth 5 nodes 91716 time 31 pv b8d8 a6d3 g7e5 f4e5 d4e5
+info score cp 65 depth 6 nodes 411816 time 111 pv g7e5 f4e3 d4e4 f3e4 c3e4 a6d3
+info score cp -12 depth 7 nodes 735954 time 197 pv g7e5 f4e5 d4e5 f3d3 f7f5 e4f5 e5f5
+info score cp 35 depth 8 nodes 1627250 time 420 pv b8a8 a6b7 a8a5 b7c6 e8f8 f4g5 f7f6 g5e3
+info score cp -12 depth 9 nodes 3884058 time 1036 pv b8a8 a6b7
+info score cp 60 depth 10 nodes 37861859 time 9845 pv b8d8
+info score cp 30 depth 11 nodes 82776620 time 21921 pv b8d8 a6b7 e8f8 b7c6 c3d5 e4d5
+info score cp 25 depth 12 nodes 168312570 time 44404 pv b8d8 a6b7 c3a2 b7c6
+info score cp 5 depth 13 nodes 366634433 time 97491 pv b8d8 f4c7 c3a2
+info score cp 30 depth 14 nodes 1452395129 time 386873 pv b8d8 f3c3
+info score cp 0 depth 15 nodes 2830494820 time 753266 pv b8d8 a6d3
+bestmove b8d8
+
+Game Board:
+
+8    r  .  .  q  k  b  .  r
+7    .  b  .  .  .  p  p  p
+6    p  .  .  .  p  n  .  .
+5    .  p  .  .  .  .  .  .
+4    .  n  .  P  .  .  .  .
+3    .  B  N  .  .  N  .  .
+2    P  P  .  .  Q  P  P  P
+1    R  .  B  R  .  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:--kq
+PosKey:5C1C279E8BEEA7BA
+
+r2qkb1r/1b3ppp/p3pn2/1p6/1n1P4/1BN2N2/PP2QPPP/R1BR2K1 w kq - bm d5; id "LCTII.POS.14"; c0 "Spasski - Aftonomov, Leningrad 1949";
+
+time:1140000 start:1363521753 stop:1364661753 depth:64 timeset:1
+info score cp 75 depth 1 nodes 405 time 8 pv c1e3
+info score cp 50 depth 2 nodes 1964 time 9 pv c1e3 f8d6
+info score cp 65 depth 3 nodes 5952 time 10 pv c1e3 f8d6 a1c1
+info score cp 62 depth 4 nodes 84654 time 34 pv a2a4 b7f3 e2f3 b5a4
+info score cp 62 depth 5 nodes 148327 time 51 pv a2a4 b7f3 e2f3 b5a4 b3a4
+info score cp 72 depth 6 nodes 547704 time 160 pv a2a4 b7f3 e2f3 a8b8 a4b5 a6b5
+info score cp 78 depth 7 nodes 1024544 time 300 pv a2a4 b5a4 b3a4 e8e7 c1g5 a8c8 a1c1
+info score cp 75 depth 8 nodes 2074273 time 579 pv a2a4 b7f3 e2f3 a8b8 a4b5 a6b5 f3e2 d8d7
+info score cp 95 depth 9 nodes 7722232 time 2226 pv a2a4 b5a4 b3a4 e8e7 e2c4
+info score cp 82 depth 10 nodes 24180311 time 6717 pv a2a4
+info score cp 92 depth 11 nodes 65361999 time 18221 pv a2a4
+info score cp 90 depth 12 nodes 194430593 time 53761 pv a2a4 b7f3 e2f3 b5a4 b3a4
+info score cp 98 depth 13 nodes 720085811 time 198909 pv a2a4 b7f3 g2f3 b5a4 c3a4 b4d5 b3d5 f6d5
+info score cp 105 depth 14 nodes 2582832633 time 714421 pv a2a4
+bestmove a2a4
+
+Game Board:
+
+8    .  r  .  .  .  .  k  .
+7    .  q  .  .  b  p  .  .
+6    .  .  .  p  .  .  p  .
+5    .  .  p  P  .  .  .  .
+4    p  .  N  .  .  .  .  R
+3    .  .  P  .  .  Q  P  .
+2    .  P  .  .  .  P  K  .
+1    .  .  .  .  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:27430A0E69E2021F
+
+1r4k1/1q2bp2/3p2p1/2pP4/p1N4R/2P2QP1/1P3PK1/8 w - - bm Nxd6; id "LCTII.CMB.01"; c0 "Romanishin - Gdansky, Polonica Zdroj 1992";
+
+time:1140000 start:1364661754 stop:1365801754 depth:64 timeset:1
+info score cp -28 depth 1 nodes 163 time 8 pv h4h3
+info score cp -43 depth 2 nodes 570 time 8 pv h4h3 b8e8
+info score cp -3 depth 3 nodes 3696 time 9 pv h4f4 f7f5 g2g1
+info score cp -13 depth 4 nodes 15758 time 12 pv h4g4 b8e8 g2g1 b7b5
+info score cp -8 depth 5 nodes 40232 time 19 pv h4g4 b8e8 g2g1 g6g5 f3e4
+info score cp -5 depth 6 nodes 247480 time 70 pv h4h2 f7f5 g2g1 b7a6 f3e2 b8e8
+info score cp 0 depth 7 nodes 488087 time 135 pv h4h2 b7b5 f3g4 b5b7 g4f3 b7b5 f3g4
+info score cp 2 depth 8 nodes 2465248 time 652 pv h4h1 b8e8 f3e4 b7b5 g2g1 b5b8 f2f4 f7f5
+info score cp 2 depth 9 nodes 5049429 time 1364 pv h4h1 b8e8 f3e4 b7a6 g2g1 a6b5 h1h2
+info score cp 10 depth 10 nodes 9674975 time 2572 pv h4h1 b7a6 h1e1 b8e8 e1e7 e8e7 c4d6 a6d6
+info score cp 10 depth 11 nodes 22840386 time 6189 pv h4h1 b7a6
+info score cp 415 depth 12 nodes 66968342 time 17974 pv c4d6 e7d6 f3f6 b7d5 g2h2
+info score cp 420 depth 13 nodes 72497043 time 19438 pv c4d6 e7d6 f3f6 b7d5 g2h2
+info score cp 420 depth 14 nodes 82665593 time 22154 pv c4d6 e7d6 f3f6 b7d5
+info score cp 445 depth 15 nodes 128404969 time 34545 pv c4d6 e7d6 h4a4 d6g3
+info score cp 445 depth 16 nodes 2501264652 time 644836 pv c4d6 e7d6 h4a4 d6g3 f2g3 b7b2
+bestmove c4d6
+
+Game Board:
+
+8    r  n  .  .  .  r  k  .
+7    p  b  p  p  q  .  p  p
+6    .  p  .  .  p  b  .  .
+5    .  .  .  .  N  .  .  Q
+4    .  .  .  P  N  .  .  .
+3    .  .  .  B  .  .  .  .
+2    P  P  P  .  .  P  P  P
+1    R  .  .  .  K  .  .  R
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:KQ--
+PosKey:BDDF385B168A74D2
+
+rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R w KQ - bm Qxh7+; id "LCTII.CMB.02"; c0 "Lasker,Ed - Thomas, London 1911";
+
+time:1140000 start:1365801755 stop:1366941755 depth:64 timeset:1
+info score cp 75 depth 1 nodes 95 time 8 pv e4f6
+info score cp 75 depth 2 nodes 756 time 9 pv e4f6 g7f6
+info score cp 70 depth 3 nodes 5131 time 10 pv e4f6 g7f6 h5g4
+info score cp 48 depth 4 nodes 35560 time 18 pv e1g1 f6e5 h5e5 d7d5
+info score cp 38 depth 5 nodes 209923 time 60 pv e1g1 f6e5 h5e5 d7d5 e4c3
+info score cp 120 depth 6 nodes 980347 time 268 pv e4c5 g7g6 e5g6 h7g6 h5g6 e7g7
+info score cp 120 depth 7 nodes 1594771 time 439 pv e4c5 g7g6 e5g6 h7g6
+info score cp 29987 depth 8 nodes 14870404 time 4131 pv h5h7 g8h7 e4f6
+info score cp 29987 depth 9 nodes 83481864 time 22040 pv h5h7
+info score cp 29987 depth 10 nodes 468004854 time 130068 pv h5h7
+info score cp 29987 depth 11 nodes 2101619182 time 578484 pv h5h7
+bestmove h5h7
+
+Game Board:
+
+8    .  .  .  .  r  .  k  .
+7    .  .  .  b  .  p  .  .
+6    .  .  .  .  .  q  p  .
+5    .  B  P  p  n  .  .  p
+4    .  .  .  .  .  .  .  n
+3    r  .  .  .  P  .  N  .
+2    .  .  Q  .  R  P  P  P
+1    .  R  .  .  .  N  K  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:642BABC4E2F43EFE
+
+4r1k1/3b1p2/5qp1/1BPpn2p/7n/r3P1N1/2Q1RPPP/1R3NK1 b - - bm Qf3; id "LCTII.CMB.03"; c0 "Andruet - Spassky, BL 1988";
+
+time:1140000 start:1366941756 stop:1368081756 depth:64 timeset:1
+info score cp -115 depth 1 nodes 144 time 9 pv d7b5
+info score cp -115 depth 2 nodes 729 time 9 pv d7b5 b1b5
+info score cp -110 depth 3 nodes 4382 time 10 pv d7b5 b1b5 f6a6
+info score cp -115 depth 4 nodes 26203 time 15 pv d7b5 b1b5 f6a6 c2b2
+info score cp -115 depth 5 nodes 110394 time 36 pv d7b5 b1b5 f6a6 b5b4 a6f6
+info score cp -127 depth 6 nodes 659611 time 173 pv d7b5 b1b5 f6c6 b5b6 c6c7 e3e4
+info score cp -120 depth 7 nodes 1744986 time 454 pv d7b5 b1b5 e5c4 b5b3 a3b3 c2b3 f6a6
+info score cp 0 depth 8 nodes 5262628 time 1415 pv e5f3 g1h1 d7h3 g2h3 f3e1 g3f5 e1c2 f5h6
+info score cp -5 depth 9 nodes 10185598 time 2715 pv e5f3 g1h1
+info score cp -2 depth 10 nodes 21322721 time 5600 pv e5f3 g1h1 d7h3 g2h3 f3e1
+info score cp 29991 depth 11 nodes 821992227 time 210604 pv f6f3
+bestmove f6f3
+
+Game Board:
+
+8    .  .  k  .  .  b  .  r
+7    .  p  q  .  .  .  p  .
+6    .  .  p  .  p  p  .  .
+5    p  .  n  .  P  n  N  p
+4    .  .  P  .  .  B  .  .
+3    .  .  N  .  .  .  .  P
+2    P  P  .  .  Q  P  P  .
+1    .  .  .  R  .  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:DB20181D9ACE054F
+
+2k2b1r/1pq3p1/2p1pp2/p1n1PnNp/2P2B2/2N4P/PP2QPP1/3R2K1 w - - bm exf6; id "LCTII.CMB.04"; c0 "Vanka - Jansa, Prag 1957";
+
+time:1140000 start:1368081757 stop:1369221757 depth:64 timeset:1
+info score cp 80 depth 1 nodes 310 time 8 pv g5f3
+info score cp 63 depth 2 nodes 887 time 8 pv g5e4 f6e5
+info score cp 65 depth 3 nodes 5603 time 10 pv g5f3 f8e7 e2d2
+info score cp 63 depth 4 nodes 22511 time 14 pv g5e4 f6e5 e4c5 f8c5
+info score cp 63 depth 5 nodes 87379 time 29 pv g5e4 f6e5 e4c5 f8c5 f4e5
+info score cp 65 depth 6 nodes 327484 time 94 pv g5f3 f6e5 e2e5 c7e5 f3e5 f8d6
+info score cp 70 depth 7 nodes 914931 time 249 pv g5e4 f6e5 e4c5 f8c5 f4e5 c7f7 c3e4
+info score cp 82 depth 8 nodes 2107406 time 566 pv e5f6 c7f4 g5e6 c5e6
+info score cp 90 depth 9 nodes 3143342 time 842 pv e5f6 c7f4 g5e6 c5e6 e2e6 c8b8
+info score cp 95 depth 10 nodes 5753674 time 1512 pv e5f6 c7f4 g5e6 c5e6 e2e6 c8b8
+info score cp 230 depth 11 nodes 11524196 time 3070 pv e5f6 c7f4 g5e6
+info score cp 245 depth 12 nodes 21712252 time 5781 pv e5f6 c7f4 g5e6 c5e6 e2e6 c8b8 c3e2 f4h6 d1d8 b8c7
+info score cp 245 depth 13 nodes 54578000 time 14619 pv e5f6 c7f4
+info score cp 260 depth 14 nodes 222080630 time 58828 pv e5f6 c7f4 f6g7 f5g7
+info score cp 255 depth 15 nodes 947964271 time 241344 pv e5f6 c7f4 f6g7
+info score cp 270 depth 16 nodes 3828472522 time 949946 pv e5f6
+bestmove e5f6
+
+Game Board:
+
+8    .  .  r  .  .  r  .  .
+7    .  .  .  q  b  p  k  p
+6    p  .  .  .  n  .  p  .
+5    .  .  p  p  P  .  .  .
+4    .  .  .  .  .  .  Q  .
+3    .  P  .  B  .  .  .  R
+2    P  B  P  .  .  .  P  P
+1    .  .  .  .  .  R  .  K
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:8DABE8254FC0548D
+
+2r2r2/3qbpkp/p3n1p1/2ppP3/6Q1/1P1B3R/PBP3PP/5R1K w - - bm Rxh7+; id "LCTII.CMB.05"; c0 "Boros - Szabo, Budapest 1937";
+
+time:1140000 start:1369221758 stop:1370361758 depth:64 timeset:1
+info score cp 140 depth 1 nodes 149 time 8 pv d3a6
+info score cp 130 depth 2 nodes 2477 time 9 pv d3a6 c8e8
+info score cp 140 depth 3 nodes 7767 time 10 pv d3a6 c8a8 g4e2
+info score cp 100 depth 4 nodes 53702 time 22 pv d3a6 c8a8 g4e2 g7g8
+info score cp 90 depth 5 nodes 367557 time 101 pv b2c1 g7g8 d3a6 c8a8 g4e2
+info score cp 85 depth 6 nodes 1437164 time 374 pv b2c1
+info score cp 192 depth 7 nodes 2104577 time 546 pv h3h7 g7h7 f1f7 f8f7 g4g6 h7h8 g6f7
+info score cp 200 depth 8 nodes 2586448 time 670 pv h3h7 g7h7 f1f7 f8f7 g4g6 h7h8 g6f7 e6g7
+info score cp 985 depth 9 nodes 4160500 time 1062 pv h3h7 g7h7 f1f7
+info score cp 1070 depth 10 nodes 12438376 time 3224 pv h3h7 g7h7
+info score cp 1073 depth 11 nodes 53500412 time 14295 pv h3h7 g7h7 f1f7 f8f7 g4e6 d7e6
+info score cp 1230 depth 12 nodes 110297034 time 28930 pv h3h7 g7h7 g4e6 f7e6 f1f8 e7f8 d3g6 h7g6 h1g1
+info score cp 1230 depth 13 nodes 392658643 time 102884 pv h3h7 g7h7 g4e6 f7e6
+info score cp 1245 depth 14 nodes 1345033778 time 355698 pv h3h7 g7h7 g4e6 f7e6 f1f8
+bestmove h3h7
+
+Game Board:
+
+8    .  .  r  .  k  .  .  r
+7    .  .  p  n  .  p  p  .
+6    .  p  .  .  .  n  .  p
+5    p  .  .  .  P  P  .  .
+4    .  .  .  .  q  .  .  B
+3    P  .  P  .  .  .  .  .
+2    .  .  Q  .  N  .  P  P
+1    R  .  .  .  .  R  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:---q
+PosKey:3D9CEC9B16F9243F
+
+2r1k2r/2pn1pp1/1p3n1p/p3PP2/4q2B/P1P5/2Q1N1PP/R4RK1 w q - bm exf6; id "LCTII.CMB.06"; c0 "Lilienthal - Capablanca, Hastings 1934";
+
+time:1140000 start:1370361759 stop:1371501759 depth:64 timeset:1
+info score cp 5 depth 1 nodes 213 time 8 pv c2e4
+info score cp 5 depth 2 nodes 459 time 8 pv c2e4 f6e4
+info score cp 15 depth 3 nodes 1898 time 9 pv c2e4 f6e4 e5e6
+info score cp 20 depth 4 nodes 6373 time 10 pv c2e4 f6e4 f5f6 g7g6
+info score cp 30 depth 5 nodes 21911 time 14 pv c2e4 f6e4 e5e6 d7f6 h4f6
+info score cp 30 depth 6 nodes 72785 time 30 pv c2e4 f6e4 e5e6 d7f6 h4f6 e4f6
+info score cp 30 depth 7 nodes 134788 time 46 pv c2e4 f6e4 e5e6 d7c5 f1f4 c5b3 a1d1
+info score cp 30 depth 8 nodes 329791 time 103 pv c2e4 f6e4 e5e6 d7c5 f1f4 c5b3 a1d1 b3c5
+info score cp 30 depth 9 nodes 749571 time 222 pv c2e4 f6e4 e5e6 d7e5 f5f6 g7f6 h4f6 e4f6 f1f6
+info score cp 35 depth 10 nodes 2193230 time 630 pv c2e4 f6e4 e5e6 f7e6 f5e6 d7c5 e2d4 e4c3
+info score cp 175 depth 11 nodes 8631122 time 2484 pv e5f6 e4c2 f6g7 h8g8 e2d4
+info score cp 180 depth 12 nodes 13001818 time 3719 pv e5f6 e4c2
+info score cp 175 depth 13 nodes 22906296 time 6613 pv e5f6
+info score cp 185 depth 14 nodes 49982634 time 14288 pv e5f6
+info score cp 190 depth 15 nodes 163965046 time 46720 pv e5f6 e4c2 f6g7 h8g8 e2d4
+info score cp 185 depth 16 nodes 561923096 time 160339 pv e5f6
+info score cp 185 depth 17 nodes 2691118829 time 726687 pv e5f6
+bestmove e5f6
+
+Game Board:
+
+8    .  .  r  r  .  .  k  .
+7    .  b  .  .  .  p  p  p
+6    p  b  .  .  p  .  .  .
+5    .  p  .  .  P  .  .  .
+4    .  P  .  .  B  P  n  q
+3    P  .  N  .  .  .  P  .
+2    .  B  .  .  Q  .  .  P
+1    R  .  .  .  .  R  .  K
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:A499BA0289E3276D
+
+2rr2k1/1b3ppp/pb2p3/1p2P3/1P2BPnq/P1N3P1/1B2Q2P/R4R1K b - - bm Rxc3; id "LCTII.CMB.07"; c0 "Rotlewi - Rubinstein, Lodz 1907";
+
+time:1140000 start:1371501760 stop:1372641760 depth:64 timeset:1
+info score cp 20 depth 1 nodes 134 time 8 pv b7e4
+info score cp 20 depth 2 nodes 784 time 9 pv b7e4 c3e4
+info score cp 0 depth 3 nodes 4433 time 9 pv b7e4 c3e4 h4h3
+info score cp 15 depth 4 nodes 21514 time 14 pv b7e4 c3e4 h4h3 a1d1
+info score cp 0 depth 5 nodes 107333 time 33 pv b7e4 c3e4 h4h3 e4d6 c8c7
+info score cp 110 depth 6 nodes 261537 time 73 pv b7e4 c3e4 h4h2 e2h2 g4h2 f1c1
+info score cp 105 depth 7 nodes 466580 time 128 pv b7e4 c3e4 h4h2 e2h2 g4h2 f1d1 c8c2
+info score cp 105 depth 8 nodes 801253 time 216 pv b7e4 c3e4 h4h2 e2h2 g4h2 f1c1 c8c1 a1c1
+info score cp 210 depth 9 nodes 2940802 time 803 pv c8c3 e4b7 c3g3 b7a6 g4h2
+info score cp 105 depth 10 nodes 6705501 time 1765 pv b7e4 c3e4 h4h2 e2h2 g4h2 f1c1 c8c1 a1c1 h2g4 b2a1
+info score cp 222 depth 11 nodes 15657846 time 4201 pv c8c3 e4b7 c3g3 a1c1 g3e3 e2g2 g4h2
+info score cp 410 depth 12 nodes 27754600 time 7459 pv c8c3 e4b7 c3g3 a1c1 g3h3
+info score cp 410 depth 13 nodes 90028318 time 23537 pv c8c3 e4b7 g4h2
+info score cp 405 depth 14 nodes 255572039 time 67495 pv c8c3 g3h4 b7e4 e2e4 g4h2 b2c3
+info score cp 455 depth 15 nodes 1412094498 time 365005 pv c8c3 g3h4 b7e4
+bestmove c8c3
+
+Game Board:
+
+8    .  .  b  .  r  .  k  .
+7    r  .  .  .  .  p  p  p
+6    p  .  .  .  .  .  .  .
+5    .  .  p  N  P  .  .  .
+4    .  .  .  .  Q  .  .  .
+3    q  .  .  .  .  .  .  P
+2    .  .  P  .  .  P  P  .
+1    .  .  .  R  R  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:35376DDF6112556D
+
+2b1r1k1/r4ppp/p7/2pNP3/4Q3/q6P/2P2PP1/3RR1K1 w - - bm Nf6+; id "LCTII.CMB.08"; c0 "Zarkov - Mephisto, Albuquerque 1991";
+
+time:1140000 start:1372641761 stop:1373781761 depth:64 timeset:1
+info score cp 45 depth 1 nodes 60 time 9 pv c2c4
+info score cp 35 depth 2 nodes 1242 time 9 pv e4e3 a3e3
+info score cp 40 depth 3 nodes 4233 time 10 pv d1d3 a3b2 c2c4
+info score cp 25 depth 4 nodes 29393 time 16 pv d1a1 a3b2 a1b1 b2a2
+info score cp 30 depth 5 nodes 88187 time 30 pv d1a1 a3b2 a1b1 b2d4 c2c4
+info score cp 25 depth 6 nodes 545684 time 151 pv d1a1 a3b2 e4e3 b2b5 a1b1 b5c4
+info score cp 30 depth 7 nodes 1136311 time 303 pv d1a1 a3b2 e4e3 b2b5 a1b1 b5c4 e3d3
+info score cp 35 depth 8 nodes 3575894 time 949 pv d1a1 a3b2 e4c4 b2d4 c4d4 c5d4 a1d1 c8f5
+info score cp 35 depth 9 nodes 6761610 time 1783 pv d1a1 a3b2 e4c4 b2d4 c4d4 c5d4 a1d1 c8f5
+info score cp 65 depth 10 nodes 17578026 time 4689 pv e1e3
+info score cp 255 depth 11 nodes 60588144 time 16162 pv d5f6 g7f6 e5f6
+info score cp 870 depth 12 nodes 1014970659 time 263240 pv d5f6 g8f8
+info score cp 1365 depth 13 nodes 2970960779 time 769975 pv d5f6 g8f8 f6e8 f8e8
+bestmove d5f6
+
+Game Board:
+
+8    .  .  .  .  .  .  k  .
+7    .  .  .  .  .  p  .  .
+6    .  .  .  P  .  .  p  .
+5    .  .  .  .  .  .  .  n
+4    .  .  .  Q  P  P  .  .
+3    .  .  .  .  .  .  .  q
+2    r  .  .  N  .  .  .  P
+1    .  .  .  .  .  .  R  K
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:87F860265078915C
+
+6k1/5p2/3P2p1/7n/3QPP2/7q/r2N3P/6RK b - - bm Rxd2; id "LCTII.CMB.09"; c0 "Portisch - Kasparov, Moskau 1981";
+
+time:1140000 start:1373781762 stop:1374921762 depth:64 timeset:1
+info score cp -152 depth 1 nodes 48 time 8 pv h5f4
+info score cp -202 depth 2 nodes 542 time 9 pv h5f4 d6d7
+info score cp -192 depth 3 nodes 2650 time 9 pv h5f4 d6d7 f7f5
+info score cp -270 depth 4 nodes 21745 time 14 pv a2a3 d4f2 h3e3 g1f1
+info score cp -307 depth 5 nodes 90766 time 33 pv h5f4 d6d7 f4e6 d7d8q e6d8
+info score cp -292 depth 6 nodes 287430 time 87 pv h3d7 f4f5 h5f4 f5g6 f7g6 g1c1
+info score cp -290 depth 7 nodes 594098 time 172 pv h3d7 f4f5 h5f4 f5g6 f7g6 g1c1 d7b7
+info score cp -297 depth 8 nodes 1444865 time 410 pv h3d7 f4f5 h5f4 f5g6 f7g6 g1f1 g6g5 e4e5
+info score cp -297 depth 9 nodes 2616896 time 736 pv h3d7 f4f5 h5f4 f5g6 f7g6 g1c1 f4e6 d4b4 e6f4
+info score cp -312 depth 10 nodes 6472927 time 1794 pv h3d7 f4f5 h5f4 g1b1 a2a8
+info score cp 0 depth 11 nodes 11016615 time 3018 pv a2d2 d4d2 h3f3 d2g2 h5g3 h2g3 f3h5 g2h2 h5f3 g1g2 f3d1
+info score cp 0 depth 12 nodes 11984779 time 3288 pv a2d2 d4d2 h3f3 d2g2 h5g3 h2g3 f3h5 g2h2 h5f3 g1g2 f3d1 h2g1
+info score cp 0 depth 13 nodes 13952572 time 3823 pv a2d2 d4d2 h3f3 d2g2 h5g3 h2g3 f3h5 g2h2 h5f3 g1g2 f3d1 h2g1 d1h5
+info score cp 0 depth 14 nodes 20090076 time 5497 pv a2d2 d4d2 h3f3 d2g2
+info score cp 0 depth 15 nodes 73534495 time 19441 pv a2d2 d4d2 h5f4 d2f4 h3h2
+info score cp 0 depth 16 nodes 1711475059 time 432356 pv a2d2 d4d2 h5f4 d2f4 h3h2 f4h2 g8g7 g1g6
+bestmove a2d2
+
+Game Board:
+
+8    r  q  .  .  r  b  k  .
+7    .  .  .  .  .  .  p  .
+6    p  .  .  p  .  .  P  p
+5    .  p  .  R  n  .  .  .
+4    .  .  .  .  P  B  .  .
+3    .  .  .  .  .  .  Q  .
+2    P  P  P  .  B  .  .  .
+1    .  .  K  .  .  .  R  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:B5FE8A8B6691009B
+
+rq2rbk1/6p1/p2p2Pp/1p1Rn3/4PB2/6Q1/PPP1B3/2K3R1 w - - bm Bxh6; id "LCTII.CMB.10"; c0 "Tchoudinovskikh - Merchiev, UdSSR 1987";
+
+time:1140000 start:1374921763 stop:1376061763 depth:64 timeset:1
+info score cp 60 depth 1 nodes 159 time 9 pv g1f1
+info score cp 55 depth 2 nodes 2857 time 9 pv g1f1 b5b4
+info score cp 55 depth 3 nodes 11764 time 12 pv g1f1 b5b4 f4e3
+info score cp 60 depth 4 nodes 73785 time 29 pv g1f1 b5b4 g3b3 g8h8
+info score cp 55 depth 5 nodes 169078 time 52 pv g1f1 g8h8 f1d1 e8e6 e2h5
+info score cp 48 depth 6 nodes 1431989 time 398 pv g1d1 g8h8 g3e3 e8e6 e3d4 f8e7
+info score cp 47 depth 7 nodes 2755123 time 718 pv g1f1 g8h8 e2h5 b8c7 c1b1 a8c8 g3f2
+info score cp 45 depth 8 nodes 12508962 time 3403 pv g1f1 g8h8 f4h6 g7h6 f1f8 e8f8 g6g7
+info score cp 45 depth 9 nodes 40649386 time 10343 pv g1d1 g8h8
+info score cp 40 depth 10 nodes 178488583 time 47747 pv g3b3
+info score cp 40 depth 11 nodes 477291142 time 123832 pv f4h6 g7h6 d5e5
+info score cp 40 depth 12 nodes 1540413377 time 412818 pv f4h6 g7h6
+info score cp 95 depth 13 nodes 2249078385 time 599926 pv f4h6 g7h6 d5e5 d6e5 e2b5 a6b5 g3e5
+bestmove f4h6
+
+Game Board:
+
+8    r  n  b  q  .  .  k  .
+7    p  .  r  .  .  p  .  p
+6    .  p  .  p  .  P  p  .
+5    .  B  p  P  n  .  N  .
+4    P  .  .  .  .  .  .  .
+3    .  .  P  .  .  .  .  .
+2    .  .  .  .  .  .  P  P
+1    R  .  B  .  Q  R  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:DE004CDABC20C9F9
+
+rnbq2k1/p1r2p1p/1p1p1Pp1/1BpPn1N1/P7/2P5/6PP/R1B1QRK1 w - - bm Nxh7; id "LCTII.CMB.11"; c0 "Vaisser - Genius 2, Aubervilliers, 1994";
+
+time:1140000 start:1376061764 stop:1377201764 depth:64 timeset:1
+info score cp -35 depth 1 nodes 90 time 9 pv c1e3
+info score cp -50 depth 2 nodes 2950 time 9 pv a4a5 c8b7
+info score cp -30 depth 3 nodes 6949 time 11 pv e1h4 h7h5 c1e3
+info score cp -45 depth 4 nodes 22042 time 15 pv e1h4 h7h5 a4a5 c8b7
+info score cp -45 depth 5 nodes 49815 time 22 pv e1h4 h7h5 a4a5 c8b7 a5b6
+info score cp -50 depth 6 nodes 368217 time 115 pv e1h4 h7h5 c1d2 c8f5 g5e4 f5e4
+info score cp -55 depth 7 nodes 974833 time 262 pv e1h4 h7h5 a4a5 b6a5 a1a5 c8d7 c1e3
+info score cp -62 depth 8 nodes 4911542 time 1395 pv e1h4 h7h5 a4a5 b6a5
+info score cp -70 depth 9 nodes 12898713 time 3383 pv e1h4 h7h5
+info score cp -35 depth 10 nodes 36256765 time 9919 pv g5e4 a7a6 e4d6 d8d6 c1f4 b8d7
+info score cp -35 depth 11 nodes 52434832 time 14369 pv g5e4 a7a6 e4d6
+info score cp -35 depth 12 nodes 92523505 time 25205 pv g5e4 a7a6
+info score cp -13 depth 13 nodes 256670162 time 69846 pv g5e4 a7a6
+info score cp -8 depth 14 nodes 772900306 time 208862 pv g5e4 h7h5 e4c5 b6c5
+info score cp -20 depth 15 nodes 3909446304 time 1055427 pv g5e4
+bestmove g5e4
+
+Game Board:
+
+8    r  .  .  q  r  b  .  k
+7    .  p  .  b  .  .  p  .
+6    p  .  .  p  p  n  .  p
+5    .  .  .  .  .  .  .  .
+4    .  .  .  N  P  .  .  .
+3    .  B  N  .  .  .  .  .
+2    P  P  P  .  .  .  Q  P
+1    .  K  .  .  .  R  R  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:82939D7C53B1F5A4
+
+r2qrb1k/1p1b2p1/p2ppn1p/8/3NP3/1BN5/PPP3QP/1K3RR1 w - - bm e5; id "LCTII.CMB.12"; c0 "Spassky - Petrosian, Moskau 1969";
+
+time:1140000 start:1377201765 stop:1378341765 depth:64 timeset:1
+info score cp -92 depth 1 nodes 205 time 8 pv b3c4
+info score cp -97 depth 2 nodes 1622 time 9 pv b3a4 b7b5
+info score cp -97 depth 3 nodes 4759 time 10 pv b3a4 b7b5 a4b3
+info score cp -112 depth 4 nodes 31555 time 17 pv b3a4 b7b5 a4b3 e6e5
+info score cp -117 depth 5 nodes 217930 time 64 pv b3a4 b7b5 a4b3 e6e5 d4f5
+info score cp -117 depth 6 nodes 799854 time 222 pv d4f3 a8c8 e4e5 d6e5 f3e5 c8c7
+info score cp -112 depth 7 nodes 2160704 time 561 pv d4f3 a8c8 e4e5 d6e5 f3e5 c8c7 b3c4
+info score cp -107 depth 8 nodes 5746352 time 1515 pv d4f3 d8e7 e4e5 f6h7 e5d6 e7d6 b3a4 b7b5
+info score cp -82 depth 9 nodes 11856097 time 3204 pv d4f3 f6g8 f3e5 d6e5 f1f8 d8e7
+info score cp -87 depth 10 nodes 23078051 time 6150 pv d4f3 f6g8 b3c4 d8e7 f3h4 e7h4 f1f8 h4e7 f8e8 a8e8
+info score cp -60 depth 11 nodes 93296919 time 24934 pv d4f3 a8b8 f3h4 g7g5 h4g6
+info score cp -87 depth 12 nodes 379492362 time 100800 pv d4f3 d8e7
+info score cp -20 depth 13 nodes 1381367270 time 369192 pv d4f3 e6e5 f3e5
+bestmove d4f3
+
+Game Board:
+
+8    .  .  .  .  .  .  .  .
+7    .  p  .  .  .  p  p  .
+6    .  .  .  .  .  .  .  p
+5    .  .  .  .  .  P  .  P
+4    .  .  k  .  .  .  P  .
+3    .  .  .  .  .  .  .  .
+2    .  .  K  .  .  P  .  .
+1    .  .  .  .  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:8C0A7AAA5E8D600D
+
+8/1p3pp1/7p/5P1P/2k3P1/8/2K2P2/8 w - - bm f6; id "LCTII.FIN.01"; c0 "NN - Lasker,Ed";
+
+time:1140000 start:1378341766 stop:1379481766 depth:64 timeset:1
+info score cp -10 depth 1 nodes 11 time 8 pv f2f4
+info score cp -30 depth 2 nodes 43 time 8 pv f2f4 c4d4
+info score cp -30 depth 3 nodes 181 time 8 pv f2f4 c4d4 g4g5
+info score cp -30 depth 4 nodes 482 time 8 pv f2f4 c4d4 g4g5 h6g5
+info score cp -30 depth 5 nodes 1230 time 9 pv f2f4 c4d4 g4g5 h6g5 f4g5
+info score cp -35 depth 6 nodes 2624 time 9 pv f2f4 c4d4 g4g5 h6g5 f4g5 b7b5
+info score cp -35 depth 7 nodes 5252 time 10 pv f2f4 b7b5 g4g5 b5b4 f5f6 b4b3 c2d2
+info score cp -55 depth 8 nodes 18756 time 14 pv c2d2 c4d4 d2d1 d4e5 d1e2 b7b5 e2e3 b5b4
+info score cp -65 depth 9 nodes 35694 time 18 pv c2d2 c4d4 d2d1 b7b5 d1d2 b5b4 d2c2 d4e4 c2b3
+info score cp -65 depth 10 nodes 54339 time 23 pv c2d2 c4d4 d2d1 b7b5 d1d2 b5b4 d2c2 d4c4 f2f4 b4b3
+info score cp -70 depth 11 nodes 95365 time 33 pv c2d2 c4d4 d2d1 b7b5 d1d2 d4e5 d2e3 b5b4 f2f4 e5d5 g4g5
+info score cp -75 depth 12 nodes 154847 time 49 pv c2d2 c4d4 d2d1 b7b5 d1d2 d4e4 d2e2 e4f4 f2f3 b5b4 e2f2 b4b3
+info score cp -75 depth 13 nodes 227935 time 67 pv c2d2 c4d4 d2d1 b7b5 d1d2 d4e4 d2e2 e4f4 f2f3 b5b4 e2f2 b4b3 f2e2
+info score cp -105 depth 14 nodes 488992 time 134 pv c2d2 c4d4 d2e2 b7b5 e2f3 b5b4 f3e2 b4b3 e2d2 f7f6 f2f3 d4c4 d2c1 c4d4
+info score cp -100 depth 15 nodes 713675 time 191 pv g4g5 f7f6 g5f6 g7f6 c2b2 c4d4 b2b3 d4e4 b3c4 e4f5 c4d5 f5g4 d5e6 b7b5 e6f6
+info score cp -110 depth 16 nodes 888919 time 236 pv g4g5 f7f6 g5f6 g7f6 c2b2 c4d4 b2b3 d4e4 b3c4 e4f5 c4d5 f5g5 d5e6 b7b5 f2f4 g5f4
+info score cp -110 depth 17 nodes 1122891 time 298 pv g4g5 f7f6 g5f6 g7f6 c2b2 c4d4 b2b3 d4e4 b3c4 e4f5 c4c5 f5e4 c5b6 e4f3 b6b7 f6f5 b7c6
+info score cp -110 depth 18 nodes 1410549 time 372 pv g4g5 f7f6 g5f6 g7f6 c2b2 c4d4 b2b3 d4e4 b3c4 e4f5 c4c5 f5e4 c5b6 e4f3 b6b7 f6f5 b7c6 f3f2
+info score cp 700 depth 19 nodes 7033558 time 1796 pv f5f6 g7f6 f2f4 b7b5 g4g5 f6g5 f4g5 h6g5 h5h6 b5b4 h6h7 b4b3 c2d2 b3b2 d2c2 g5g4 h7h8q g4g3 h8c3
+info score cp 715 depth 20 nodes 8875794 time 2266 pv f5f6 g7f6 f2f4 b7b5 g4g5 f6g5 f4g5 h6g5 h5h6
+info score cp 715 depth 21 nodes 12576755 time 3182 pv f5f6 g7f6 f2f4 b7b5 g4g5 f6g5
+info score cp 735 depth 22 nodes 16789746 time 4240 pv f5f6 g7f6 f2f4 b7b5 g4g5 f6g5 f4g5 h6g5 h5h6 f7f5
+info score cp 745 depth 23 nodes 46637237 time 11518 pv f5f6
+info score cp 765 depth 24 nodes 221305084 time 51465 pv f5f6
+info score cp 755 depth 25 nodes 694876254 time 166238 pv f5f6
+info score cp 865 depth 26 nodes 1329491655 time 318132 pv f5f6 g7f6 c2d2 f6f5 g4f5 b7b5 d2c2 c4d5
+info score cp 815 depth 27 nodes 3428289987 time 814176 pv f5f6 g7f6 c2d2
+bestmove f5f6
+
+Game Board:
+
+8    .  .  .  .  .  .  .  .
+7    p  p  .  .  r  .  k  .
+6    .  .  p  .  p  .  .  .
+5    .  .  .  p  P  .  .  p
+4    .  P  .  P  .  P  .  P
+3    P  .  .  .  .  .  K  R
+2    .  .  .  .  .  .  .  .
+1    .  .  .  .  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:4F74CB19AF52E10
+
+8/pp2r1k1/2p1p3/3pP2p/1P1P1P1P/P5KR/8/8 w - - bm f5; id "LCTII.FIN.02"; c0 "Capablanca - Eliskases, Moskau 1936";
+
+time:1140000 start:1379481767 stop:1380621767 depth:64 timeset:1
+info score cp 10 depth 1 nodes 13 time 9 pv g3f3
+info score cp 0 depth 2 nodes 55 time 9 pv g3f3 g7f7
+info score cp 10 depth 3 nodes 233 time 9 pv g3f3 g7f7 h3g3
+info score cp 0 depth 4 nodes 922 time 9 pv g3f3 g7g6 h3g3 g6f5
+info score cp 10 depth 5 nodes 2606 time 9 pv g3f3 g7f7 h3g3 e7d7 g3g2
+info score cp 20 depth 6 nodes 5667 time 10 pv g3f3 g7f7 h3g3 e7e8 g3g5 e8h8
+info score cp 20 depth 7 nodes 10818 time 12 pv g3f3 g7f7 h3g3 e7e8 g3g5 e8h8 f4f5
+info score cp 30 depth 8 nodes 76237 time 29 pv f4f5 e6f5 g3f4 g7g6 h3g3 g6h6 g3g5 c6c5
+info score cp 35 depth 9 nodes 140740 time 47 pv f4f5 e6f5 g3f4 g7h6 h3g3 a7a6 g3g5 c6c5 b4c5
+info score cp 40 depth 10 nodes 246988 time 77 pv f4f5 e6f5 g3f4
+info score cp 40 depth 11 nodes 492758 time 145 pv f4f5 e6f5 g3f4 g7h6 h3g3 e7f7 g3g5 f7e7 g5f5 h6g6 f5f8
+info score cp 30 depth 12 nodes 786814 time 226 pv f4f5 e6f5 g3f4 g7h6 h3g3 b7b6 g3c3 e7c7 b4b5 c6c5 f4f5 c5c4
+info score cp 55 depth 13 nodes 2026517 time 577 pv f4f5 e6f5 g3f4 g7h6 h3g3 b7b6 g3g5 c6c5 d4c5 b6c5 b4c5 e7c7 e5e6
+info score cp 50 depth 14 nodes 3779683 time 1077 pv f4f5 e6f5 g3f4 g7f7
+info score cp 50 depth 15 nodes 6392887 time 1817 pv f4f5 e6f5 g3f4 e7e6 h3g3 e6g6 g3g5 g6g5 f4g5
+info score cp 45 depth 16 nodes 9823209 time 2776 pv f4f5 e6f5 g3f4 e7e6 h3g3 e6g6 g3g5 g6g5 f4g5
+info score cp 50 depth 17 nodes 25715211 time 7205 pv f4f5 e6f5 g3f4 e7e5 d4e5 g7f7 f4f5 a7a6 e5e6 f7e7 f5e5
+info score cp 55 depth 18 nodes 75608759 time 21048 pv f4f5 e6f5 g3f4 g7h6 f4f5
+info score cp 90 depth 19 nodes 352990978 time 98375 pv f4f5 e6f5 e5e6 e7e6 g3f4 a7a6
+info score cp 90 depth 20 nodes 1968232583 time 546203 pv f4f5 e7e8
+bestmove f4f5
+
+Game Board:
+
+8    .  .  .  .  .  .  .  .
+7    .  .  .  p  .  .  .  .
+6    p  .  b  k  .  .  .  p
+5    P  p  .  .  .  .  .  .
+4    .  K  p  .  P  p  P  p
+3    .  .  P  .  .  P  .  P
+2    .  .  P  .  .  .  .  .
+1    .  .  .  .  .  B  .  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:8EE4FDA0920EF5F8
+
+8/3p4/p1bk3p/Pp6/1Kp1PpPp/2P2P1P/2P5/5B2 b - - bm Bxe4; id "LCTII.FIN.03"; c0 "Studie 1994";
+
+time:1140000 start:1380621768 stop:1381761768 depth:64 timeset:1
+info score cp 35 depth 1 nodes 45 time 9 pv d6e5
+info score cp 15 depth 2 nodes 122 time 9 pv d6e5 f1e2
+info score cp 25 depth 3 nodes 432 time 9 pv d6e6 f1e2 d7d5
+info score cp 5 depth 4 nodes 1220 time 9 pv d6e6 b4c5 e6e5 f1e2
+info score cp 15 depth 5 nodes 3060 time 10 pv d6e5 b4c5 c6b7 c5b6 b7c8
+info score cp 35 depth 6 nodes 6617 time 11 pv c6b7 f1e2 d6e5 b4c5 d7d5 c5b6
+info score cp 25 depth 7 nodes 9292 time 12 pv c6b7 f1e2 d6e5 b4c5 d7d5 c5b6 b7c8
+info score cp 50 depth 8 nodes 18627 time 14 pv c6a8 f1g2 d6e5 b4c5 d7d5 c5b6 d5e4 f3e4
+info score cp 35 depth 9 nodes 33164 time 19 pv c6a8 f1g2 a8b7 g2h1 d6e5 b4c5 d7d5 c5b6 b7c8
+info score cp 35 depth 10 nodes 43233 time 22 pv c6a8 f1g2 a8b7 g2h1 d6e5 b4c5 d7d6 c5b6 b7c8 h1g2
+info score cp 30 depth 11 nodes 71136 time 31 pv c6a8 f1g2 a8b7 g2h1 d6e5 b4c5 d7d6 c5b6 b7c8 h1g2 d6d5
+info score cp 25 depth 12 nodes 129826 time 48 pv c6a8 f1g2 a8b7 g2h1 b7c8 h1g2 d6e6 g2f1 e6e5 f1e2 d7d5 e4d5
+info score cp 25 depth 13 nodes 195273 time 67 pv c6a8 f1g2 a8b7 g2h1 b7c8 h1g2 d6e6 b4c5 e6e5 g2f1 d7d6 c5c6 c8e6
+info score cp 25 depth 14 nodes 302145 time 99 pv c6a8 f1g2 a8b7 g2h1 b7c8 h1g2 d6c6 g2h1 d7d6 h1g2 c8e6 g2h1
+info score cp 25 depth 15 nodes 468820 time 147 pv c6a8 f1g2 a8b7 g2h1 b7c8 h1g2 d6c6 g2h1 d7d6 h1g2 c8e6 g2f1 e6d7 f1e2 d6d5
+info score cp 15 depth 16 nodes 1001437 time 302 pv c6a8 f1g2 a8b7 g2h1 b7c8 h1g2 d6c6 g2h1 d7d6 h1g2 c8e6 g2f1 c6c7 f1e2 c7d7 e2d1
+info score cp 25 depth 17 nodes 1709968 time 508 pv c6a8 f1g2 a8b7 g2h1 b7c8 h1g2 d6c6 g2h1 d7d6 h1g2 c8e6 g2h1
+info score cp 25 depth 18 nodes 3062921 time 896 pv c6a8 f1g2 a8b7 g2h1 b7c8 h1g2 d6c6 g2f1 d7d6 f1g2 c8e6 g2h1
+info score cp 30 depth 19 nodes 6193105 time 1787 pv c6a8 f1g2 a8b7 g2h1 d6c6 h1g2 d7d6 g2h1 b7c8 h1g2 c8e6 g2f1 c6c7 f1g2 c7d7 g2h1 d7c6 h1g2 c6d7
+info score cp 50 depth 20 nodes 12143808 time 3463 pv c6a8 f1g2 a8b7 g2h1 d6c6 h1g2 d7d6 g2h1 c6d7 h1g2 d7e6 g2f1 d6d5 e4d5 b7d5 f1e2 e6d6 b4a3 d6e6 a3b4
+info score cp 55 depth 21 nodes 23905443 time 6725 pv c6a8 f1g2 a8b7
+info score cp 60 depth 22 nodes 49424838 time 13859 pv c6a8 f1g2 a8b7 g2h1
+info score cp 55 depth 23 nodes 90651335 time 25393 pv c6a8 f1g2 a8b7 g2h1
+info score cp 60 depth 24 nodes 1512803726 time 372317 pv c6a8 f1g2
+info score cp 60 depth 25 nodes 1780997737 time 447021 pv c6a8
+bestmove c6a8
+
+Game Board:
+
+8    .  .  .  .  .  k  .  .
+7    .  .  .  .  .  .  .  R
+6    .  .  .  .  P  .  .  p
+5    .  .  .  .  .  K  .  .
+4    p  .  r  .  .  P  .  p
+3    .  .  .  .  .  .  .  .
+2    .  .  .  .  .  .  .  .
+1    .  .  .  .  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:5E0A6D75301BB834
+
+5k2/7R/4P2p/5K2/p1r2P1p/8/8/8 b - - bm h3; am h5; id "LCTII.FIN.04"; c0 "Karpov - Deep Thought, Analyse 1990";
+
+time:1140000 start:1381761769 stop:1382901769 depth:64 timeset:1
+info score cp 20 depth 1 nodes 40 time 9 pv c4c5
+info score cp -30 depth 2 nodes 263 time 9 pv h4h3 h7h6
+info score cp -30 depth 3 nodes 737 time 9 pv h4h3 h7h6 c4c5
+info score cp -50 depth 4 nodes 3393 time 10 pv h6h5 h7h5 c4c5 f5g4
+info score cp -45 depth 5 nodes 10750 time 12 pv h4h3 h7h6 c4c3 h6h8 f8g7
+info score cp -20 depth 6 nodes 34676 time 18 pv h6h5 h7h5 c4c5 f5g4 c5h5 g4h5
+info score cp -15 depth 7 nodes 93257 time 34 pv a4a3 h7a7 c4c3 f5g6 f8e8 f4f5 h4h3
+info score cp -20 depth 8 nodes 173809 time 55 pv a4a3 h7f7 f8e8 f7a7 c4c3 f5f6 e8d8 e6e7
+info score cp -35 depth 9 nodes 476743 time 138 pv h6h5 f5g5 a4a3 f4f5 a3a2 h7a7 c4c2 e6e7 f8f7
+info score cp -70 depth 10 nodes 829727 time 232 pv h6h5 f5g5 h4h3 h7h5 f8e7 f4f5 c4c3 h5h7 e7d6 h7d7
+info score cp -75 depth 11 nodes 1446786 time 399 pv h6h5 f5g5 h4h3 h7h5 f8e7 f4f5 c4c3 h5h7 e7d6 e6e7 c3g3
+info score cp -80 depth 12 nodes 2614768 time 713 pv h6h5 f5g5 a4a3 h7a7 h4h3 a7a3 h3h2 a3h3 c4c2 f4f5 f8e7 h3h5
+info score cp -95 depth 13 nodes 5663309 time 1532 pv h6h5 f5g5 a4a3 h7a7
+info score cp -100 depth 14 nodes 15391150 time 4197 pv h6h5 f5g5 c4e4 f4f5 f8g8
+info score cp -95 depth 15 nodes 57717278 time 15633 pv h6h5 f5g5 h4h3
+info score cp -95 depth 16 nodes 300562936 time 80315 pv h6h5 h7h5
+info score cp 0 depth 17 nodes 3193194813 time 779254 pv h4h3 h7h6
+bestmove h4h3
+
+Game Board:
+
+8    .  .  .  .  .  .  k  .
+7    .  .  .  .  .  .  p  .
+6    .  .  .  .  .  .  .  p
+5    P  .  N  .  .  .  .  .
+4    .  r  .  .  .  p  .  .
+3    .  .  .  .  .  .  .  P
+2    .  b  .  .  .  P  P  .
+1    .  .  .  b  R  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:79CC5EF791F9FEBD
+
+6k1/6p1/7p/P1N5/1r3p2/7P/1b3PP1/3bR1K1 w - - bm a6; id "LCTII.FIN.05"; c0 "Karpov - Kasparov, Moskau 1985 [Analyse]";
+
+time:1140000 start:1382901770 stop:1384041770 depth:64 timeset:1
+info score cp 150 depth 1 nodes 26 time 9 pv e1d1
+info score cp 135 depth 2 nodes 394 time 9 pv c5d3 b2c3
+info score cp 135 depth 3 nodes 1140 time 9 pv c5d3 b2c3 e1d1
+info score cp 125 depth 4 nodes 4854 time 10 pv c5d3 b2c3 e1d1 b4d4
+info score cp 150 depth 5 nodes 16182 time 13 pv e1d1 b2e5 a5a6 b4d4 d1d4
+info score cp 135 depth 6 nodes 48057 time 21 pv e1d1 b4d4 c5d3 b2c3 a5a6 g8f7
+info score cp 135 depth 7 nodes 120834 time 39 pv e1d1 b4b5 c5d3 b2a3 d3f4 b5a5 d1d7
+info score cp 130 depth 8 nodes 272714 time 76 pv e1d1 b4b5 c5d3 b2a3 a5a6 b5a5 g1f1 a5a6
+info score cp 145 depth 9 nodes 1007232 time 263 pv e1d1 b4d4 d1d4 b2d4 c5d3 g7g5 a5a6 g8f7 g1f1
+info score cp 130 depth 10 nodes 2677728 time 690 pv e1d1 b2d4 c5e4 g8f8 g1f1 f8f7 a5a6 f7e6 f1e2 b4b2
+info score cp 150 depth 11 nodes 10382068 time 2714 pv a5a6 d1b3 c5b3 b4a4 b3c5 a4a5
+info score cp 145 depth 12 nodes 14616366 time 3825 pv a5a6 d1b3 c5b3 b4a4 b3c5 a4a5
+info score cp 145 depth 13 nodes 26694067 time 6960 pv a5a6 d1b3 c5b3 b4a4 b3c5
+info score cp 145 depth 14 nodes 62919109 time 16510 pv a5a6 b2f6 e1d1 b4b2 a6a7 b2f2
+info score cp 140 depth 15 nodes 496803709 time 128136 pv a5a6 g8f7 e1d1 b2e5 c5d3
+info score cp 145 depth 16 nodes 2767608022 time 694584 pv a5a6 b2d4 e1d1 d4c5 g1f1 c5f2
+bestmove a5a6
+
+Game Board:
+
+8    .  .  .  .  .  .  .  .
+7    .  .  .  b  .  .  .  .
+6    .  .  .  .  .  k  .  .
+5    .  .  p  P  n  p  .  .
+4    .  p  P  .  .  .  .  N
+3    p  P  .  B  .  .  P  .
+2    P  .  .  .  K  .  .  .
+1    .  .  .  .  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:b
+enPas:99
+castle:----
+PosKey:B1D65F5593B962B
+
+8/3b4/5k2/2pPnp2/1pP4N/pP1B2P1/P3K3/8 b - - bm f4; id "LCTII.FIN.06"; c0 "Minev - Portisch, Halle 1967";
+
+time:1140000 start:1384041771 stop:1385181771 depth:64 timeset:1
+info score cp -115 depth 1 nodes 64 time 8 pv e5g4
+info score cp -120 depth 2 nodes 224 time 8 pv e5d3 e2d3
+info score cp -100 depth 3 nodes 711 time 9 pv e5d3 e2d3 f6e5
+info score cp -110 depth 4 nodes 2369 time 9 pv e5d3 e2d3 f6e5 h4f3
+info score cp -125 depth 5 nodes 8531 time 11 pv e5g4 h4f3 f6e7 f3g5 e7f6
+info score cp -125 depth 6 nodes 27136 time 16 pv f6g5 h4f3 g5f6 f3e5 f6e5 e2e3
+info score cp -125 depth 7 nodes 43086 time 21 pv f6g5 h4f3 g5f6 f3e5 f6e5 e2e3 d7e8
+info score cp -120 depth 8 nodes 149689 time 50 pv d7c8 h4g2 e5d3 e2d3 f6e5 g2h4 c8a6 h4f3
+info score cp -125 depth 9 nodes 335298 time 102 pv f6g5 h4f3 g5f6 e2e3 e5f3 e3f3 f6e5 d3b1 d7e8
+info score cp -125 depth 10 nodes 483588 time 144 pv f6g5 h4f3 g5f6 f3e1 e5g4 e1g2 g4e5 g2e1 e5g4 e1g2
+info score cp -125 depth 11 nodes 621275 time 184 pv f6g5 h4f3 g5f6 f3e5 f6e5 e2e3 d7e8 d3e2 e8f7 e2f1 f7e8
+info score cp -120 depth 12 nodes 1747416 time 508 pv e5d3 e2d3 d7a4 d3c2 a4e8
+info score cp -120 depth 13 nodes 4130805 time 1198 pv f6g5 d3b1 g5g4 e2f2
+info score cp -120 depth 14 nodes 6380116 time 1851 pv f6g5 d3b1 g5f6 e2e3 f6g5 h4f3
+info score cp -55 depth 15 nodes 13221472 time 3818 pv f5f4 g3f4 d7g4 e2d2 e5d3 d2d3 g4d1 d5d6 d1b3 d6d7 f6e7 h4g6 e7d8 f4f5 b3a4
+info score cp -55 depth 16 nodes 22833301 time 6576 pv f5f4 g3f4 d7g4 e2d2 e5d3
+info score cp -110 depth 17 nodes 45172409 time 12951 pv f5f4 g3f4 e5d3 e2d3 d7e8 d5d6 e8d7 d3e3 d7e8 e3d2
+info score cp -125 depth 18 nodes 133477358 time 37992 pv f6g5 h4f3 e5f3
+info score cp -5 depth 19 nodes 525012286 time 148986 pv f5f4 g3f4
+info score cp 0 depth 20 nodes 1337632105 time 375678 pv f5f4 g3f4 e5d3 e2d3 f6e7
+bestmove f5f4
+
+Game Board:
+
+8    .  .  .  .  .  .  k  .
+7    .  .  .  .  p  p  .  p
+6    .  .  .  p  .  .  p  .
+5    P  .  p  P  b  .  .  .
+4    R  .  .  .  .  .  .  .
+3    .  r  .  .  P  .  P  P
+2    .  .  .  B  .  P  .  .
+1    .  .  .  .  .  .  K  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:81E98292EB917AFA
+
+6k1/4pp1p/3p2p1/P1pPb3/R7/1r2P1PP/3B1P2/6K1 w - - bm Bb4; id "LCTII.FIN.07"; c0 "Lengyel - Kaufman, Los Angeles 1974";
+
+time:1140000 start:1385181772 stop:1386321772 depth:64 timeset:1
+info score cp 25 depth 1 nodes 68 time 9 pv a5a6
+info score cp 0 depth 2 nodes 300 time 9 pv a5a6 b3b2
+info score cp -25 depth 3 nodes 2553 time 9 pv f2f4 b3b1 g1g2
+info score cp 5 depth 4 nodes 5318 time 10 pv f2f4 b3b1 g1g2 e5f6
+info score cp -35 depth 5 nodes 27456 time 16 pv a4a2 b3b1 g1g2 c5c4 f2f4
+info score cp 80 depth 6 nodes 76981 time 28 pv a5a6 b3b1 g1g2 b1b8 a6a7 b8a8
+info score cp 65 depth 7 nodes 123775 time 42 pv a5a6 b3b1 g1g2 b1b8 a6a7 b8a8 g2g1
+info score cp 90 depth 8 nodes 329243 time 96 pv a5a6 b3b8 a6a7 b8a8 f2f4 e5f6 e3e4 e7e5
+info score cp 80 depth 9 nodes 781776 time 219 pv a5a6 b3b1 g1g2 b1b8 a6a7 b8a8 f2f4 e5f6 g2f1
+info score cp 100 depth 10 nodes 1676203 time 466 pv a5a6 b3b1 g1g2 b1b8 a6a7 b8a8 f2f4 e5f6 e3e4 e7e6
+info score cp 75 depth 11 nodes 2022007 time 558 pv a5a6 b3b1 g1g2 b1b8 a6a7 b8a8 f2f4 e5f6 e3e4 c5c4 g2g1
+info score cp 80 depth 12 nodes 4095326 time 1120 pv a5a6 b3b1 g1g2 b1b8 a6a7 e5g3
+info score cp 80 depth 13 nodes 19761534 time 5368 pv a5a6 b3b1 d2e1 b1e1 g1g2 e5f6 a6a7 e1b1
+info score cp 80 depth 14 nodes 67675733 time 18682 pv a5a6
+info score cp 75 depth 15 nodes 480377993 time 131133 pv a5a6
+info score cp 230 depth 16 nodes 2005425150 time 540881 pv d2b4 c5b4
+info score cp 230 depth 17 nodes 4039073904 time 1084373 pv d2b4 c5b4
+bestmove d2b4
+
+Game Board:
+
+8    .  .  k  .  .  .  .  .
+7    p  .  .  .  .  .  .  .
+6    P  p  .  p  .  b  .  .
+5    .  P  .  P  .  p  .  .
+4    .  .  P  .  .  P  .  p
+3    .  .  .  K  .  .  .  P
+2    .  .  .  .  .  B  .  .
+1    .  .  .  .  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:F940F7972E6E638F
+
+2k5/p7/Pp1p1b2/1P1P1p2/2P2P1p/3K3P/5B2/8 w - - bm c5; id "LCTII.FIN.08"; c0 "Spassky - Byrne, 1974";
+
+time:1140000 start:1386321773 stop:1387461773 depth:64 timeset:1
+info score cp 160 depth 1 nodes 25 time 9 pv f2d4
+info score cp 160 depth 2 nodes 95 time 9 pv f2d4 f6e7
+info score cp 160 depth 3 nodes 369 time 9 pv f2d4 f6e7 d3c3
+info score cp 150 depth 4 nodes 923 time 9 pv f2d4 f6e7 d3c3 c8c7
+info score cp 150 depth 5 nodes 2859 time 10 pv f2e3 c8c7 e3d4 f6e7 d3c3
+info score cp 150 depth 6 nodes 4793 time 10 pv f2e3 c8c7 e3d4 f6e7 d3c3 c7d7
+info score cp 150 depth 7 nodes 7390 time 11 pv f2d4 f6d4 d3d4 c8c7 d4c3 c7c8 c3d3
+info score cp 145 depth 8 nodes 18431 time 14 pv f2e3 c8c7 d3d2 c7d7 d2e2 d7c7 e2f3 f6e7
+info score cp 145 depth 9 nodes 32014 time 17 pv f2e3 c8c7 d3d2 c7c8 d2e2 c8d7 e2f2 f6e7 f2f3
+info score cp 140 depth 10 nodes 62445 time 25 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 c7d7 d2c3 f6c3
+info score cp 140 depth 11 nodes 77441 time 29 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 c7d7 d2c3 f6c3 d3c3
+info score cp 140 depth 12 nodes 105350 time 37 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 c7d7 d2c3 f6c3 d3c3 d7c8
+info score cp 140 depth 13 nodes 149585 time 49 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6e7 d3d4 e7f6 d4e3 c7d7 e3d3
+info score cp 140 depth 14 nodes 223701 time 68 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6b2 d3e3 b2f6 e3f3 f6d4 f3e2 c7d7
+info score cp 140 depth 15 nodes 349945 time 101 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6b2 d3e3 b2f6 e3f3 f6d4 d2e1 d4f6 e1b4
+info score cp 140 depth 16 nodes 559967 time 156 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6b2 d3e3 b2f6 e3f3 f6d4 d2c1 c7d7 c1e3 d4e3
+info score cp 140 depth 17 nodes 1041121 time 282 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6b2 d3e3 b2f6 e3f3 f6d4 d2e1 d4f6 e1f2 c7d7 f2b6
+info score cp 140 depth 18 nodes 1713723 time 464 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6b2 d3e3 c7d7 e3e2 b2d4 e2d3 d4b2 d3e3 b2f6 e3d3 d7d8
+info score cp 140 depth 19 nodes 2730828 time 732 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6b2
+info score cp 140 depth 20 nodes 5831949 time 1532 pv f2e3 c8c7 d3e2 c7c8 e3d2 c8c7 e2d3 f6b2
+info score cp 140 depth 21 nodes 11147313 time 2911 pv f2e3 c8c7 d3e2 f6b2 e2f3 b2c3 f3f2 c3f6 e3d2 f6d4
+info score cp 140 depth 22 nodes 53475862 time 13667 pv f2e3 c8c7 d3e2 f6b2 e2f3 b2f6 e3f2 c7c8 f3e2 c8c7 e2e3 c7c8 f2e1 c8d7 e1b4 d7c7 e3d3 c7d7 b4c3 d7e7 c3d4 f6d4
+info score cp 140 depth 23 nodes 393201208 time 94734 pv f2e3
+info score cp 140 depth 24 nodes 544256703 time 131861 pv f2e3 c8c7 d3e2 c7c8 e3f2 c8c7 e2e3 f6e7 e3d3 e7f6 f2e3 c7d7 e3d4 f6d4 d3d4 d7c7 d4d3 c7d7 d3c3
+bestmove f2e3
+
+Game Board:
+
+8    .  .  .  .  .  .  .  .
+7    .  .  .  .  .  B  p  .
+6    .  .  .  .  P  .  .  .
+5    .  .  .  .  .  .  p  P
+4    .  b  .  k  .  P  .  .
+3    .  .  .  .  .  K  .  .
+2    .  .  .  .  .  .  .  .
+1    .  .  .  .  .  .  .  .
+
+     a  b  c  d  e  f  g  h
+side:w
+enPas:99
+castle:----
+PosKey:69D2EFDEDCECE2A0
+
+8/5Bp1/4P3/6pP/1b1k1P2/5K2/8/8 w - - bm Kg4; id "LCTII.FIN.09"; c0 "Klimenok - Kabanov, UdSSR 1969";
+
+time:1140000 start:1387461774 stop:1388601774 depth:64 timeset:1
+info score cp 250 depth 1 nodes 13 time 8 pv f4g5
+info score cp 245 depth 2 nodes 67 time 8 pv f4g5 b4c5
+info score cp 250 depth 3 nodes 291 time 8 pv f4g5 b4c5 h5h6
+info score cp 250 depth 4 nodes 1020 time 9 pv f4g5 b4d2 g5g6 d2e3
+info score cp 255 depth 5 nodes 2942 time 9 pv f4g5 b4f8 f7g6 f8e7 h5h6
+info score cp 255 depth 6 nodes 7549 time 10 pv f4g5 b4f8 f7e8 d4e5 e8d7 f8c5
+info score cp 260 depth 7 nodes 14103 time 12 pv f4g5 b4f8 f7e8 d4e5 e8d7 f8c5 h5h6
+info score cp 260 depth 8 nodes 31602 time 16 pv f4g5 b4f8 f7e8 d4e5 e8d7 e5d5 g5g6 f8c5
+info score cp 350 depth 9 nodes 76766 time 28 pv f4g5 b4f8 h5h6 g7h6 g5h6 f8e7 h6h7 e7f6 f7g8
+info score cp 340 depth 10 nodes 110311 time 36 pv f4g5 b4f8 h5h6 g7h6 g5h6 f8e7 h6h7 e7f6 f7g8 f6e5
+info score cp 380 depth 11 nodes 297607 time 85 pv f4g5 d4e5 h5h6 g7h6 g5h6 b4c3 h6h7 e5d6 f7g8 c3d4 f3e4
+info score cp 380 depth 12 nodes 448267 time 124 pv f4g5 d4e5 h5h6 g7h6 g5h6 e5d6 h6h7 b4c3 f7g8 c3d4 f3e4 d4e5
+info score cp 390 depth 13 nodes 625340 time 170 pv f4g5 d4e5 h5h6 g7h6 g5h6 e5d6 h6h7 b4c3 f7g8 c3d4 f3e4 d4f6 g8f7
+info score cp 380 depth 14 nodes 829544 time 225 pv f4g5 d4e5 h5h6 g7h6 g5h6 e5d6 h6h7 b4c3 f7g8 c3d4 f3e4 d4f6 g8f7 f6e5
+info score cp 380 depth 15 nodes 1106520 time 296 pv f4g5 d4e5 h5h6 g7h6 g5h6 e5d6 h6h7 b4c3 f7g8 c3d4 f3e4 d4f6 g8f7 f6e5 f7g8
+info score cp 370 depth 16 nodes 1745275 time 465 pv f4g5 d4e5 h5h6 g7h6 g5h6 e5d6
+info score cp 390 depth 17 nodes 3196871 time 842 pv f4g5 d4e5 h5h6 g7h6 g5h6 e5d6
+info score cp 390 depth 18 nodes 5747110 time 1510 pv f4g5 d4e5 h5h6 g7h6 g5h6 e5d6 h6h7 b4c3 f3e4 c3f6 e4f5 f6d4 f7h5 d4c3 h5f3 c3d4 f5e4 d4e5
+info score cp 380 depth 19 nodes 2039261655 time 440241 pv f4g5
+info score cp 370 depth 20 nodes 2065971609 time 447148 pv f4g5 d4e5
+info score cp 390 depth 21 nodes 2238199766 time 487133 pv f4g5
+info score cp 380 depth 22 nodes 2404358993 time 527454 pv f4g5
+bestmove f4g5
