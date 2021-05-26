@@ -1,5 +1,12 @@
 # Prerequisites
 *.d
+*.zip
+*.epd
+*.zip
+*.epd
+*.zip
+*.epd
+*.txt
 
 # Object files
 *.o
