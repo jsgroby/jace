@@ -7,7 +7,7 @@
 *.zip
 *.epd
 *.txt
-.support
+./.support/
 
 # Object files
 *.o
