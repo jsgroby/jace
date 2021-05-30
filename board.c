@@ -312,7 +312,7 @@ void PrintBoard(const S_BOARD *pos) {
 	for(file = FILE_A; file <= FILE_H; file++) {
 		printf("%3c",'a'+file);
 	}
-	printf("\n\n");
+	printf("\n");
 	printf("side:%c\n",SideChar[pos->side]);
 	printf("enPas:%d\n",pos->enPas);
 	printf("castle:%c%c%c%c\n",

@@ -143,6 +143,9 @@ static int Quiescence(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
 			alpha = Score;
 		}
     }
+
+	// ASSERT(alpha >= OldAlpha);
+
 	return alpha;
 }
 
@@ -220,9 +223,7 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 			}
 		}
 	}
-	
-	int FoundPv = FALSE;
-	
+
 	for(MoveNum = 0; MoveNum < list->count; ++MoveNum) {
 
 		PickNextMove(MoveNum, list);
@@ -231,17 +232,8 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
             continue;
         }
 
-		Legal++;
-		
-		if(FoundPv == TRUE) {
-			Score = -AlphaBeta(-alpha - 1, -alpha, depth-1, pos, info, TRUE);
-			if(Score > alpha && Score < beta) {
-				Score = -AlphaBeta( -beta, -alpha, depth-1, pos, info, TRUE);
-			}
-		} else {
-			Score = -AlphaBeta( -beta, -alpha, depth-1, pos, info, TRUE);
-		}
-		
+		Legal++;	
+		Score = -AlphaBeta( -beta, -alpha, depth-1, pos, info, TRUE);
 		TakeMove(pos);
 
 		if(info->stopped == TRUE) {
@@ -266,7 +258,6 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 
 					return beta;
 				}
-				FoundPv = TRUE;
 				alpha = Score;
 
 				if(!(list->moves[MoveNum].move & MFLAGCAP)) {
