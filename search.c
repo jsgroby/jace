@@ -232,7 +232,7 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
             continue;
         }
 
-		Legal++;	
+		Legal++;
 		Score = -AlphaBeta( -beta, -alpha, depth-1, pos, info, TRUE);
 		TakeMove(pos);
 
