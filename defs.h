@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 // Comment out below line to turn off debugging
-#define DEBUG
+// #define DEBUG
 
 #define MAX_HASH 1024
 
