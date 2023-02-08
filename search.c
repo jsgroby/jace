@@ -143,9 +143,6 @@ static int Quiescence(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
 			alpha = Score;
 		}
     }
-
-	// ASSERT(alpha >= OldAlpha);
-
 	return alpha;
 }
 
