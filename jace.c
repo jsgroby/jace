@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 
 	// print date and time - add function to misc.c for this to handle all systems
 	int numofcpus = getNumberOfCores();
-	printf("%d physical cores detected\n",numofcpus/2);
+	printf("%d physical cores detected\n",numofcpus);
 	
 	AllInit();
 
