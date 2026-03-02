@@ -225,6 +225,13 @@ extern int PieceVal[13];
 extern int PieceCol[13];
 extern int PiecePawn[13];
 
+extern const int KnDir[8];
+extern const int RkDir[4];
+extern const int BiDir[4];
+extern const int KiDir[8];
+
+extern int SEE(const S_BOARD *pos, int move);
+
 extern int FilesBrd[BRD_SQ_NUM];
 extern int RanksBrd[BRD_SQ_NUM];
 
@@ -248,7 +255,7 @@ extern S_OPTIONS EngineOptions[1];
 /* FUNCTIONS */
 
 // init.c
-extern void AllInit();
+extern void AllInit(void);
 
 // bitboards.c
 extern void PrintBitBoard(U64 bb);
@@ -292,7 +299,7 @@ extern void DebugAnalysisTest(S_BOARD *pos, S_SEARCHINFO *info);
 extern void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list);
 extern void GenerateAllCaps(const S_BOARD *pos, S_MOVELIST *list);
 extern int MoveExists(S_BOARD *pos, const int move);
-extern void InitMvvLva();
+extern void InitMvvLva(void);
 
 // makemove.c
 extern int MakeMove(S_BOARD *pos, int move);
@@ -307,8 +314,8 @@ extern void PerftTest(int depth, S_BOARD *pos);
 extern void SearchPosition(S_BOARD *pos, S_SEARCHINFO *info);
 
 // misc.c
-extern int getNumberOfCores();
-extern int GetTimeMs();
+extern int getNumberOfCores(void);
+extern int GetTimeMs(void);
 extern void ReadInput(S_SEARCHINFO *info);
 
 // pvtable.c
@@ -332,7 +339,7 @@ extern void Console_Loop(S_BOARD *pos, S_SEARCHINFO *info);
 
 // polybook.c
 extern int GetBookMove(S_BOARD *board);
-extern void CleanPolyBook();
-extern void InitPolyBook() ;
+extern void CleanPolyBook(void);
+extern void InitPolyBook(void);
 
 #endif

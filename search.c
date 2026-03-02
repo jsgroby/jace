@@ -1,10 +1,15 @@
 // search.c
 
 #include "stdio.h"
+#include "string.h"
 #include "defs.h"
 
 
 int rootDepth;
+
+// Counter-move history: for the previous move's (piece, to-square), store a good reply move.
+// Indexed by piece [0..12] and square [0..BRD_SQ_NUM-1].
+static int counterMoves[13][BRD_SQ_NUM];
 
 static void CheckUp(S_SEARCHINFO *info) {
 	// .. check if time up, or interrupt from GUI
@@ -55,6 +60,8 @@ static void ClearForSearch(S_BOARD *pos, S_SEARCHINFO *info) {
 
 	int index = 0;
 	int index2 = 0;
+
+	memset(counterMoves, 0, sizeof(counterMoves));
 
 	for(index = 0; index < 13; ++index) {
 		for(index2 = 0; index2 < BRD_SQ_NUM; ++index2) {
@@ -116,9 +123,27 @@ static int Quiescence(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
 	int Legal = 0;
 	Score = -INFINITE;
 
+\
+	// Minor move ordering tweak: try hash/PV move first in quiescence, too.
+	int qPvMove = ProbePvMove(pos);
+	if(qPvMove != NOMOVE) {
+		for(int q = 0; q < list->count; ++q) {
+			if(list->moves[q].move == qPvMove) {
+				list->moves[q].score = 2000000;
+				break;
+			}
+		}
+	}
+
 	for(MoveNum = 0; MoveNum < list->count; ++MoveNum) {
 
 		PickNextMove(MoveNum, list);
+
+		// SEE-based capture filtering: skip obviously losing captures in quiescence.
+		// GenerateAllCaps() produces only captures/EP, so SEE is meaningful here.
+		if(SEE(pos, list->moves[MoveNum].move) < 0) {
+			continue;
+		}
 
         if ( !MakeMove(pos,list->moves[MoveNum].move))  {
             continue;
@@ -146,11 +171,12 @@ static int Quiescence(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
 	return alpha;
 }
 
+
 static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO *info, int DoNull) {
 
 	ASSERT(CheckBoard(pos));
-	ASSERT(beta>alpha);
-	ASSERT(depth>=0);
+	ASSERT(beta > alpha);
+	ASSERT(depth >= 0);
 
 	if(depth <= 0) {
 		return Quiescence(alpha, beta, pos, info);
@@ -171,7 +197,7 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 		return EvalPosition(pos);
 	}
 
-	int InCheck = SqAttacked(pos->KingSq[pos->side],pos->side^1,pos);
+	int InCheck = SqAttacked(pos->KingSq[pos->side], pos->side ^ 1, pos);
 
 	if(InCheck == TRUE) {
 		depth++;
@@ -180,29 +206,30 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 	int Score = -INFINITE;
 	int PvMove = NOMOVE;
 
-	if( ProbeHashEntry(pos, &PvMove, &Score, alpha, beta, depth) == TRUE ) {
+	if(ProbeHashEntry(pos, &PvMove, &Score, alpha, beta, depth) == TRUE) {
 		pos->HashTable->cut++;
 		return Score;
 	}
 
-	if( DoNull && !InCheck && pos->ply && (pos->bigPce[pos->side] > 1) && depth >= 4) {
+	if(DoNull && !InCheck && pos->ply && (pos->bigPce[pos->side] > 1) && depth >= 4) {
 		MakeNullMove(pos);
-		Score = -AlphaBeta( -beta, -beta + 1, depth-4, pos, info, FALSE);
+		Score = -AlphaBeta(-beta, -beta + 1, depth - 4, pos, info, FALSE);
 		TakeNullMove(pos);
+
 		if(info->stopped == TRUE) {
 			return 0;
 		}
 
-		if (Score >= beta && abs(Score) < ISMATE) {
+		if(Score >= beta && abs(Score) < ISMATE) {
 			info->nullCut++;
 			return beta;
 		}
 	}
 
 	S_MOVELIST list[1];
-    GenerateAllMoves(pos,list);
+	GenerateAllMoves(pos, list);
 
-    int MoveNum = 0;
+	int MoveNum = 0;
 	int Legal = 0;
 	int OldAlpha = alpha;
 	int BestMove = NOMOVE;
@@ -211,12 +238,34 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 
 	Score = -INFINITE;
 
-	if( PvMove != NOMOVE) {
+	if(PvMove != NOMOVE) {
 		for(MoveNum = 0; MoveNum < list->count; ++MoveNum) {
-			if( list->moves[MoveNum].move == PvMove) {
+			if(list->moves[MoveNum].move == PvMove) {
 				list->moves[MoveNum].score = 2000000;
-				//printf("Pv move found \n");
 				break;
+			}
+		}
+	}
+
+	// Counter-move ordering tweak: if we have a recorded good reply to the previous move,
+	// give it a bonus so it gets searched earlier.
+	int prevMove = NOMOVE;
+	if(pos->hisPly > 0) {
+		prevMove = pos->history[pos->hisPly - 1].move;
+	}
+	if(prevMove != NOMOVE) {
+		int prevTo = TOSQ(prevMove);
+		int prevPiece = pos->pieces[prevTo]; // after making prevMove, the mover sits on its 'to' square
+		if(prevPiece != EMPTY && prevPiece != OFFBOARD) {
+			int cm = counterMoves[prevPiece][prevTo];
+			if(cm != NOMOVE) {
+				for(int i = 0; i < list->count; ++i) {
+					if(list->moves[i].move == cm) {
+						// Keep below PV bump but above most heuristics.
+						list->moves[i].score += 250000;
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -225,23 +274,89 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 
 		PickNextMove(MoveNum, list);
 
-        if ( !MakeMove(pos,list->moves[MoveNum].move))  {
-            continue;
-        }
+		if(!MakeMove(pos, list->moves[MoveNum].move)) {
+			continue;
+		}
 
 		Legal++;
-		Score = -AlphaBeta( -beta, -alpha, depth-1, pos, info, TRUE);
+
+\
+		// --- PVS (Principal Variation Search) + LMR (Late Move Reductions) ---
+		// Full-window search on the first legal move.
+		// Null-window searches on subsequent moves, with a re-search only if needed.
+		//
+		// LMR: reduce depth for late, quiet moves (non-captures) when not in check.
+		// We do the reduced-depth null-window search first, then "upgrade" only if it improves alpha.
+
+		int isCapture = (list->moves[MoveNum].move & MFLAGCAP);
+		int reducedDepth = depth - 1;
+
+		// Late move reduction conditions (conservative):
+		// - not in check
+		// - not a capture
+		// - not the first few legal moves
+		// - enough depth remaining to make reduction meaningful
+		if(!InCheck && !isCapture && depth >= 3 && Legal >= 4) {
+			// small depth-based reduction
+			int r = 1;
+			if(depth >= 6 && Legal >= 8) r = 2;
+			reducedDepth -= r;
+			if(reducedDepth < 1) reducedDepth = 1;
+		}
+
+		if(Legal == 1) {
+			// First move: always full window, unreduced
+			Score = -AlphaBeta(-beta, -alpha, depth - 1, pos, info, TRUE);
+		} else {
+
+			int windowBeta = alpha + 1;
+			if(windowBeta > INFINITE) windowBeta = INFINITE;
+
+			// First do a (possibly reduced) null-window search
+			Score = -AlphaBeta(-windowBeta, -alpha, reducedDepth, pos, info, TRUE);
+
+			if(info->stopped == TRUE) {
+				TakeMove(pos);
+				return 0;
+			}
+
+			// If it improved alpha, we need to confirm at full depth.
+			// If it also looks like it can hit beta, widen and/or re-search accordingly.
+			if(Score > alpha) {
+
+				// If reduced, re-search at full depth with null-window first
+				if(reducedDepth != depth - 1) {
+					Score = -AlphaBeta(-windowBeta, -alpha, depth - 1, pos, info, TRUE);
+
+					if(info->stopped == TRUE) {
+						TakeMove(pos);
+						return 0;
+					}
+				}
+
+				// If still between alpha and beta, do a full-window re-search
+				if(Score > alpha && Score < beta) {
+					Score = -AlphaBeta(-beta, -alpha, depth - 1, pos, info, TRUE);
+				}
+			}
+		}
+		// --- end PVS/LMR ---\
+
+		// --- end PVS ---
+
 		TakeMove(pos);
 
 		if(info->stopped == TRUE) {
 			return 0;
 		}
+
 		if(Score > BestScore) {
 			BestScore = Score;
 			BestMove = list->moves[MoveNum].move;
+
 			if(Score > alpha) {
 				if(Score >= beta) {
-					if(Legal==1) {
+					if(Legal == 1) {
 						info->fhf++;
 					}
 					info->fh++;
@@ -251,10 +366,23 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 						pos->searchKillers[0][pos->ply] = list->moves[MoveNum].move;
 					}
 
-					StoreHashEntry(pos, BestMove, beta, HFBETA, depth);
+					// Update counter-move history: the best reply to the previous move.
+					int prevMove2 = NOMOVE;
+					if(pos->hisPly > 0) {
+						prevMove2 = pos->history[pos->hisPly - 1].move;
+					}
+					if(prevMove2 != NOMOVE) {
+						int prevTo2 = TOSQ(prevMove2);
+						int prevPiece2 = pos->pieces[prevTo2];
+						if(prevPiece2 != EMPTY && prevPiece2 != OFFBOARD) {
+							counterMoves[prevPiece2][prevTo2] = list->moves[MoveNum].move;
+						}
+					}
 
+					StoreHashEntry(pos, BestMove, beta, HFBETA, depth);
 					return beta;
 				}
+
 				alpha = Score;
 
 				if(!(list->moves[MoveNum].move & MFLAGCAP)) {
@@ -262,7 +390,7 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 				}
 			}
 		}
-    }
+	}
 
 	if(Legal == 0) {
 		if(InCheck) {
@@ -272,7 +400,7 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
 		}
 	}
 
-	ASSERT(alpha>=OldAlpha);
+	ASSERT(alpha >= OldAlpha);
 
 	if(alpha != OldAlpha) {
 		StoreHashEntry(pos, BestMove, BestScore, HFEXACT, depth);
@@ -304,7 +432,49 @@ void SearchPosition(S_BOARD *pos, S_SEARCHINFO *info) {
 		for( currentDepth = 1; currentDepth <= info->depth; ++currentDepth ) {
 								// alpha	 beta
 			rootDepth = currentDepth;
-			bestScore = AlphaBeta(-INFINITE, INFINITE, currentDepth, pos, info, TRUE);
+			\
+			// Aspiration windows: start narrow around the last iteration's score.
+			// If we fail low/high, expand and retry.
+			int window = 50; // centipawns; tune as desired
+
+			int a = -INFINITE;
+			int b = INFINITE;
+
+			if(currentDepth > 1) {
+				a = bestScore - window;
+				b = bestScore + window;
+				if(a < -INFINITE) a = -INFINITE;
+				if(b > INFINITE) b = INFINITE;
+			}
+
+			while(TRUE) {
+				bestScore = AlphaBeta(a, b, currentDepth, pos, info, TRUE);
+
+				if(info->stopped == TRUE) {
+					break;
+				}
+
+				// Fail-low: widen downward
+				if(bestScore <= a) {
+					a = -INFINITE;
+					window *= 2;
+					b = bestScore + window;
+					if(b > INFINITE) b = INFINITE;
+					continue;
+				}
+
+				// Fail-high: widen upward
+				if(bestScore >= b) {
+					b = INFINITE;
+					window *= 2;
+					a = bestScore - window;
+					if(a < -INFINITE) a = -INFINITE;
+					continue;
+				}
+
+				break; // within window
+			}\
+
 
 			if(info->stopped == TRUE) {
 				break;
