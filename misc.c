@@ -146,7 +146,7 @@ static int InputWaiting(void)
         if (!pipe) {
             SetConsoleMode(
                 inh,
-                dw & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT)
+                dw & ~(DWORD)(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT)
             );
 
             FlushConsoleInputBuffer(inh);
@@ -217,7 +217,18 @@ static void AcceptLine(S_SEARCHINFO *info) {
  used=0;inputOverflow=0;
 }
 static void ReadChar(S_SEARCHINFO *info) {
- int c=fgetc(stdin);
+ int c;
+#ifdef _WIN32
+ /* Poll and read the same OS pipe. CRT buffering can otherwise leave a
+    command byte invisible to PeekNamedPipe even with unbuffered stdio. */
+ HANDLE input=GetStdHandle(STD_INPUT_HANDLE);
+ if(GetFileType(input)==FILE_TYPE_PIPE) {
+  unsigned char byte;DWORD count=0;
+  c=ReadFile(input,&byte,1,&count,NULL) && count==1 ? (int)byte : EOF;
+ } else c=fgetc(stdin);
+#else
+ c=fgetc(stdin);
+#endif
  if(c==EOF) {inputEof=TRUE;if(used) AcceptLine(info);if(info) {info->stopped=TRUE;info->quit=TRUE;}return;}
  if(c=='\n') AcceptLine(info);
  else if(c!='\r') {if(used+1<INPUT_SIZE) partial[used++]=(char)c;else inputOverflow=TRUE;}
