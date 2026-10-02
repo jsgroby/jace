@@ -17,7 +17,10 @@ def until(prefix, timeout=20):
     end = time.monotonic() + timeout
     seen = []
     while True:
-        line = lines.get(timeout=max(.001, end-time.monotonic()))
+        try:
+            line = lines.get(timeout=max(.001, end-time.monotonic()))
+        except queue.Empty:
+            raise AssertionError('Timeout waiting for '+prefix+'; recent output: '+repr(seen[-5:])) from None
         assert line is not None, 'Engine exited: ' + ''.join(errors)
         seen.append(line)
         if line.startswith(prefix):
@@ -50,7 +53,7 @@ try:
     assert {int(row[row.index('multipv')+1]) for row in rows}=={1,2,3}
     assert len({row[row.index('pv')+1] for row in rows})==3
     send('setoption name MultiPV value 1');send('position startpos');send('go infinite')
-    ready();send('stop');until('bestmove ')
+    ready();ready();send('stop');until('bestmove ')
     send('position startpos');send('go ponder depth 2');until('info score ')
     silence();send('ponderhit');until('bestmove ')
     send('position startpos');send('go ponder depth 2');until('info score ')

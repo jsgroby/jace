@@ -146,7 +146,7 @@ static int InputWaiting(void)
         if (!pipe) {
             SetConsoleMode(
                 inh,
-                dw & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT)
+                dw & ~(DWORD)(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT)
             );
 
             FlushConsoleInputBuffer(inh);

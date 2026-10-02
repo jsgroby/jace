@@ -4,6 +4,10 @@
 #include "defs.h"
 #include "stdlib.h"
 #include "string.h"
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 
 
@@ -21,6 +25,14 @@ int main(int argc, char *argv[]) {
 	pos->HashTable->pTable = NULL;
     InitHashTable(pos->HashTable, 64);
 	ParseFen(START_FEN, pos);
+#ifdef _WIN32
+    /* Keep CRT CRLF lookahead from hiding bytes from PeekNamedPipe.
+       ReadChar already handles CR and LF explicitly. */
+    if (_setmode(_fileno(stdin), _O_BINARY) == -1) {
+        perror("stdin binary mode");
+        return EXIT_FAILURE;
+    }
+#endif
 	setbuf(stdin, NULL);
     setbuf(stdout, NULL);
     
