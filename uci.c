@@ -38,15 +38,21 @@ static void ParseGo(char *line,S_SEARCHINFO *info,S_BOARD *pos) {
  GoControls(line,info,pos);
  info->ponderBudget=0;
  long long depth=Number(line,"depth ",MAXDEPTH-1);
- if(depth<1) depth=1;if(depth>=MAXDEPTH) depth=MAXDEPTH-1;
+ if(depth<1) depth=1;
+ if(depth>=MAXDEPTH) depth=MAXDEPTH-1;
  long long nodes=Number(line,"nodes ",0);
- if(nodes<0) nodes=0;if(nodes>LONG_MAX) nodes=LONG_MAX;info->nodeLimit=(long)nodes;
+ if(nodes<0) nodes=0;
+ if(nodes>LONG_MAX) nodes=LONG_MAX;
+ info->nodeLimit=(long)nodes;
  info->depth=(int)depth;info->timeset=FALSE;info->starttime=GetTimeMs();info->stoptime=0;
  long long time=Number(line,pos->side==WHITE?"wtime ":"btime ",-1);
  long long inc=Number(line,pos->side==WHITE?"winc ":"binc ",0);
  long long mtg=Number(line,"movestogo ",30),fixed=Number(line,"movetime ",-1);
- if(mtg<1) mtg=1;if(inc<0) inc=0;if(inc>INT_MAX) inc=INT_MAX;
- if(time>INT_MAX) time=INT_MAX;if(fixed>INT_MAX) fixed=INT_MAX;
+ if(mtg<1) mtg=1;
+ if(inc<0) inc=0;
+ if(inc>INT_MAX) inc=INT_MAX;
+ if(time>INT_MAX) time=INT_MAX;
+ if(fixed>INT_MAX) fixed=INT_MAX;
  if(!info->infinite && (time>=0 || fixed>=0)) {
   long long budget;
   if(fixed>=0) budget=fixed;
