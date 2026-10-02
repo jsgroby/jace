@@ -68,6 +68,8 @@ e=Engine(str(root/'build/sanitize/jace'));e.send('xboard');e.until('feature done
 e.send('force');e.send('setboard 7k/6Q1/5K2/8/8/8/8/8 b - - 0 1');e.send('go');e.until('1-0 ')
 e.send('force');e.send('setboard rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');e.send('st 0');e.send('go');assert e.until('move ')!='move 0000';e.close();print('XBOARD TESTS PASS')
 subprocess.run([sys.executable,'tests/features.py'],check=True,env=env,timeout=120)
+for mode in ('release','sanitize'):
+ subprocess.run([sys.executable,'tests/perft_input.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
 # Leave the convenient executable as the release build.
 subprocess.run(['make','release'],check=True)
 print('ALL TESTS PASS')

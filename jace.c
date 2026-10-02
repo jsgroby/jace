@@ -4,6 +4,8 @@
 #include "defs.h"
 #include "stdlib.h"
 #include "string.h"
+#include <errno.h>
+#include <ctype.h>
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
@@ -69,16 +71,26 @@ int main(int argc, char *argv[]) {
 			if(info->quit == TRUE) break;
 			continue;
 		} else if (!strncmp(line, "perft",5))	{
-			char fenstring[80];
-			int depth;
-			fprintf(stderr,"FEN: ");
-			fgets(fenstring, 80, stdin);
-			fprintf(stderr,"Depth: ");
-			scanf("%d", &depth);
-			S_BOARD perftpos[1] = {0};
-			ParseFen(fenstring,perftpos);
-			fprintf(stderr,"Testing position: %s",fenstring);
-			PerftTest(depth,perftpos);
+            char fenstring[256], depthline[256], *end;
+            fprintf(stderr,"FEN: ");
+            if (!NextInputLine(fenstring, sizeof fenstring)) break;
+            S_BOARD perftpos[1] = {0};
+            if (ParseFen(fenstring, perftpos) != 0) {
+                fprintf(stderr,"Invalid FEN\n");
+                continue;
+            }
+            fprintf(stderr,"Depth: ");
+            if (!NextInputLine(depthline, sizeof depthline)) break;
+            errno = 0;
+            long depth = strtol(depthline, &end, 10);
+            int hasNumber = end != depthline;
+            while (isspace((unsigned char)*end)) end++;
+            if (errno == ERANGE || !hasNumber || *end || depth < 1 || depth >= MAXDEPTH) {
+                fprintf(stderr,"Invalid perft depth (expected 1..%d)\n", MAXDEPTH-1);
+                continue;
+            }
+            fprintf(stderr,"Testing position: %s\n",fenstring);
+            PerftTest((int)depth,perftpos);
 			continue;
 		} else if (!strncmp(line, "debug",5))	{
 			DebugAnalysisTest(pos,info);

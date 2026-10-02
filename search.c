@@ -224,14 +224,18 @@ static void PrintInfo(S_BOARD *pos,S_SEARCHINFO *info,int depth,int score,
   printf(" pv");
  } else if(info->POST_THINKING) printf("%d %d %" PRId64 " %ld",depth,score,(GetTimeMs()-info->starttime)/10,info->nodes);
  if(info->GAME_MODE==UCIMODE || info->POST_THINKING) {
-  for(int i=0;i<count;i++) printf(" %s",PrMove(pv[i]));printf("\n");
+  for(int i=0;i<count;i++) {
+   printf(" %s",PrMove(pv[i]));
+  }
+  printf("\n");
  }
 }
 void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
  ClearForSearch(pos,info);info->excludedCount=0;
  int bestMove=NOMOVE,bestScore=0,ponderMove=NOMOVE;
  int multi=info->GAME_MODE==UCIMODE?EngineOptions->MultiPV:1;
- if(multi<1) multi=1;if(multi>16) multi=16;
+ if(multi<1) multi=1;
+ if(multi>16) multi=16;
  S_MOVELIST list;GenerateAllMoves(pos,&list);
  int available=0;
  for(int i=0;i<list.count;i++) if(RootAllowed(info,list.moves[i].move) && MakeMove(pos,list.moves[i].move)) {
@@ -243,7 +247,8 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
           EngineOptions->MultiPV<=1 && !info->pondering && !info->infinite ? GetBookMove(pos):NOMOVE;
  if(book!=NOMOVE && MoveExists(pos,book)) bestMove=book;else book=NOMOVE;
  int maxDepth=info->depth;
- if(maxDepth<1) maxDepth=1;if(maxDepth>=MAXDEPTH) maxDepth=MAXDEPTH-1;
+ if(maxDepth<1) maxDepth=1;
+ if(maxDepth>=MAXDEPTH) maxDepth=MAXDEPTH-1;
  if(bestMove!=NOMOVE && book==NOMOVE) for(int depth=1;depth<=maxDepth;depth++) {
   info->seldepth=0;
   if(multi>1) {
