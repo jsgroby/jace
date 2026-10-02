@@ -10,7 +10,7 @@ char *PrSq(const int sq) {
 	int file = FilesBrd[sq];
 	int rank = RanksBrd[sq];
 
-	sprintf(SqStr, "%c%c", ('a'+file), ('1'+rank));
+	snprintf(SqStr,sizeof SqStr, "%c%c", ('a'+file), ('1'+rank));
 
 	return SqStr;
 
@@ -19,6 +19,7 @@ char *PrSq(const int sq) {
 char *PrMove(const int move) {
 
 	static char MvStr[6];
+	if(move == NOMOVE) return "0000";
 
 	int ff = FilesBrd[FROMSQ(move)];
 	int rf = RanksBrd[FROMSQ(move)];
@@ -36,9 +37,9 @@ char *PrMove(const int move) {
 		} else if(!IsRQ(promoted) && IsBQ(promoted))  {
 			pchar = 'b';
 		}
-		sprintf(MvStr, "%c%c%c%c%c", ('a'+ff), ('1'+rf), ('a'+ft), ('1'+rt), pchar);
+		snprintf(MvStr,sizeof MvStr, "%c%c%c%c%c", ('a'+ff), ('1'+rf), ('a'+ft), ('1'+rt), pchar);
 	} else {
-		sprintf(MvStr, "%c%c%c%c", ('a'+ff), ('1'+rf), ('a'+ft), ('1'+rt));
+		snprintf(MvStr,sizeof MvStr, "%c%c%c%c", ('a'+ff), ('1'+rf), ('a'+ft), ('1'+rt));
 	}
 
 	return MvStr;

@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <ctype.h>
+#include <time.h>
 
 #include "defs.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include <windows.h>
 
@@ -29,7 +31,7 @@
  */
 int getNumberOfCores(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 
     SYSTEM_INFO sysinfo;
 
@@ -80,22 +82,17 @@ int getNumberOfCores(void)
 /*
  * Return the current time in milliseconds.
  */
-int GetTimeMs(void)
+int64_t GetTimeMs(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 
-    return (int)GetTickCount();
+    return (int64_t)GetTickCount64();
 
 #else
 
-    struct timeval t;
-
-    gettimeofday(&t, NULL);
-
-    return (int)(
-        (t.tv_sec * 1000L) +
-        (t.tv_usec / 1000L)
-    );
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return (int64_t)t.tv_sec * 1000 + t.tv_nsec / 1000000;
 
 #endif
 }
@@ -104,9 +101,9 @@ int GetTimeMs(void)
 /*
  * Check whether input is waiting on stdin.
  */
-int InputWaiting(void)
+static int InputWaiting(void)
 {
-#ifndef WIN32
+#ifndef _WIN32
 
     fd_set readfds;
     struct timeval tv;
@@ -186,72 +183,62 @@ int InputWaiting(void)
  *
  * This allows commands such as "quit" to interrupt the search.
  */
-void ReadInput(S_SEARCHINFO *info)
-{
-    char input[256] = "";
-    char *endc;
 
-#ifndef WIN32
+#define INPUT_SIZE 4096
+#define INPUT_QUEUE 64
+static char queued[INPUT_QUEUE][INPUT_SIZE];
+static unsigned head, tail, pending;
+static char partial[INPUT_SIZE];
+static size_t used;
+static int inputEof, inputOverflow;
 
-    ssize_t bytes;
-
-#endif
-
-    if (info == NULL) {
-        return;
+static void AcceptLine(S_SEARCHINFO *info) {
+ /* UCI allows arbitrary whitespace between tokens. Normalize complete lines. */
+ size_t out=0;int gap=FALSE;
+ for(size_t i=0;i<used;i++) {
+  if(isspace((unsigned char)partial[i])) {if(out) gap=TRUE;}
+  else {if(gap) partial[out++]=' ';partial[out++]=partial[i];gap=FALSE;}
+ }
+ used=out;partial[used]='\0';
+ if(!inputOverflow && used) {
+  if(info && strcmp(partial,"isready")==0) {printf("readyok\n");fflush(stdout);}
+  else if(info && strcmp(partial,"ponderhit")==0) {
+   if(info->pondering) {
+    info->pondering=FALSE;
+    if(info->ponderBudget>0 && !info->infinite) {
+     info->timeset=TRUE;info->stoptime=GetTimeMs()+info->ponderBudget;
     }
+   }
+  }
+  else if(info && strcmp(partial,"stop")==0) {info->stopped=TRUE;info->pondering=info->infinite=FALSE;}
+  else if(info && strcmp(partial,"quit")==0) {info->stopped=TRUE;info->quit=TRUE;}
+  else {memcpy(queued[tail],partial,used+1);tail=(tail+1)%INPUT_QUEUE;pending++;if(info) {info->stopped=TRUE;info->pondering=info->infinite=FALSE;}}
+ }
+ used=0;inputOverflow=0;
+}
+static void ReadChar(S_SEARCHINFO *info) {
+ int c=fgetc(stdin);
+ if(c==EOF) {inputEof=TRUE;if(used) AcceptLine(info);if(info) {info->stopped=TRUE;info->quit=TRUE;}return;}
+ if(c=='\n') AcceptLine(info);
+ else if(c!='\r') {if(used+1<INPUT_SIZE) partial[used++]=(char)c;else inputOverflow=TRUE;}
+}
+int NextInputLine(char *line,size_t size) {
+ while(!pending && !inputEof) ReadChar(NULL);
+ if(!pending || !size) return FALSE;
+ snprintf(line,size,"%s",queued[head]);head=(head+1)%INPUT_QUEUE;pending--;return TRUE;
+}
+void ReadInput(S_SEARCHINFO *info) {
+ if(!info) return;
+ /* Existing queued commands require returning to the protocol loop. */
+ if(pending) {info->stopped=TRUE;return;}
+ while(!inputEof && pending<INPUT_QUEUE && InputWaiting()) ReadChar(info);
+}
 
-    if (!InputWaiting()) {
-        return;
-    }
-
-    info->stopped = TRUE;
-
-#ifndef WIN32
-
-    do {
-
-        bytes = read(
-            STDIN_FILENO,
-            input,
-            sizeof(input) - 1
-        );
-
-    } while (bytes < 0);
-
-    if (bytes > 0) {
-
-        input[(size_t)bytes] = '\0';
-
-    } else {
-
-        input[0] = '\0';
-    }
-
-#else
-
-    if (fgets(input, sizeof(input), stdin) == NULL) {
-        input[0] = '\0';
-    }
-
-#endif
-
-    endc = strchr(input, '\n');
-
-    if (endc != NULL) {
-        *endc = '\0';
-    }
-
-    endc = strchr(input, '\r');
-
-    if (endc != NULL) {
-        *endc = '\0';
-    }
-
-    if (input[0] != '\0') {
-
-        if (strncmp(input, "quit", 4) == 0) {
-            info->quit = TRUE;
-        }
-    }
+/* Search has reached a depth/node/mate limit. Block without spinning until
+   stop/ponderhit/quit, still answering readiness and preserving queued input. */
+void WaitForSearchSignal(S_SEARCHINFO *info) {
+ while((info->pondering || info->infinite) && !info->quit) {
+  if(pending) {info->stopped=TRUE;info->pondering=info->infinite=FALSE;break;}
+  ReadChar(info);
+ }
 }

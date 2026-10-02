@@ -4,11 +4,13 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-#define RAND_64 	((U64)rand() | \
-					(U64)rand() << 15 | \
-					(U64)rand() << 30 | \
-					(U64)rand() << 45 | \
-					((U64)rand() & 0xf) << 60 )
+static U64 RandomKey(void) {
+ static U64 state=0x4a414345ULL;
+ U64 z=(state+=0x9e3779b97f4a7c15ULL);
+ z=(z^(z>>30))*0xbf58476d1ce4e5b9ULL;
+ z=(z^(z>>27))*0x94d049bb133111ebULL;
+ return z^(z>>31);
+}
 
 int Sq120ToSq64[BRD_SQ_NUM];
 int Sq64ToSq120[64];
@@ -32,7 +34,7 @@ U64 IsolatedMask[64];
 
 S_OPTIONS EngineOptions[1];
 
-void InitEvalMasks() {
+static void InitEvalMasks(void) {
 
 	int sq, tsq, r, f;
 
@@ -103,7 +105,7 @@ void InitEvalMasks() {
 	}
 }
 
-void InitFilesRanksBrd() {
+static void InitFilesRanksBrd(void) {
 
 	int index = 0;
 	int file = FILE_A;
@@ -124,23 +126,23 @@ void InitFilesRanksBrd() {
 	}
 }
 
-void InitHashKeys() {
+static void InitHashKeys(void) {
 
 	int index = 0;
 	int index2 = 0;
 	for(index = 0; index < 13; ++index) {
 		for(index2 = 0; index2 < 120; ++index2) {
-			PieceKeys[index][index2] = RAND_64;
+			PieceKeys[index][index2] = RandomKey();
 		}
 	}
-	SideKey = RAND_64;
+	SideKey = RandomKey();
 	for(index = 0; index < 16; ++index) {
-		CastleKeys[index] = RAND_64;
+		CastleKeys[index] = RandomKey();
 	}
 
 }
 
-void InitBitMasks() {
+static void InitBitMasks(void) {
 	int index = 0;
 
 	for(index = 0; index < 64; index++) {
@@ -154,7 +156,7 @@ void InitBitMasks() {
 	}
 }
 
-void InitSq120To64() {
+static void InitSq120To64(void) {
 
 	int index = 0;
 	int file = FILE_A;
@@ -180,7 +182,10 @@ void InitSq120To64() {
 	}
 }
 
-void AllInit() {
+void AllInit(void) {
+	EngineOptions->TaperedEval = TRUE;
+ EngineOptions->MultiPV = 1;
+ EngineOptions->Ponder = FALSE;
 	InitSq120To64();
 	InitBitMasks();
 	InitHashKeys();

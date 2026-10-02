@@ -3,14 +3,16 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 // Comment out below line to turn off debugging
-#define DEBUG
+/* Define DEBUG only in diagnostic builds. */
 
 #define MAX_HASH 1024
 
 #ifndef DEBUG
-#define ASSERT(n)
+#define ASSERT(n) ((void)sizeof(!!(n)))
 #else
 #define ASSERT(n) \
 if(!(n)) { \
@@ -24,7 +26,9 @@ exit(1);}
 
 typedef unsigned long long U64;
 
-#define NAME "Jace 1.0"
+#define ENGINE_VERSION "1.3"
+#define ENGINE_AUTHOR "Jeffrey S. Groby"
+#define NAME "Jace " ENGINE_VERSION
 #define BRD_SQ_NUM 120
 
 #define MAXGAMEMOVES 2048
@@ -34,7 +38,8 @@ typedef unsigned long long U64;
 #define START_FEN  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 #define INFINITE 30000
-#define ISMATE (INFINITE - MAXDEPTH)
+#define MATE (INFINITE - 128)
+#define ISMATE (MATE - MAXDEPTH)
 
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK  };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
@@ -60,6 +65,7 @@ enum { WKCA = 1, WQCA = 2, BKCA = 4, BQCA = 8 };
 typedef struct {
 	int move;
 	int score;
+ int see; /* INT_MAX until ordering evaluates this capture. */
 } S_MOVE;
 
 typedef struct {
@@ -75,11 +81,15 @@ typedef struct {
 	int score;
 	int depth;
 	int flags;
+	int fiftyMove;
+	U64 context;
+	unsigned generation;
 } S_HASHENTRY;
 
 typedef struct {
 	S_HASHENTRY *pTable;
 	int numEntries;
+	unsigned generation;
 	int newWrite;
 	int overWrite;
 	int hit;
@@ -135,13 +145,19 @@ typedef struct {
 
 typedef struct {
 
-	int starttime;
-	int stoptime;
+	int64_t starttime;
+	int64_t stoptime;
 	int depth;
+	int seldepth;
 	int timeset;
 	int movestogo;
+ int pondering, infinite;
+ int64_t ponderBudget;
+ int restricted, searchMoveCount, searchMoves[MAXPOSITIONMOVES];
+ int excludedCount, excludedMoves[MAXPOSITIONMOVES];
 
 	long nodes;
+	long nodeLimit;
 
 	int quit;
 	int stopped;
@@ -157,6 +173,8 @@ typedef struct {
 
 typedef struct {
 	int UseBook;
+	int TaperedEval;
+ int MultiPV, Ponder;
 } S_OPTIONS;
 
 
@@ -263,6 +281,7 @@ extern int PopBit(U64 *bb);
 extern int CountBits(U64 b);
 
 // hashkeys.c
+extern U64 RepetitionKey(const S_BOARD *pos);
 extern U64 GeneratePosKey(const S_BOARD *pos);
 
 // board.c
@@ -315,14 +334,19 @@ extern void SearchPosition(S_BOARD *pos, S_SEARCHINFO *info);
 
 // misc.c
 extern int getNumberOfCores(void);
-extern int GetTimeMs(void);
+extern int64_t GetTimeMs(void);
+extern int NextInputLine(char *line, size_t size);
+extern int HasLegalMove(S_BOARD *pos);
+extern int DeadMaterial(const S_BOARD *pos);
 extern void ReadInput(S_SEARCHINFO *info);
+extern void WaitForSearchSignal(S_SEARCHINFO *info);
 
 // pvtable.c
 extern void InitHashTable(S_HASHTABLE *table, const int MB);
 extern void StoreHashEntry(S_BOARD *pos, const int move, int score, const int flags, const int depth);
 extern int ProbeHashEntry(S_BOARD *pos, int *move, int *score, int alpha, int beta, int depth);
 extern int ProbePvMove(const S_BOARD *pos);
+extern int PvDrawReached(const S_BOARD *pos);
 extern int GetPvLine(const int depth, S_BOARD *pos);
 extern void ClearHashTable(S_HASHTABLE *table);
 

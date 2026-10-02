@@ -1,172 +1,104 @@
-// uci.c
-
-#include "stdio.h"
 #include "defs.h"
-#include "string.h"
+#include <string.h>
+#include <limits.h>
 
-#define INPUTBUFFER 400 * 6
-
-// go depth 6 wtime 180000 btime 100000 binc 1000 winc 1000 movetime 1000 movestogo 40
-void ParseGo(char* line, S_SEARCHINFO *info, S_BOARD *pos) {
-
-	int depth = -1, movestogo = 30,movetime = -1;
-	int time = -1, inc = 0;
-    char *ptr = NULL;
-	info->timeset = FALSE;
-
-	if ((ptr = strstr(line,"infinite"))) {
-		;
-	}
-
-	if ((ptr = strstr(line,"binc")) && pos->side == BLACK) {
-		inc = atoi(ptr + 5);
-	}
-
-	if ((ptr = strstr(line,"winc")) && pos->side == WHITE) {
-		inc = atoi(ptr + 5);
-	}
-
-	if ((ptr = strstr(line,"wtime")) && pos->side == WHITE) {
-		time = atoi(ptr + 6);
-	}
-
-	if ((ptr = strstr(line,"btime")) && pos->side == BLACK) {
-		time = atoi(ptr + 6);
-	}
-
-	if ((ptr = strstr(line,"movestogo"))) {
-		movestogo = atoi(ptr + 10);
-	}
-
-	if ((ptr = strstr(line,"movetime"))) {
-		movetime = atoi(ptr + 9);
-	}
-
-	if ((ptr = strstr(line,"depth"))) {
-		depth = atoi(ptr + 6);
-	}
-
-	if(movetime != -1) {
-		time = movetime;
-		movestogo = 1;
-	}
-
-	info->starttime = GetTimeMs();
-	info->depth = depth;
-
-	if(time != -1) {
-		info->timeset = TRUE;
-		time /= movestogo;
-		time -= 50;
-		info->stoptime = info->starttime + time + inc;
-	}
-
-	if(depth == -1) {
-		info->depth = MAXDEPTH;
-	}
-
-	printf("time:%d start:%d stop:%d depth:%d timeset:%d\n",
-		time,info->starttime,info->stoptime,info->depth,info->timeset);
-	SearchPosition(pos, info);
+static long long Number(const char *line,const char *token,long long fallback) {
+ const char *p=strstr(line,token);
+ if(!p) return fallback;
+ char *end;long long n=strtoll(p+strlen(token),&end,10);
+ return end==p+strlen(token)?fallback:n;
 }
-
-// position fen fenstr
-// position startpos
-// ... moves e2e4 e7e5 b7b8q
-void ParsePosition(char* lineIn, S_BOARD *pos) {
-
-	lineIn += 9;
-    char *ptrChar = lineIn;
-
-    if(strncmp(lineIn, "startpos", 8) == 0){
-        ParseFen(START_FEN, pos);
-    } else {
-        ptrChar = strstr(lineIn, "fen");
-        if(ptrChar == NULL) {
-            ParseFen(START_FEN, pos);
-        } else {
-            ptrChar+=4;
-            ParseFen(ptrChar, pos);
-        }
-    }
-
-	ptrChar = strstr(lineIn, "moves");
-	int move;
-
-	if(ptrChar != NULL) {
-        ptrChar += 6;
-        while(*ptrChar) {
-              move = ParseMove(ptrChar,pos);
-			  if(move == NOMOVE) break;
-			  MakeMove(pos, move);
-              pos->ply=0;
-              while(*ptrChar && *ptrChar!= ' ') ptrChar++;
-              ptrChar++;
-        }
-    }
-	PrintBoard(pos);
+static int GoKeyword(const char *s) {
+ const char *keys[]={"searchmoves","ponder","wtime","btime","winc","binc",
+                     "movestogo","depth","nodes","mate","movetime","infinite"};
+ for(size_t i=0;i<sizeof keys/sizeof keys[0];i++) if(!strcmp(s,keys[i])) return TRUE;
+ return FALSE;
 }
-
-void Uci_Loop(S_BOARD *pos, S_SEARCHINFO *info) {
-
-	info->GAME_MODE = UCIMODE;
-
-	setbuf(stdin, NULL);
-    setbuf(stdout, NULL);
-
-	char line[INPUTBUFFER];
-    printf("id name %s\n",NAME);
-    printf("id author Jeffrey S. Groby\n");
-	printf("option name Hash type spin default 64 min 4 max %d\n",MAX_HASH);
-	printf("option name Book type check default true\n");
-    printf("uciok\n");
-	
-	int MB = 64;
-
-	while (TRUE) {
-		memset(&line[0], 0, sizeof(line));
-        fflush(stdout);
-        if (!fgets(line, INPUTBUFFER, stdin))
-        continue;
-
-        if (line[0] == '\n')
-        continue;
-
-        if (!strncmp(line, "isready", 7)) {
-            printf("readyok\n");
-            continue;
-        } else if (!strncmp(line, "position", 8)) {
-            ParsePosition(line, pos);
-        } else if (!strncmp(line, "ucinewgame", 10)) {
-            ParsePosition("position startpos\n", pos);
-        } else if (!strncmp(line, "go", 2)) {
-            printf("Seen Go..\n");
-            ParseGo(line, info, pos);
-        } else if (!strncmp(line, "quit", 4)) {
-            info->quit = TRUE;
-            break;
-        } else if (!strncmp(line, "uci", 3)) {
-            printf("id name %s\n",NAME);
-            printf("id author Jeffrey S. Groby\n");
-            printf("uciok\n");
-        } else if (!strncmp(line, "debug", 4)) {
-            DebugAnalysisTest(pos,info);
-            break;
-        } else if (!strncmp(line, "setoption name Hash value ", 26)) {			
-			sscanf(line,"%*s %*s %*s %*s %d",&MB);
-			if(MB < 4) MB = 4;
-			if(MB > MAX_HASH) MB = MAX_HASH;
-			printf("Set Hash to %d MB\n",MB);
-			InitHashTable(pos->HashTable, MB);
-		} else if (!strncmp(line, "setoption name Book value ", 26)) {			
-			char *ptrTrue = NULL;
-			ptrTrue = strstr(line, "true");
-			if(ptrTrue != NULL) {
-				EngineOptions->UseBook = TRUE;
-			} else {
-				EngineOptions->UseBook = FALSE;
-			}
-		}
-		if(info->quit) break;
-    }
+static void GoControls(const char *line,S_SEARCHINFO *info,S_BOARD *pos) {
+ char copy[4096];snprintf(copy,sizeof copy,"%s",line);
+ info->restricted=info->searchMoveCount=info->excludedCount=0;
+ info->pondering=info->infinite=FALSE;
+ int collecting=FALSE;
+ for(char *token=strtok(copy," \t\r\n");token;token=strtok(NULL," \t\r\n")) {
+  if(GoKeyword(token)) collecting=FALSE;
+  if(!strcmp(token,"ponder")) info->pondering=TRUE;
+  else if(!strcmp(token,"infinite")) info->infinite=TRUE;
+  else if(!strcmp(token,"searchmoves")) {info->restricted=TRUE;collecting=TRUE;}
+  else if(collecting) {
+   int move=NOMOVE;size_t n=strlen(token);
+   if(n==4 || n==5) move=ParseMove(token,pos);
+   if(move==NOMOVE || strcmp(PrMove(move),token) || !MoveExists(pos,move)) {printf("info string ignored invalid searchmove %s\n",token);continue;}
+   int duplicate=FALSE;
+   for(int i=0;i<info->searchMoveCount;i++) if(info->searchMoves[i]==move) duplicate=TRUE;
+   if(!duplicate && info->searchMoveCount<MAXPOSITIONMOVES) info->searchMoves[info->searchMoveCount++]=move;
+  }
+ }
+}
+static void ParseGo(char *line,S_SEARCHINFO *info,S_BOARD *pos) {
+ GoControls(line,info,pos);
+ info->ponderBudget=0;
+ long long depth=Number(line,"depth ",MAXDEPTH-1);
+ if(depth<1) depth=1;if(depth>=MAXDEPTH) depth=MAXDEPTH-1;
+ long long nodes=Number(line,"nodes ",0);
+ if(nodes<0) nodes=0;if(nodes>LONG_MAX) nodes=LONG_MAX;info->nodeLimit=(long)nodes;
+ info->depth=(int)depth;info->timeset=FALSE;info->starttime=GetTimeMs();info->stoptime=0;
+ long long time=Number(line,pos->side==WHITE?"wtime ":"btime ",-1);
+ long long inc=Number(line,pos->side==WHITE?"winc ":"binc ",0);
+ long long mtg=Number(line,"movestogo ",30),fixed=Number(line,"movetime ",-1);
+ if(mtg<1) mtg=1;if(inc<0) inc=0;if(inc>INT_MAX) inc=INT_MAX;
+ if(time>INT_MAX) time=INT_MAX;if(fixed>INT_MAX) fixed=INT_MAX;
+ if(!info->infinite && (time>=0 || fixed>=0)) {
+  long long budget;
+  if(fixed>=0) budget=fixed;
+  else {
+   long long reserve=time>1000?50:time/20;
+   budget=time/mtg+inc*3/4;
+   if(budget>time-reserve) budget=time-reserve;
+  }
+  if(budget<1) budget=1;
+  info->ponderBudget=budget;
+  if(!info->pondering) {info->timeset=TRUE;info->stoptime=info->starttime+budget;}
+ }
+ SearchPosition(pos,info);
+}
+static void ParsePosition(char *line,S_BOARD *pos) {
+ S_BOARD next=*pos;
+ char *fen=strstr(line,"fen ");
+ if(ParseFen(fen?fen+4:START_FEN,&next)!=0) {printf("info string invalid FEN\n");return;}
+ char *moves=strstr(line,"moves ");
+ if(moves) {
+  char *token=strtok(moves+6," \t\r\n");
+  while(token) {
+   size_t len=strlen(token);
+   if(len<4 || len>5) {printf("info string invalid move\n");return;}
+   int move=ParseMove(token,&next);
+   if(move==NOMOVE || !MakeMove(&next,move)) {printf("info string illegal move\n");return;}
+   next.ply=0;token=strtok(NULL," \t\r\n");
+  }
+ }
+ *pos=next;
+}
+static void Identify(void) {
+ printf("id name %s\nid author %s\n",NAME,ENGINE_AUTHOR);
+ printf("option name Hash type spin default 64 min 4 max %d\n",MAX_HASH);
+ printf("option name Book type check default true\noption name TaperedEval type check default true\noption name MultiPV type spin default 1 min 1 max 16\noption name Ponder type check default false\nuciok\n");
+}
+void Uci_Loop(S_BOARD *pos,S_SEARCHINFO *info) {
+ info->GAME_MODE=UCIMODE;setbuf(stdin,NULL);setbuf(stdout,NULL);Identify();
+ char line[4096];
+ while(!info->quit && NextInputLine(line,sizeof line)) {
+  if(!strcmp(line,"isready")) printf("readyok\n");
+  else if(!strncmp(line,"position ",9)) ParsePosition(line,pos);
+  else if(!strcmp(line,"ucinewgame")) {ClearHashTable(pos->HashTable);ParseFen(START_FEN,pos);}
+  else if(!strcmp(line,"go") || !strncmp(line,"go ",3)) ParseGo(line,info,pos);
+  else if(!strcmp(line,"quit")) info->quit=TRUE;
+  else if(!strcmp(line,"uci")) Identify();
+  else if(!strncmp(line,"setoption name Hash value ",26)) {
+   long long mb=Number(line,"value ",64);if(mb<4) mb=4;if(mb>MAX_HASH) mb=MAX_HASH;InitHashTable(pos->HashTable,(int)mb);
+  } else if(!strncmp(line,"setoption name MultiPV value ",28)) {
+   long long n=Number(line,"value ",1);if(n<1)n=1;if(n>16)n=16;EngineOptions->MultiPV=(int)n;
+  } else if(!strncmp(line,"setoption name Ponder value ",27)) EngineOptions->Ponder=strstr(line+27,"true")!=NULL;
+  else if(!strncmp(line,"setoption name Book value ",26)) EngineOptions->UseBook=strstr(line+26,"true")!=NULL;
+  else if(!strncmp(line,"setoption name TaperedEval value ",33)) {EngineOptions->TaperedEval=strstr(line+33,"true")!=NULL;ClearHashTable(pos->HashTable);}
+ }
 }

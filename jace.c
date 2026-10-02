@@ -4,22 +4,23 @@
 #include "defs.h"
 #include "stdlib.h"
 #include "string.h"
-#include "unistd.h"
+
 
 
 int main(int argc, char *argv[]) {
 
 	// print date and time - add function to misc.c for this to handle all systems
 	int numofcpus = getNumberOfCores();
-	printf("%d physical cores detected\n",numofcpus);
+	fprintf(stderr,"%d logical cores detected\n",numofcpus);
 	
 	AllInit();
 
-	S_BOARD pos[1];
-    S_SEARCHINFO info[1];
+	S_BOARD pos[1] = {0};
+    S_SEARCHINFO info[1] = {0};
     info->quit = FALSE;
 	pos->HashTable->pTable = NULL;
     InitHashTable(pos->HashTable, 64);
+	ParseFen(START_FEN, pos);
 	setbuf(stdin, NULL);
     setbuf(stdout, NULL);
     
@@ -28,20 +29,19 @@ int main(int argc, char *argv[]) {
     for(ArgNum = 0; ArgNum < argc; ++ArgNum) {
     	if(strncmp(argv[ArgNum], "NoBook", 6) == 0) {
     		EngineOptions->UseBook = FALSE;
-    		printf("Book Off\n");
+    		fprintf(stderr,"Book Off\n");
     	}
     }
-	printf("\n");
-	printf("\"How about a nice game of chess?\"\n\n");
-	printf("Welcome to Jace! Type 'jace' for console mode...\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"\"How about a nice game of chess?\"\n\n");
+	fprintf(stderr,"Welcome to Jace! Type 'jace' for console mode...\n");
 
 	char line[256];
 	while (TRUE) {
 		memset(&line[0], 0, sizeof(line));
 
 		fflush(stdout);
-		if (!fgets(line, 256, stdin))
-			continue;
+		if (!NextInputLine(line, sizeof(line))) break;
 		if (line[0] == '\n')
 			continue;
 		if (!strncmp(line, "uci",3)) {
@@ -59,13 +59,13 @@ int main(int argc, char *argv[]) {
 		} else if (!strncmp(line, "perft",5))	{
 			char fenstring[80];
 			int depth;
-			printf("FEN: ");
+			fprintf(stderr,"FEN: ");
 			fgets(fenstring, 80, stdin);
-			printf("Depth: ");
+			fprintf(stderr,"Depth: ");
 			scanf("%d", &depth);
-			S_BOARD perftpos[1];
+			S_BOARD perftpos[1] = {0};
 			ParseFen(fenstring,perftpos);
-			printf("Testing position: %s",fenstring);
+			fprintf(stderr,"Testing position: %s",fenstring);
 			PerftTest(depth,perftpos);
 			continue;
 		} else if (!strncmp(line, "debug",5))	{

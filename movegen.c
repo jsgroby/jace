@@ -46,7 +46,7 @@ HistoryScore
 const int VictimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
 static int MvvLvaScores[13][13];
 
-void InitMvvLva() {
+void InitMvvLva(void) {
 	int Attacker;
 	int Victim;
 	for(Attacker = wP; Attacker <= bK; ++Attacker) {
@@ -380,6 +380,8 @@ void GenerateAllCaps(const S_BOARD *pos, S_MOVELIST *list) {
 		for(pceNum = 0; pceNum < pos->pceNum[wP]; ++pceNum) {
 			sq = pos->pList[wP][pceNum];
 			ASSERT(SqOnBoard(sq));
+            if(RanksBrd[sq]==RANK_7 && side==WHITE && pos->pieces[sq+10]==EMPTY) AddWhitePawnMove(pos,sq,sq+10,list);
+            if(RanksBrd[sq]==RANK_2 && side==BLACK && pos->pieces[sq-10]==EMPTY) AddBlackPawnMove(pos,sq,sq-10,list);
 
 			if(!SQOFFBOARD(sq + 9) && PieceCol[pos->pieces[sq + 9]] == BLACK) {
 				AddWhitePawnCapMove(pos, sq, sq+9, pos->pieces[sq + 9], list);
@@ -403,6 +405,8 @@ void GenerateAllCaps(const S_BOARD *pos, S_MOVELIST *list) {
 		for(pceNum = 0; pceNum < pos->pceNum[bP]; ++pceNum) {
 			sq = pos->pList[bP][pceNum];
 			ASSERT(SqOnBoard(sq));
+            if(RanksBrd[sq]==RANK_7 && side==WHITE && pos->pieces[sq+10]==EMPTY) AddWhitePawnMove(pos,sq,sq+10,list);
+            if(RanksBrd[sq]==RANK_2 && side==BLACK && pos->pieces[sq-10]==EMPTY) AddBlackPawnMove(pos,sq,sq-10,list);
 
 			if(!SQOFFBOARD(sq - 9) && PieceCol[pos->pieces[sq - 9]] == WHITE) {
 				AddBlackPawnCapMove(pos, sq, sq-9, pos->pieces[sq - 9], list);
@@ -484,4 +488,9 @@ void GenerateAllCaps(const S_BOARD *pos, S_MOVELIST *list) {
 		pce = LoopNonSlidePce[pceIndex++];
 	}
     ASSERT(MoveListOk(list,pos));
+}
+int HasLegalMove(S_BOARD *pos) {
+ S_MOVELIST list; GenerateAllMoves(pos,&list);
+ for(int i=0;i<list.count;i++) if(MakeMove(pos,list.moves[i].move)) { TakeMove(pos); return TRUE; }
+ return FALSE;
 }
