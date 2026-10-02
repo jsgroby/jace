@@ -1,184 +1,59 @@
-// see.c
-// Static Exchange Evaluation (SEE) for capture moves.
-// Conservative, simple implementation suitable for 120-square board representation.
-
 #include "defs.h"
+#include <string.h>
 
-static int PieceAttacksSq(const S_BOARD *pos, const int from, const int pce, const int to) {
-
-	// Pawns
-	if(pce == wP) {
-		if(from + 9 == to || from + 11 == to) return TRUE;
-		return FALSE;
-	}
-	if(pce == bP) {
-		if(from - 9 == to || from - 11 == to) return TRUE;
-		return FALSE;
-	}
-
-	// Knights
-	if(pce == wN || pce == bN) {
-		for(int i = 0; i < 8; ++i) {
-			if(from + KnDir[i] == to) return TRUE;
-		}
-		return FALSE;
-	}
-
-	// Kings
-	if(pce == wK || pce == bK) {
-		for(int i = 0; i < 8; ++i) {
-			if(from + KiDir[i] == to) return TRUE;
-		}
-		return FALSE;
-	}
-
-	// Sliding pieces
-	if(pce == wB || pce == bB || pce == wQ || pce == bQ) {
-		for(int d = 0; d < 4; ++d) {
-			int sq = from + BiDir[d];
-			while(pos->pieces[sq] != OFFBOARD) {
-				if(sq == to) return TRUE;
-				if(pos->pieces[sq] != EMPTY) break;
-				sq += BiDir[d];
-			}
-		}
-	}
-
-	if(pce == wR || pce == bR || pce == wQ || pce == bQ) {
-		for(int d = 0; d < 4; ++d) {
-			int sq = from + RkDir[d];
-			while(pos->pieces[sq] != OFFBOARD) {
-				if(sq == to) return TRUE;
-				if(pos->pieces[sq] != EMPTY) break;
-				sq += RkDir[d];
-			}
-		}
-	}
-
-	return FALSE;
+/* SEE uses only a mailbox and king squares; no history/search-table copies. */
+typedef struct {int pieces[120];int king[2];} ExchangeBoard;
+static int Attacks(const ExchangeBoard *b,int from,int to) {
+ int p=b->pieces[from],delta=to-from;
+ if(p==wP) return delta==9 || delta==11;
+ if(p==bP) return delta==-9 || delta==-11;
+ if(IsKn(p)) {for(int i=0;i<8;i++) if(delta==KnDir[i]) return TRUE;return FALSE;}
+ if(IsKi(p)) {for(int i=0;i<8;i++) if(delta==KiDir[i]) return TRUE;return FALSE;}
+ for(int i=0;i<8;i++) {
+  int d=KiDir[i];
+  if(i<4 ? !IsRQ(p) : !IsBQ(p)) continue;
+  for(int sq=from+d;b->pieces[sq]!=OFFBOARD;sq+=d) {
+   if(sq==to) return TRUE;
+   if(b->pieces[sq]!=EMPTY) break;
+  }
+ }
+ return FALSE;
 }
-
-static int FindLeastValuableAttacker(const S_BOARD *pos, const int side, const int to, int *fromSq) {
-
-	int bestSq = NO_SQ;
-	int bestVal = 1000000;
-
-	for(int sq = 0; sq < BRD_SQ_NUM; ++sq) {
-
-		int pce = pos->pieces[sq];
-		if(pce == OFFBOARD || pce == EMPTY) continue;
-		if(PieceCol[pce] != side) continue;
-
-		if(!PieceAttacksSq(pos, sq, pce, to)) continue;
-
-		int v = PieceVal[pce];
-		if(v < bestVal) {
-			bestVal = v;
-			bestSq = sq;
-
-			// Can't do better than a pawn.
-			if(bestVal <= PieceVal[wP]) break;
-		}
-	}
-
-	*fromSq = bestSq;
-	return (bestSq != NO_SQ);
+static int Attacked(const ExchangeBoard *b,int sq,int side) {
+ for(int i=0;i<64;i++) {int from=SQ120(i),p=b->pieces[from];if(p!=EMPTY && PieceCol[p]==side && Attacks(b,from,sq)) return TRUE;}
+ return FALSE;
 }
-
-int SEE(const S_BOARD *pos, int move) {
-
-	ASSERT(CheckBoard(pos));
-
-	// Only meaningful for captures / en-passant. Promotions are handled.
-	const int isEp = (move & MFLAGEP) ? TRUE : FALSE;
-	const int cap = CAPTURED(move);
-
-	if(cap == EMPTY && !isEp) {
-		return 0;
-	}
-
-	// We do a lightweight "swap" sequence on a copied position.
-	S_BOARD tmp = *pos; // struct copy (includes pieces[] array)
-	tmp.ply = 0;
-	tmp.hisPly = 0;
-
-	const int from = FROMSQ(move);
-	const int to = TOSQ(move);
-
-	int side = tmp.side;
-	int moving = tmp.pieces[from];
-
-	// Determine initial victim value
-	int victimPce = cap;
-	if(isEp) {
-		victimPce = (side == WHITE) ? bP : wP;
-	}
-
-	int gain[32];
-	int depth = 0;
-
-	gain[0] = PieceVal[victimPce];
-
-	// Make the capture on the temp board (minimal, not using MakeMove)
-	tmp.pieces[to] = moving;
-	tmp.pieces[from] = EMPTY;
-
-	// remove en-passant pawn
-	if(isEp) {
-		int epSq = (side == WHITE) ? (to - 10) : (to + 10);
-		ASSERT(SqOnBoard(epSq));
-		tmp.pieces[epSq] = EMPTY;
-	}
-
-	// promotion: piece on to becomes promoted piece
-	const int prom = PROMOTED(move);
-	if(prom != EMPTY) {
-		tmp.pieces[to] = prom;
-		moving = prom;
-	}
-
-	// The piece currently on 'to' is what will be captured next
-	int capturedOnTo = tmp.pieces[to];
-
-	// Alternate captures
-	side ^= 1;
-
-	while(depth < 30) {
-
-		int attSq = NO_SQ;
-		if(!FindLeastValuableAttacker(&tmp, side, to, &attSq)) {
-			break;
-		}
-
-		int attPce = tmp.pieces[attSq];
-
-		// next ply gain: attacker value - previous gain
-		depth++;
-		gain[depth] = PieceVal[attPce] - gain[depth - 1];
-
-		// If this side already does worse by continuing, it might still be forced,
-		// but SEE assumes optimal play; we can cut when the sequence can't improve.
-		if(gain[depth] < 0 && depth >= 2) {
-			// keep going a little is usually unnecessary; break is fine for this simple SEE
-			// break;
-			;
-		}
-
-		// Make the capture: move attacker to 'to'
-		tmp.pieces[to] = attPce;
-		tmp.pieces[attSq] = EMPTY;
-
-		capturedOnTo = attPce;
-
-		side ^= 1;
-	}
-
-	// minimax backwards
-	for(int i = depth - 1; i >= 0; --i) {
-		if(-gain[i + 1] > gain[i]) {
-			gain[i] = -gain[i + 1];
-		}
-	}
-
-	return gain[0];
+static int Reply(ExchangeBoard *b,int to,int side,int depth) {
+ if(depth>=30 || IsKi(b->pieces[to])) return 0;
+ int bestFrom=NO_SQ,bestValue=100000,bestPiece=EMPTY;
+ for(int i=0;i<64;i++) {
+  int from=SQ120(i),p=b->pieces[from];
+  if(p==EMPTY || PieceCol[p]!=side || PieceVal[p]>=bestValue || !Attacks(b,from,to)) continue;
+  int victim=b->pieces[to],king=b->king[side];
+  int placed=PiecePawn[p] && (RanksBrd[to]==RANK_1 || RanksBrd[to]==RANK_8) ? (side==WHITE?wQ:bQ):p;
+  b->pieces[from]=EMPTY;b->pieces[to]=placed;if(IsKi(p)) b->king[side]=to;
+  int legal=!Attacked(b,b->king[side],side^1);
+  b->pieces[from]=p;b->pieces[to]=victim;b->king[side]=king;
+  if(legal) {bestFrom=from;bestValue=PieceVal[p];bestPiece=placed;}
+ }
+ if(bestFrom==NO_SQ) return 0;
+ int victim=b->pieces[to],p=b->pieces[bestFrom],king=b->king[side];
+ int gain=PieceVal[victim]+PieceVal[bestPiece]-PieceVal[p];
+ b->pieces[bestFrom]=EMPTY;b->pieces[to]=bestPiece;if(IsKi(p)) b->king[side]=to;
+ gain-=Reply(b,to,side^1,depth+1);
+ b->pieces[bestFrom]=p;b->pieces[to]=victim;b->king[side]=king;
+ return gain>0?gain:0; /* Each recapturing side may decline the exchange. */
+}
+int SEE(const S_BOARD *pos,int move) {
+ int from=FROMSQ(move),to=TOSQ(move),p=pos->pieces[from];
+ int cap=(move&MFLAGEP)?(pos->side==WHITE?bP:wP):CAPTURED(move);
+ int prom=PROMOTED(move);
+ if(cap==EMPTY && !prom) return 0;
+ ExchangeBoard b;memcpy(b.pieces,pos->pieces,sizeof b.pieces);memcpy(b.king,pos->KingSq,sizeof b.king);
+ b.pieces[from]=EMPTY;b.pieces[to]=prom?prom:p;
+ if(move&MFLAGEP) b.pieces[to+(pos->side==WHITE?-10:10)]=EMPTY;
+ if(IsKi(p)) b.king[pos->side]=to;
+ if(Attacked(&b,b.king[pos->side],pos->side^1)) return 0; /* Legality is enforced by MakeMove. */
+ int gain=PieceVal[cap]+(prom?PieceVal[prom]-PieceVal[p]:0);
+ return gain-Reply(&b,to,pos->side^1,0);
 }

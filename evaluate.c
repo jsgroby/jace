@@ -79,31 +79,58 @@ const int KingO[64] = {
 
 // sjeng 11.2
 //8/6R1/2k5/6P1/8/8/4nP2/6K1 w - - 1 41 
-int MaterialDraw(const S_BOARD *pos) {
-
-	ASSERT(CheckBoard(pos));
-	
-    if (!pos->pceNum[wR] && !pos->pceNum[bR] && !pos->pceNum[wQ] && !pos->pceNum[bQ]) {
-	  if (!pos->pceNum[bB] && !pos->pceNum[wB]) {
-	      if (pos->pceNum[wN] < 3 && pos->pceNum[bN] < 3) {  return TRUE; }
-	  } else if (!pos->pceNum[wN] && !pos->pceNum[bN]) {
-	     if (abs(pos->pceNum[wB] - pos->pceNum[bB]) < 2) { return TRUE; }
-	  } else if ((pos->pceNum[wN] < 3 && !pos->pceNum[wB]) || (pos->pceNum[wB] == 1 && !pos->pceNum[wN])) {
-	    if ((pos->pceNum[bN] < 3 && !pos->pceNum[bB]) || (pos->pceNum[bB] == 1 && !pos->pceNum[bN]))  { return TRUE; }
-	  }
-	} else if (!pos->pceNum[wQ] && !pos->pceNum[bQ]) {
-        if (pos->pceNum[wR] == 1 && pos->pceNum[bR] == 1) {
-            if ((pos->pceNum[wN] + pos->pceNum[wB]) < 2 && (pos->pceNum[bN] + pos->pceNum[bB]) < 2)	{ return TRUE; }
-        } else if (pos->pceNum[wR] == 1 && !pos->pceNum[bR]) {
-            if ((pos->pceNum[wN] + pos->pceNum[wB] == 0) && (((pos->pceNum[bN] + pos->pceNum[bB]) == 1) || ((pos->pceNum[bN] + pos->pceNum[bB]) == 2))) { return TRUE; }
-        } else if (pos->pceNum[bR] == 1 && !pos->pceNum[wR]) {
-            if ((pos->pceNum[bN] + pos->pceNum[bB] == 0) && (((pos->pceNum[wN] + pos->pceNum[wB]) == 1) || ((pos->pceNum[wN] + pos->pceNum[wB]) == 2))) { return TRUE; }
-        }
-    }
-  return FALSE;
+int DeadMaterial(const S_BOARD *pos) {
+ if(pos->pceNum[wP] || pos->pceNum[bP] || pos->pceNum[wR] || pos->pceNum[bR] || pos->pceNum[wQ] || pos->pceNum[bQ]) return FALSE;
+ int knights=pos->pceNum[wN]+pos->pceNum[bN];
+ int bishops=pos->pceNum[wB]+pos->pceNum[bB];
+ if(knights+bishops<=1) return TRUE;
+ if(knights) return FALSE;
+ int color=-1;
+ for(int piece=wB;piece<=bB;piece+=bB-wB) {
+  for(int i=0;i<pos->pceNum[piece];i++) {
+   int sq=pos->pList[piece][i], c=(FilesBrd[sq]+RanksBrd[sq])&1;
+   if(color>=0 && color!=c) return FALSE;
+   color=c;
+  }
+ }
+ return TRUE;
 }
 
 #define ENDGAME_MAT (1 * PieceVal[wR] + 2 * PieceVal[wN] + 2 * PieceVal[wP] + PieceVal[wK])
+
+static int PawnAttacked(const S_BOARD *pos,int sq,int enemy) {
+ return enemy==WHITE ? pos->pieces[sq-9]==wP || pos->pieces[sq-11]==wP : pos->pieces[sq+9]==bP || pos->pieces[sq+11]==bP;
+}
+static int Mobility(const S_BOARD *pos,int sq,int piece,int side) {
+ int n=0;
+ for(int i=0;i<8;i++) {
+  int dir=IsKn(piece)?KnDir[i]:KiDir[i];
+  if(!IsKn(piece) && (i<4 ? !IsRQ(piece):!IsBQ(piece))) continue;
+  for(int to=sq+dir;pos->pieces[to]!=OFFBOARD;to+=dir) {
+   int victim=pos->pieces[to];
+   if(victim!=EMPTY && PieceCol[victim]==side) break;
+   if(!PawnAttacked(pos,to,side^1)) n++;
+   if(victim!=EMPTY || IsKn(piece)) break;
+  }
+ }
+ return n;
+}
+static int PawnShield(const S_BOARD *pos,int side) {
+ int king=pos->KingSq[side],file=FilesBrd[king],rank=RanksBrd[king],step=side==WHITE?1:-1;
+ int ownPawn=side==WHITE?wP:bP,score=0;
+ for(int f=file-1;f<=file+1;f++) {
+  if(f<0 || f>7) continue;
+  if(!(pos->pawns[side]&FileBBMask[f])) score-=12;
+  int near=rank+step,far=rank+2*step;
+  if(near>=0 && near<8 && pos->pieces[FR2SQ(f,near)]==ownPawn) score+=10;
+  else if(far>=0 && far<8 && pos->pieces[FR2SQ(f,far)]==ownPawn) score+=5;
+ }
+ /* King cover matters in proportion to the opponent's attacking material. */
+ int enemy=side^1,offset=enemy==WHITE?0:6;
+ int attack=pos->pceNum[wN+offset]+pos->pceNum[wB+offset]+2*pos->pceNum[wR+offset]+4*pos->pceNum[wQ+offset];
+ if(attack>12) attack=12;
+ return score*attack/12;
+}
 
 int EvalPosition(const S_BOARD *pos) {
 
@@ -113,8 +140,11 @@ int EvalPosition(const S_BOARD *pos) {
 	int pceNum;
 	int sq;
 	int score = pos->material[WHITE] - pos->material[BLACK];
+ int mg=0,eg=0;
+ int phase=pos->pceNum[wN]+pos->pceNum[bN]+pos->pceNum[wB]+pos->pceNum[bB]+2*(pos->pceNum[wR]+pos->pceNum[bR])+4*(pos->pceNum[wQ]+pos->pceNum[bQ]);
+ if(phase>24) phase=24;
 	
-	if(!pos->pceNum[wP] && !pos->pceNum[bP] && MaterialDraw(pos) == TRUE) {
+	if(!pos->pceNum[wP] && !pos->pceNum[bP] && DeadMaterial(pos) == TRUE) {
 		return 0;
 	}
 	
@@ -242,29 +272,44 @@ int EvalPosition(const S_BOARD *pos) {
 			score -= QueenSemiOpenFile;
 		}
 	}	
-	//8/p6k/6p1/5p2/P4K2/8/5pB1/8 b - - 2 62 
-	pce = wK;
-	sq = pos->pList[pce][0];
-	ASSERT(SqOnBoard(sq));
-	ASSERT(SQ64(sq)>=0 && SQ64(sq)<=63);
-	
-	if( (pos->material[BLACK] <= ENDGAME_MAT) ) {
-		score += KingE[SQ64(sq)];
-	} else {
-		score += KingO[SQ64(sq)];
-	}
-	
-	pce = bK;
-	sq = pos->pList[pce][0];
-	ASSERT(SqOnBoard(sq));
-	ASSERT(MIRROR64(SQ64(sq))>=0 && MIRROR64(SQ64(sq))<=63);
-	
-	if( (pos->material[WHITE] <= ENDGAME_MAT) ) {
-		score -= KingE[MIRROR64(SQ64(sq))];
-	} else {
-		score -= KingO[MIRROR64(SQ64(sq))];
-	}
-	
+ if(EngineOptions->TaperedEval) {
+  mg += KingO[SQ64(pos->KingSq[WHITE])] - KingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
+  eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
+  mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
+  for(int side=WHITE;side<=BLACK;side++) {
+   int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
+   for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
+    int count=Mobility(pos,pos->pList[piece+offset][i],piece+offset,side);
+    int mgWeight=piece==wN?4:piece==wB?4:piece==wR?2:1;
+    int egWeight=piece==wN?3:piece==wB?4:piece==wR?3:2;
+    mg+=sign*count*mgWeight;eg+=sign*count*egWeight;
+   }
+   int pawn=wP+offset;
+   for(int i=0;i<pos->pceNum[pawn];i++) {
+    int square=pos->pList[pawn][i],rank=RanksBrd[square];
+    int relative=side==WHITE?rank:7-rank;
+    U64 passed=side==WHITE?WhitePassedMask[SQ64(square)]:BlackPassedMask[SQ64(square)];
+    if(!(passed&pos->pawns[side^1])) mg-=sign*(PawnPassed[relative]/2);
+    int behind=side==WHITE?-10:10;
+    int supported=pos->pieces[square+behind-1]==pawn || pos->pieces[square+behind+1]==pawn;
+    int connected=pos->pieces[square-1]==pawn || pos->pieces[square+1]==pawn;
+    if(supported || connected) {mg+=sign*5;eg+=sign*8;}
+    /* Penalize the rear pawn on a doubled file; avoid double-counting pairs. */
+    int ahead=FALSE,step=side==WHITE?10:-10;
+    for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
+    if(ahead) {
+     mg-=sign*10;eg-=sign*15;
+     if(!(passed&pos->pawns[side^1])) {mg-=sign*(PawnPassed[relative]-PawnPassed[relative]/2);eg-=sign*PawnPassed[relative];}
+    }
+   }
+  }
+  score+=(mg*phase+eg*(24-phase))/24;
+ } else {
+  int whiteSq=SQ64(pos->KingSq[WHITE]),blackSq=MIRROR64(SQ64(pos->KingSq[BLACK]));
+  score+=pos->material[BLACK]<=ENDGAME_MAT?KingE[whiteSq]:KingO[whiteSq];
+  score-=pos->material[WHITE]<=ENDGAME_MAT?KingE[blackSq]:KingO[blackSq];
+ }
+
 	if(pos->pceNum[wB] >= 2) score += BishopPair;
 	if(pos->pceNum[bB] >= 2) score -= BishopPair;
 	

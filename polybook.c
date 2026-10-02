@@ -9,52 +9,42 @@ typedef struct {
 	
 } S_POLY_BOOK_ENTRY;
 
-long NumEntries = 0;
+static size_t NumEntries;
 
-S_POLY_BOOK_ENTRY *entries;
+static S_POLY_BOOK_ENTRY *entries;
 
 const int PolyKindOfPiece[13] = {
 	-1, 1, 3, 5, 7, 9, 11, 0, 2, 4, 6, 8, 10
 };
 
-void InitPolyBook() {
-
-	EngineOptions->UseBook = FALSE;
-	
-	FILE *pFile = fopen("performance.bin","rb");
-	
-	if(pFile == NULL) {
-		printf("Book File Not Read\n");
-	} else {
-		fseek(pFile,0,SEEK_END);
-		long position = ftell(pFile);
-		
-		if(position < sizeof(S_POLY_BOOK_ENTRY)) {
-			printf("No entries found\n");
-			return;
-		}
-		
-		NumEntries = position / sizeof(S_POLY_BOOK_ENTRY);
-		printf("%ld entries found in book file\n", NumEntries);
-		
-		entries = (S_POLY_BOOK_ENTRY*)malloc(NumEntries * sizeof(S_POLY_BOOK_ENTRY));
-		rewind(pFile);
-		
-		size_t returnValue;
-		returnValue = fread(entries, sizeof(S_POLY_BOOK_ENTRY), NumEntries, pFile);
-		printf("%ld entries read in from book file\n", returnValue);
-		
-		if(NumEntries > 0) {
-			EngineOptions->UseBook = TRUE;
-		}
-	}
+static U64 ReadBigEndian(const unsigned char *p,int n) {
+ U64 v=0;for(int i=0;i<n;i++) v=(v<<8)|p[i];return v;
 }
-
-void CleanPolyBook() {
-	free(entries);
+void InitPolyBook(void) {
+ EngineOptions->UseBook=FALSE;CleanPolyBook();
+ FILE *file=fopen("performance.bin","rb");if(!file) return;
+ if(fseek(file,0,SEEK_END)!=0) {fclose(file);return;}
+ long length=ftell(file);
+ if(length<16 || length%16) {fclose(file);return;}
+ size_t count=(size_t)length/16;
+ if(count>SIZE_MAX/sizeof *entries) {fclose(file);return;}
+ entries=malloc(count*sizeof *entries);
+ if(!entries) {fclose(file);return;}
+ rewind(file);
+ for(size_t i=0;i<count;i++) {
+  unsigned char bytes[16];
+  if(fread(bytes,1,16,file)!=16) {CleanPolyBook();fclose(file);return;}
+  entries[i].key=ReadBigEndian(bytes,8);
+  entries[i].move=(unsigned short)ReadBigEndian(bytes+8,2);
+  entries[i].weight=(unsigned short)ReadBigEndian(bytes+10,2);
+  entries[i].learn=0;
+  if(i && entries[i].key<entries[i-1].key) {CleanPolyBook();fclose(file);return;}
+ }
+ fclose(file);NumEntries=count;EngineOptions->UseBook=TRUE;
 }
+void CleanPolyBook(void) {free(entries);entries=NULL;NumEntries=0;}
 
-int HasPawnForCapture(const S_BOARD *board) {
+static int HasPawnForCapture(const S_BOARD *board) {
 	int sqWithPawn = 0;
 	int targetPce = (board->side == WHITE) ? wP : bP;
 	if(board->enPas != NO_SQ) {
@@ -73,7 +63,7 @@ int HasPawnForCapture(const S_BOARD *board) {
 	return FALSE;
 }
 
-U64 PolyKeyFromBoard(const S_BOARD *board) {
+static U64 PolyKeyFromBoard(const S_BOARD *board) {
 
 	int sq = 0, rank = 0, file = 0;
 	U64 finalKey = 0;
@@ -113,36 +103,7 @@ U64 PolyKeyFromBoard(const S_BOARD *board) {
 	return finalKey;
 }
 
-unsigned short endian_swap_u16(unsigned short x) 
-{ 
-    x = (x>>8) | 
-        (x<<8); 
-    return x;
-} 
-
-unsigned int endian_swap_u32(unsigned int x) 
-{ 
-    x = (x>>24) | 
-        ((x<<8) & 0x00FF0000) | 
-        ((x>>8) & 0x0000FF00) | 
-        (x<<24); 
-    return x;
-} 
-
-U64 endian_swap_u64(U64 x) 
-{ 
-    x = (x>>56) | 
-        ((x<<40) & 0x00FF000000000000) | 
-        ((x<<24) & 0x0000FF0000000000) | 
-        ((x<<8)  & 0x000000FF00000000) | 
-        ((x>>8)  & 0x00000000FF000000) | 
-        ((x>>24) & 0x0000000000FF0000) | 
-        ((x>>40) & 0x000000000000FF00) | 
-        (x<<56); 
-    return x;
-}
-
-int ConvertPolyMoveToInternalMove(unsigned short polyMove, S_BOARD *board) {
+static int ConvertPolyMoveToInternalMove(unsigned short polyMove, S_BOARD *board) {
 	
 	int ff = (polyMove >> 6) & 7;
 	int fr = (polyMove >> 9) & 7;
@@ -150,9 +111,12 @@ int ConvertPolyMoveToInternalMove(unsigned short polyMove, S_BOARD *board) {
 	int tr = (polyMove >> 3) & 7;
 	int pp = (polyMove >> 12) & 7;
 	
-	char moveString[6];
+	if(pp>4) return NOMOVE;
+    int piece=board->pieces[FR2SQ(ff,fr)];
+    if(IsKi(piece) && ff==4 && fr==tr) {if(tf==7) tf=6;else if(tf==0) tf=2;}
+    char moveString[6];
 	if(pp == 0) {
-		sprintf(moveString, "%c%c%c%c",
+		snprintf(moveString,sizeof moveString, "%c%c%c%c",
 		FileChar[ff],
 		RankChar[fr],
 		FileChar[tf],
@@ -164,7 +128,7 @@ int ConvertPolyMoveToInternalMove(unsigned short polyMove, S_BOARD *board) {
 			case 2: promChar = 'b'; break;
 			case 3: promChar = 'r'; break;
 		}
-		sprintf(moveString, "%c%c%c%c%c",
+		snprintf(moveString,sizeof moveString, "%c%c%c%c%c",
 		FileChar[ff],
 		RankChar[fr],
 		FileChar[tf],
@@ -176,31 +140,17 @@ int ConvertPolyMoveToInternalMove(unsigned short polyMove, S_BOARD *board) {
 }
 
 int GetBookMove(S_BOARD *board) {
-	// int index = 0;
-	S_POLY_BOOK_ENTRY *entry;
-	unsigned short move;
-	const int MAXBOOKMOVES = 32;
-	int bookMoves[MAXBOOKMOVES];
-	int tempMove = NOMOVE;
-	int count = 0;
-	
-	U64 polyKey = PolyKeyFromBoard(board);
-	
-	for(entry = entries; entry < entries + NumEntries; entry++) {
-		if(polyKey == endian_swap_u64(entry->key)) {
-			move = endian_swap_u16(entry->move);
-			tempMove = ConvertPolyMoveToInternalMove(move, board);
-			if(tempMove != NOMOVE) {
-				bookMoves[count++] = tempMove;
-				if(count > MAXBOOKMOVES) break;
-			}
-		}
-	}
-	
-	if(count != 0) {
-		int randMove = rand() % count;
-		return bookMoves[randMove];
-	} else {
-		return NOMOVE;
-	}
+ if(!entries || !NumEntries) return NOMOVE;
+ U64 key=PolyKeyFromBoard(board);size_t lo=0,hi=NumEntries;
+ while(lo<hi) {size_t mid=lo+(hi-lo)/2;if(entries[mid].key<key) lo=mid+1;else hi=mid;}
+ U64 total=0;int chosen=NOMOVE;
+ for(size_t i=lo;i<NumEntries && entries[i].key==key;i++) {
+  int move=ConvertPolyMoveToInternalMove(entries[i].move,board);
+  if(move==NOMOVE || !MoveExists(board,move)) continue;
+  U64 weight=entries[i].weight?entries[i].weight:1;
+  total+=weight;
+  U64 random=((U64)(unsigned)rand()<<32) ^ (U64)(unsigned)rand();
+  if(random%total<weight) chosen=move;
+ }
+ return chosen;
 }

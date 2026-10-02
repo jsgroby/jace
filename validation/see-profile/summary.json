@@ -1,0 +1,82 @@
+{
+  "opening": {
+    "positions": 12,
+    "nodes": 753366,
+    "calls": 961462,
+    "duplicates": 0,
+    "see_ms": 544.788,
+    "profile_ms": 1086,
+    "median_unprofiled_ms": 1028,
+    "ops": [
+      43735594,
+      81843155,
+      1992862,
+      123488974,
+      1717185,
+      105812672,
+      1031400,
+      102087,
+      8
+    ]
+  },
+  "tactical": {
+    "positions": 8,
+    "nodes": 1489654,
+    "calls": 1580737,
+    "duplicates": 0,
+    "see_ms": 599.691,
+    "profile_ms": 1434,
+    "median_unprofiled_ms": 1342,
+    "ops": [
+      46039213,
+      108628232,
+      2574620,
+      156885442,
+      2095736,
+      124590400,
+      993883,
+      328743,
+      7
+    ]
+  },
+  "endgame": {
+    "positions": 8,
+    "nodes": 1172778,
+    "calls": 46659,
+    "duplicates": 0,
+    "see_ms": 8.321,
+    "profile_ms": 319,
+    "median_unprofiled_ms": 317,
+    "ops": [
+      264752,
+      421750,
+      63261,
+      3797414,
+      53725,
+      1856384,
+      16602,
+      7099,
+      3
+    ]
+  },
+  "all": {
+    "positions": 28,
+    "nodes": 3415798,
+    "calls": 2588858,
+    "duplicates": 0,
+    "see_ms": 1152.8,
+    "profile_ms": 2839,
+    "median_unprofiled_ms": 2692,
+    "ops": [
+      90039559,
+      190893137,
+      4630743,
+      284171830,
+      3866646,
+      232259456,
+      2041885,
+      437929,
+      8
+    ]
+  }
+}

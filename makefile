@@ -1,69 +1,41 @@
-# ===== Project =====
-NAME   := jace
-SRCS   := $(wildcard *.c)
-OBJS   := $(SRCS:.c=.o)
-DEPS   := $(OBJS:.o=.d)
-
-# Compiler / tools
-CC     ?= gcc
-
-# ===== Flags =====
-STD    := -std=c11
-
-WARN   := -Wall -Wextra -Wpedantic \
-          -Wshadow -Wconversion -Wsign-conversion \
-          -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
-
-# Generate dependency files alongside .o files
-DEPFLAGS := -MMD -MP
-
-# Common flags for all builds
-CFLAGS  ?= $(STD) $(WARN) $(DEPFLAGS)
-LDFLAGS ?=
-
-# ===== Build modes =====
-RELEASE_CFLAGS := -O3 -DNDEBUG -flto
-RELEASE_LDFLAGS := -flto
-
-DEBUG_CFLAGS   := -O0 -g3
-# Sanitizers are incredibly useful for a C engine (UB/ASan finds real bugs fast)
-SANITIZERS     := -fsanitize=address,undefined
-DEBUG_SAN_CFLAGS := $(SANITIZERS) -fno-omit-frame-pointer
-DEBUG_SAN_LDFLAGS := $(SANITIZERS)
-
-# ===== Default target =====
-.PHONY: all
+CC ?= cc
+PYTHON ?= python3
+MODE ?= release
+TARGET := $(shell $(CC) -dumpmachine)
+WINDOWS := $(or $(findstring mingw,$(TARGET)),$(findstring windows,$(TARGET)))
+EXE := $(if $(WINDOWS),.exe,)
+PROGRAM = jace-baseline$(EXE)
+WARN = -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
+PLATFORM = $(if $(WINDOWS),-D_WIN32_WINNT=0x0600,-D_POSIX_C_SOURCE=200809L -D_DARWIN_C_SOURCE)
+BASE = -std=c11 $(PLATFORM) $(WARN) -MMD -MP
+FLAGS_release = -O3 -DNDEBUG
+FLAGS_debug = -O0 -g3 -DDEBUG
+FLAGS_sanitize = -O1 -g3 -DDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer
+LINK_sanitize = -fsanitize=address,undefined
+SRCS = $(wildcard *.c)
+OBJS = $(patsubst %.c,build/$(MODE)/%.o,$(SRCS))
+.PHONY: all release debug debug-sanitize build-mode clean rebuild test smoke
 all: release
-
-# ===== Targets =====
-.PHONY: release
-release: CFLAGS  += $(RELEASE_CFLAGS)
-release: LDFLAGS += $(RELEASE_LDFLAGS)
-release: $(NAME)
-
-.PHONY: debug
-debug: CFLAGS += $(DEBUG_CFLAGS)
-debug: $(NAME)
-
-.PHONY: debug-sanitize
-debug-sanitize: CFLAGS  += $(DEBUG_CFLAGS) $(DEBUG_SAN_CFLAGS)
-debug-sanitize: LDFLAGS += $(DEBUG_SAN_LDFLAGS)
-debug-sanitize: $(NAME)
-
-$(NAME): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-
-# Compile .c -> .o
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Pull in auto-generated dependency files (ignore if missing)
--include $(DEPS)
-
-# ===== Utilities =====
-.PHONY: clean
+release:
+	$(MAKE) MODE=release build-mode
+debug:
+	$(MAKE) MODE=debug build-mode
+debug-sanitize:
+	$(MAKE) MODE=sanitize build-mode
+build-mode: build/$(MODE)/jace$(EXE)
+	cp $< $(PROGRAM)
+build/$(MODE)/jace$(EXE): $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
+build/$(MODE)/%.o: %.c
+	@mkdir -p $(@D)
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+-include $(OBJS:.o=.d)
 clean:
-	rm -f $(NAME) $(OBJS) $(DEPS)
-
-.PHONY: rebuild
-rebuild: clean all
+	rm -rf build jace-baseline jace-baseline.exe
+rebuild:
+	$(MAKE) clean
+	$(MAKE) all
+test:
+	$(PYTHON) tests/run.py
+smoke: release
+	$(PYTHON) tests/portable_smoke.py ./$(PROGRAM)

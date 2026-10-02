@@ -138,10 +138,13 @@ static void MovePiece(const int from, const int to, S_BOARD *pos) {
 			break;
 		}
 	}
+	#ifdef DEBUG
 	ASSERT(t_PieceNum);
+#endif
 }
 
 int MakeMove(S_BOARD *pos, int move) {
+	if(move == NOMOVE || pos->ply >= MAXDEPTH-1 || pos->hisPly >= MAXGAMEMOVES-1) return FALSE;
 
 	ASSERT(CheckBoard(pos));
 	
@@ -156,7 +159,7 @@ int MakeMove(S_BOARD *pos, int move) {
 	ASSERT(pos->hisPly >= 0 && pos->hisPly < MAXGAMEMOVES);
 	ASSERT(pos->ply >= 0 && pos->ply < MAXDEPTH);
 	
-	pos->history[pos->hisPly].posKey = pos->posKey;
+	pos->history[pos->hisPly].posKey = RepetitionKey(pos);
 	
 	if(move & MFLAGEP) {
         if(side == WHITE) {
@@ -328,7 +331,7 @@ void MakeNullMove(S_BOARD *pos) {
     ASSERT(!SqAttacked(pos->KingSq[pos->side],pos->side^1,pos));
 
     pos->ply++;
-    pos->history[pos->hisPly].posKey = pos->posKey;
+    pos->history[pos->hisPly].posKey = RepetitionKey(pos);
 
     if(pos->enPas != NO_SQ) HASH_EP;
 

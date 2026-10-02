@@ -59,3 +59,30 @@ Module.symvers
 Mkfile.old
 dkms.conf
 jace
+
+# Jace 1.3 additions
+# Compiler output and engine executables
+/build/
+/jace
+/jace.exe
+/jace-baseline
+/jace-baseline.exe
+/jace-analysis
+/jace-see-test
+/jace-uci
+/jace-qsearch-test
+*.o
+*.d
+*.dSYM/
+*.exe
+
+# Local/editor files
+.DS_Store
+__pycache__/
+*.pyc
+
+# Raw local validation output; keep source fixtures and reports
+/validation/**/*.log
+/validation/fastchess-smoke/
+/validation/see-profile/bench
+/validation/see-profile/profile
