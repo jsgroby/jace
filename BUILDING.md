@@ -18,7 +18,7 @@ make release           # leave the release executable at the top level
 ```
 
 `make test` currently uses `cc` for its standalone C tests and Unix pipe APIs.
-It is supported on macOS/Linux, not Windows. `make smoke` is portable.
+It is supported on macOS/Linux, not Windows. On Windows, `make test` exits\nwith a clear explanation and nonzero status before any builds; it does not\nreport skipped tests as passing. `make smoke` is portable.
 Always run `make clean` when switching compiler, architecture, or compiler flags.
 The native compiler target determines the operating-system flags and executable suffix.
 No architecture-specific instruction flags are required.

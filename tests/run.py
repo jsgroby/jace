@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
 """Build isolated sanitizer tests and exercise the actual UCI process."""
-import os, pathlib, subprocess, sys, time, select, struct, tempfile, re
+import sys
+
+# Stop before importing Unix test helpers or invoking any build commands.
+if sys.platform.startswith(("win32", "cygwin", "msys")):
+ print("Full regression suite NOT RUN: make test is supported on macOS and Linux.")
+ print("It requires sanitizer runtimes and Unix pipe handling unavailable in this Windows setup.")
+ print("On Windows ARM64, use MSYS2 CLANGARM64 and run:")
+ print("  make CC=clang LDFLAGS=-static PYTHON=python smoke")
+ print("Run make test on macOS or Ubuntu for full regression coverage.")
+ sys.exit(2)
+
+import os, pathlib, subprocess, time, select, struct, tempfile, re
 root=pathlib.Path(__file__).resolve().parents[1]
 os.chdir(root)
 subprocess.run(['make','release'],check=True)
