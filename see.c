@@ -20,7 +20,24 @@ static int Attacks(const ExchangeBoard *b,int from,int to) {
  return FALSE;
 }
 static int Attacked(const ExchangeBoard *b,int sq,int side) {
- for(int i=0;i<64;i++) {int from=SQ120(i),p=b->pieces[from];if(p!=EMPTY && PieceCol[p]==side && Attacks(b,from,sq)) return TRUE;}
+ /* Query attacks from the target square; preserve pseudo-attack semantics
+    (including pinned defenders) used to validate exchange king safety. */
+ int pawn=side==WHITE?wP:bP,back=side==WHITE?-10:10;
+ if(b->pieces[sq+back-1]==pawn || b->pieces[sq+back+1]==pawn) return TRUE;
+ int knight=side==WHITE?wN:bN,king=side==WHITE?wK:bK;
+ for(int i=0;i<8;i++) {
+  if(b->pieces[sq+KnDir[i]]==knight) return TRUE;
+  if(b->pieces[sq+KiDir[i]]==king) return TRUE;
+ }
+ for(int i=0;i<8;i++) {
+  int d=KiDir[i];
+  for(int from=sq+d;b->pieces[from]!=OFFBOARD;from+=d) {
+   int p=b->pieces[from];
+   if(p==EMPTY) continue;
+   if(PieceCol[p]==side && (i<4?IsRQ(p):IsBQ(p))) return TRUE;
+   break;
+  }
+ }
  return FALSE;
 }
 static int Reply(ExchangeBoard *b,int to,int side,int depth) {

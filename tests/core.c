@@ -7,6 +7,35 @@ static void TestInput(S_SEARCHINFO *info) {(void)info;}
 #include "search.c"
 #include "qsearch_reference.inc"
 #undef ReadInput
+/* Keep the prior SEE implementation as a differential oracle. */
+#define ExchangeBoard ReferenceExchangeBoard
+#define Attacks ReferenceAttacks
+#define Attacked ReferenceAttacked
+#define Reply ReferenceReply
+#define SEE ReferenceSEE
+#include "see_reference.inc"
+#undef ExchangeBoard
+#undef Attacks
+#undef Attacked
+#undef Reply
+#undef SEE
+#define SEE IncludedSEE
+#include "see.c"
+#undef SEE
+static unsigned long seeComparisons,attackComparisons;
+static void CompareSee(S_BOARD *p) {
+ ExchangeBoard b;ReferenceExchangeBoard ref;
+ memcpy(b.pieces,p->pieces,sizeof b.pieces);memcpy(b.king,p->KingSq,sizeof b.king);
+ memcpy(ref.pieces,p->pieces,sizeof ref.pieces);memcpy(ref.king,p->KingSq,sizeof ref.king);
+ for(int sq=0;sq<64;sq++) for(int side=0;side<2;side++) {
+  assert(Attacked(&b,SQ120(sq),side)==ReferenceAttacked(&ref,SQ120(sq),side));attackComparisons++;
+ }
+ S_MOVELIST list;GenerateAllCaps(p,&list);
+ for(int i=0;i<list.count;i++) {
+  int move=list.moves[i].move;
+  assert(SEE(p,move)==ReferenceSEE(p,move));seeComparisons++;
+ }
+}
 static U64 perft(S_BOARD *p,int depth) {
  if(!depth) return 1;
  S_MOVELIST list;GenerateAllMoves(p,&list);U64 total=0;
@@ -21,7 +50,7 @@ static U64 perft(S_BOARD *p,int depth) {
 }
 static void fen(S_BOARD *p,const char *s) {assert(ParseFen((char*)s,p)==0);assert(CheckBoard(p));}
 static void see(S_BOARD *p,const char *f,char *m,int expected) {
- fen(p,f);int move=ParseMove(m,p);assert(move!=NOMOVE);int actual=SEE(p,move);
+ fen(p,f);int move=ParseMove(m,p);assert(move!=NOMOVE);int actual=SEE(p,move);assert(actual==ReferenceSEE(p,move));CompareSee(p);
  printf("SEE %s = %d expected %d\n",m,actual,expected);assert(actual==expected);
 }
 static void TestQSearchEquivalence(void) {
@@ -31,7 +60,7 @@ static void TestQSearchEquivalence(void) {
  for(size_t i=0;i<sizeof positions/sizeof positions[0];i++) {
   for(int window=0;window<5;window++) {
    S_BOARD reference={0},candidate={0};S_SEARCHINFO ri={0},ci={0};
-   fen(&reference,positions[i]);candidate=reference;
+   fen(&reference,positions[i]);CompareSee(&reference);candidate=reference;
    int alpha=window==0?-INFINITE:(window-3)*200;
    int beta=window==0?INFINITE:alpha+1;
    int expected=ReferenceQuiescence(alpha,beta,&reference,&ri);
@@ -171,7 +200,7 @@ int main(void) {
  for(int game=0;game<40;game++) {
   fen(&p,START_FEN);
   for(int turn=0;turn<120;turn++) {
-   assert(CheckBoard(&p));assert(GeneratePosKey(&p)==p.posKey);
+   assert(CheckBoard(&p));assert(GeneratePosKey(&p)==p.posKey);CompareSee(&p);
    for(int mode=0;mode<=1;mode++) {EngineOptions->TaperedEval=mode;int eval=EvalPosition(&p);S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==eval);}
    GenerateAllMoves(&p,&list);int legal[256],n=0;
    for(int i=0;i<list.count;i++) if(MakeMove(&p,list.moves[i].move)) {TakeMove(&p);legal[n++]=list.moves[i].move;}
@@ -188,5 +217,5 @@ int main(void) {
  /* A complete search must still select a legal move with no table. */
  free(p.HashTable->pTable);p.HashTable->pTable=NULL;p.HashTable->numEntries=0;info.depth=2;info.starttime=GetTimeMs();SearchPosition(&p,&info);assert(rootBestMove!=NOMOVE && MoveExists(&p,rootBestMove));
  fen(&p,"7k/6Q1/5K2/8/8/8/8/8 b - - 0 1");SearchPosition(&p,&info);
- CleanPolyBook();puts("CORE TESTS PASS");return 0;
+ printf("SEE differential: %lu captures, %lu attack queries PASS\n",seeComparisons,attackComparisons);CleanPolyBook();puts("CORE TESTS PASS");return 0;
 }
