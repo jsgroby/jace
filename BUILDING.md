@@ -67,7 +67,9 @@ This produces an x64 executable, not a native ARM64 executable.
 Local validation has passed on macOS and Ubuntu, including the full regression
 suite. Portable smoke tests have also passed on Windows ARM64 and x64.
 For a specific revision, check its GitHub Actions results: the workflow tests
-macOS ARM64, Linux x64, Windows ARM64, and Windows x64 separately.
+macOS ARM64, Linux ARM64 and x64, and Windows ARM64 and x64 separately.
+On Ubuntu, `uname -m` reports `aarch64` for ARM64 or `x86_64` for x64;
+choose the corresponding Linux package. Building from source uses your native compiler.
 A successful build alone is not a strength result or a substitute for match testing.
 
 The portable smoke test checks UCI handshake, a depth-limited search,

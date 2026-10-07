@@ -6,6 +6,7 @@ and manual dispatch. It does not run strength matches or promote candidates.
 | Package | Hosted runner | Validation |
 |---|---|---|
 | linux-x64 | Ubuntu 24.04 | Strict release build, smoke, full ASan/UBSan regression suite |
+| linux-arm64 | Ubuntu 24.04 ARM64 | Strict release build, smoke, full ASan/UBSan regression suite |
 | macos-arm64 | macOS 14 ARM64 | Strict release build, smoke, full ASan/UBSan regression suite |
 | windows-x64 | Windows 2022, MSYS2 UCRT64 | Strict static release build, portable smoke |
 | windows-arm64 | Windows 11 ARM, MSYS2 CLANGARM64 | Strict static release build, portable smoke |

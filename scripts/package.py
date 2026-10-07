@@ -11,7 +11,7 @@ import tarfile
 import zipfile
 
 p = argparse.ArgumentParser()
-p.add_argument('--platform', required=True, choices=['macos-arm64', 'linux-x64', 'windows-x64', 'windows-arm64'])
+p.add_argument('--platform', required=True, choices=['macos-arm64', 'linux-x64', 'linux-arm64', 'windows-x64', 'windows-arm64'])
 a = p.parse_args()
 root = Path(__file__).resolve().parents[1]
 version = re.search(r'#define\s+ENGINE_VERSION\s+"([^"]+)"', (root/'defs.h').read_text())[1]

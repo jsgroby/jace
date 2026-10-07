@@ -20,6 +20,7 @@ jobs:
       matrix:
         include:
           - {os: ubuntu-24.04, platform: linux-x64, cc: gcc}
+          - {os: ubuntu-24.04-arm, platform: linux-arm64, cc: gcc}
           - {os: macos-14, platform: macos-arm64, cc: clang}
     env:
       CC: ${{ matrix.cc }}
