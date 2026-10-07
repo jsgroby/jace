@@ -18,7 +18,9 @@ make release           # leave the release executable at the top level
 ```
 
 `make test` currently uses `cc` for its standalone C tests and Unix pipe APIs.
-It is supported on macOS/Linux, not Windows. On Windows, `make test` exits\nwith a clear explanation and nonzero status before any builds; it does not\nreport skipped tests as passing. `make smoke` is portable.
+It is supported on macOS/Linux, not Windows. On Windows, `make test` exits
+with a clear explanation and nonzero status before any builds; it does not
+report skipped tests as passing. `make smoke` is portable.
 Always run `make clean` when switching compiler, architecture, or compiler flags.
 The native compiler target determines the operating-system flags and executable suffix.
 No architecture-specific instruction flags are required.
@@ -76,3 +78,7 @@ scores and moves, not wall-clock speed across dissimilar hardware or VMs.
 MSYS2 references:
 https://www.msys2.org/docs/arm64/
 https://www.msys2.org/docs/environments/
+
+## Automated builds
+
+See [CI.md](CI.md) for GitHub Actions checks, downloadable packages, and draft releases.

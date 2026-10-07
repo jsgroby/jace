@@ -86,3 +86,5 @@ __pycache__/
 /validation/fastchess-smoke/
 /validation/see-profile/bench
 /validation/see-profile/profile
+
+/dist/
