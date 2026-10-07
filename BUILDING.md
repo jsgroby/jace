@@ -64,10 +64,11 @@ This produces an x64 executable, not a native ARM64 executable.
 
 ## Validation status
 
-Jace 1.3 release, debug, sanitizer and portable smoke tests were run on macOS.
-The preceding Jace Analysis build was reported working on Windows ARM64 by
-its user. The new 1.3 Windows and Ubuntu binaries have not yet been compiled
-or run on those machines. A dry-run build is not native verification.
+Local validation has passed on macOS and Ubuntu, including the full regression
+suite. Portable smoke tests have also passed on Windows ARM64 and x64.
+For a specific revision, check its GitHub Actions results: the workflow tests
+macOS ARM64, Linux x64, Windows ARM64, and Windows x64 separately.
+A successful build alone is not a strength result or a substitute for match testing.
 
 The portable smoke test checks UCI handshake, a depth-limited search,
 searchmoves, MultiPV, readiness during search, stop, pondering and quit.
