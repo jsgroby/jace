@@ -18,7 +18,9 @@ make release           # leave the release executable at the top level
 ```
 
 `make test` currently uses `cc` for its standalone C tests and Unix pipe APIs.
-It is supported on macOS/Linux, not Windows. On Windows, `make test` exits\nwith a clear explanation and nonzero status before any builds; it does not\nreport skipped tests as passing. `make smoke` is portable.
+It is supported on macOS/Linux, not Windows. On Windows, `make test` exits
+with a clear explanation and nonzero status before any builds; it does not
+report skipped tests as passing. `make smoke` is portable.
 Always run `make clean` when switching compiler, architecture, or compiler flags.
 The native compiler target determines the operating-system flags and executable suffix.
 No architecture-specific instruction flags are required.
@@ -62,10 +64,13 @@ This produces an x64 executable, not a native ARM64 executable.
 
 ## Validation status
 
-Jace 1.3 release, debug, sanitizer and portable smoke tests were run on macOS.
-The preceding Jace Analysis build was reported working on Windows ARM64 by
-its user. The new 1.3 Windows and Ubuntu binaries have not yet been compiled
-or run on those machines. A dry-run build is not native verification.
+Local validation has passed on macOS and Ubuntu, including the full regression
+suite. Portable smoke tests have also passed on Windows ARM64 and x64.
+For a specific revision, check its GitHub Actions results: the workflow tests
+macOS ARM64, Linux ARM64 and x64, and Windows ARM64 and x64 separately.
+On Ubuntu, `uname -m` reports `aarch64` for ARM64 or `x86_64` for x64;
+choose the corresponding Linux package. Building from source uses your native compiler.
+A successful build alone is not a strength result or a substitute for match testing.
 
 The portable smoke test checks UCI handshake, a depth-limited search,
 searchmoves, MultiPV, readiness during search, stop, pondering and quit.
@@ -76,3 +81,7 @@ scores and moves, not wall-clock speed across dissimilar hardware or VMs.
 MSYS2 references:
 https://www.msys2.org/docs/arm64/
 https://www.msys2.org/docs/environments/
+
+## Automated builds
+
+See [CI.md](CI.md) for GitHub Actions checks, downloadable packages, and draft releases.
