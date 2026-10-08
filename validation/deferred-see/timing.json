@@ -1,0 +1,134 @@
+{
+  "opening": {
+    "baseline": {
+      "milliseconds": [
+        796,
+        823,
+        781,
+        786,
+        780,
+        805,
+        804,
+        770,
+        790
+      ],
+      "see_calls": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        784,
+        775,
+        752,
+        763,
+        773,
+        776,
+        760,
+        773,
+        748
+      ],
+      "see_calls": 0
+    },
+    "time_reduction_pct": 2.1518987341772156,
+    "see_reduction_pct": null,
+    "nodes": 753366
+  },
+  "tactical": {
+    "baseline": {
+      "milliseconds": [
+        1102,
+        1087,
+        1097,
+        1086,
+        1103,
+        1088,
+        1132,
+        1098,
+        1137
+      ],
+      "see_calls": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        1080,
+        1112,
+        1061,
+        1070,
+        1084,
+        1113,
+        1087,
+        1065,
+        1061
+      ],
+      "see_calls": 0
+    },
+    "time_reduction_pct": 1.6393442622950838,
+    "see_reduction_pct": null,
+    "nodes": 1489654
+  },
+  "endgame": {
+    "baseline": {
+      "milliseconds": [
+        329,
+        328,
+        328,
+        323,
+        318,
+        312,
+        323,
+        314,
+        319
+      ],
+      "see_calls": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        316,
+        336,
+        317,
+        317,
+        323,
+        335,
+        319,
+        315,
+        319
+      ],
+      "see_calls": 0
+    },
+    "time_reduction_pct": 1.2383900928792602,
+    "see_reduction_pct": null,
+    "nodes": 1172778
+  },
+  "all": {
+    "baseline": {
+      "milliseconds": [
+        2227,
+        2238,
+        2206,
+        2195,
+        2201,
+        2205,
+        2259,
+        2182,
+        2246
+      ],
+      "see_calls": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        2180,
+        2223,
+        2130,
+        2150,
+        2180,
+        2224,
+        2166,
+        2153,
+        2128
+      ],
+      "see_calls": 0
+    },
+    "time_reduction_pct": 1.8132366273798772,
+    "see_reduction_pct": null,
+    "nodes": 3415798
+  }
+}

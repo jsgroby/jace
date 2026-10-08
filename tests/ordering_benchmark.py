@@ -12,10 +12,11 @@ import subprocess
 parser = argparse.ArgumentParser()
 parser.add_argument('--baseline-ref', required=True)
 parser.add_argument('--repeats', type=int, default=5)
+parser.add_argument('--no-counters', action='store_true', help='Time production search without SEE instrumentation')
 args = parser.parse_args()
 assert args.repeats > 0
 src = Path(__file__).resolve().parents[1]
-out = src/'build/ordering-benchmark'
+out = src/'build'/('ordering-timing' if args.no_counters else 'ordering-benchmark')
 out.mkdir(parents=True, exist_ok=True)
 positions = json.loads((src/'validation/see-profile/positions.json').read_text())
 (out/'positions.fen').write_text(''.join(p['fen']+'\n' for p in positions))
@@ -48,6 +49,8 @@ int main(int argc,char **argv) {
  fclose(f);free(p.HashTable->pTable);CleanPolyBook();return 0;
 }
 '''
+if args.no_counters:
+    harness = harness.replace('#define SEE CountSEE', '')
 common = [os.environ.get('CC', 'cc'), '-std=c11', '-O3', '-DNDEBUG',
           '-D_POSIX_C_SOURCE=200809L', '-D_DARWIN_C_SOURCE', '-I'+str(src)]
 sources = [str(p) for p in src.glob('*.c') if p.name not in ('jace.c', 'search.c')]
@@ -86,7 +89,7 @@ for category in ('opening','tactical','endgame','all'):
     d = {label: {'milliseconds': [sum(run[i]['ms'] for i in ids) for run in trials],
                  'see_calls': sum(trials[0][i]['see_calls'] for i in ids)} for label,trials in runs.items()}
     d['time_reduction_pct'] = 100*(1-statistics.median(d['candidate']['milliseconds'])/statistics.median(d['baseline']['milliseconds']))
-    d['see_reduction_pct'] = 100*(1-d['candidate']['see_calls']/d['baseline']['see_calls'])
+    d['see_reduction_pct'] = None if args.no_counters else 100*(1-d['candidate']['see_calls']/d['baseline']['see_calls'])
     d['nodes'] = sum(runs['baseline'][0][i]['nodes'] for i in ids)
     summary[category] = d
 (out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
