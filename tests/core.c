@@ -101,6 +101,33 @@ static void TestRestrictedRoot(void) {
  EngineOptions->MultiPV=1;free(p.HashTable->pTable);
  puts("RESTRICTED ROOT TT TESTS PASS");
 }
+static void TestDeferredOrdering(void) {
+ const char *positions[]={START_FEN,
+  "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+  "7k/8/8/3pP3/8/8/K7/3r4 w - d6 0 1",
+  "1r5k/P7/8/8/8/8/8/K7 w - - 0 1"};
+ for(size_t k=0;k<sizeof positions/sizeof positions[0];k++) {
+  S_BOARD p={0};fen(&p,positions[k]);S_MOVELIST generated;
+  GenerateAllMoves(&p,&generated);
+  for(int h=-1;h<generated.count;h++) {
+   int hash=h<0?0x7fffffff:generated.moves[h].move;
+   S_MOVELIST eager=generated,lazy=generated;
+   assert(!OrderMoves(&p,&eager,NOMOVE));
+   if(h>=0) {eager.moves[h].score=2000000;eager.moves[h].see=INT_MAX;}
+   int deferred=OrderMoves(&p,&lazy,hash);
+   assert(deferred==(h>=0));
+   if(deferred) for(int i=0;i<lazy.count;i++) assert(lazy.moves[i].see==INT_MAX);
+   for(int i=0;i<generated.count;i++) {
+    if(i==1 && deferred) ScoreRemainingCaptures(&p,&lazy);
+    PickNextMove(i,&eager);PickNextMove(i,&lazy);
+    assert(eager.moves[i].move==lazy.moves[i].move);
+    assert(eager.moves[i].score==lazy.moves[i].score);
+    assert(eager.moves[i].see==lazy.moves[i].see);
+   }
+  }
+ }
+ puts("DEFERRED ORDERING TESTS PASS");
+}
 static void TestSeeCache(void) {
  const char *positions[]={
   "7k/8/4p3/3p4/8/8/8/K2Q4 w - - 0 1",
@@ -110,9 +137,11 @@ static void TestSeeCache(void) {
  for(size_t k=0;k<sizeof positions/sizeof positions[0];k++) {
   S_BOARD p={0};fen(&p,positions[k]);S_MOVELIST list;GenerateAllCaps(&p,&list);
   for(int useHash=0;useHash<2;useHash++) {
+   GenerateAllCaps(&p,&list);
    int hash=useHash?list.moves[0].move:NOMOVE;
-   OrderMoves(&p,&list,hash);
+   int deferred=OrderMoves(&p,&list,hash);
    for(int i=0;i<list.count;i++) {
+    if(i==1 && deferred) ScoreRemainingCaptures(&p,&list);
     PickNextMove(i,&list);int move=list.moves[i].move;
     if(move==hash || PROMOTED(move)) assert(list.moves[i].see==INT_MAX);
     else assert(list.moves[i].see==SEE(&p,move));
@@ -160,7 +189,7 @@ static void TestPvDrawTermination(void) {
 int main(void) {
  setbuf(stdout,NULL);AllInit();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestSeeCache();
+ TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}

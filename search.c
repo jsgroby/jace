@@ -57,7 +57,12 @@ static int DrawScore(S_BOARD *pos,int inCheck) {
  /* Checkmate takes precedence over a draw claim. */
  return inCheck && !HasLegalMove(pos) ? -MATE+pos->ply : 0;
 }
-static void OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove) {
+/* Score quiet moves before searching: descendants may update counterMoves. */
+static int OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove) {
+ int deferred=FALSE;
+ if(hashMove!=NOMOVE) for(int i=0;i<list->count;i++) {
+  if(list->moves[i].move==hashMove) {deferred=TRUE;break;}
+ }
  int reply=NOMOVE;
  if(pos->hisPly>0) {
   int prev=pos->history[pos->hisPly-1].move;
@@ -70,9 +75,23 @@ static void OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove) {
   else if(PROMOTED(move)) list->moves[i].score=1500000+PieceVal[PROMOTED(move)];
   else if(move&MFLAGCAP) {
    /* Preserve MVV/LVA within each exchange category. */
+   if(!deferred) {
+    list->moves[i].see=SEE(pos,move);
+    if(list->moves[i].see<0) list->moves[i].score-=1500000;
+   }
+  } else if(move==reply && list->moves[i].score<700000) list->moves[i].score=700000;
+ }
+ return deferred;
+}
+/* The hash move has already been selected and swapped into slot zero. Keep
+   that exact swap and the original scores to preserve ordering of tied moves. */
+static void ScoreRemainingCaptures(S_BOARD *pos,S_MOVELIST *list) {
+ for(int i=1;i<list->count;i++) {
+  int move=list->moves[i].move;
+  if((move&MFLAGCAP) && !PROMOTED(move)) {
    list->moves[i].see=SEE(pos,move);
    if(list->moves[i].see<0) list->moves[i].score-=1500000;
-  } else if(move==reply && list->moves[i].score<700000) list->moves[i].score=700000;
+  }
  }
 }
 static int Quiescence(int alpha,int beta,S_BOARD *pos,S_SEARCHINFO *info) {
@@ -94,8 +113,9 @@ static int Quiescence(int alpha,int beta,S_BOARD *pos,S_SEARCHINFO *info) {
  S_MOVELIST list;
  int legal=0;
  if(inCheck) GenerateAllMoves(pos,&list); else GenerateAllCaps(pos,&list);
- OrderMoves(pos,&list,ProbePvMove(pos));
+ int deferred=OrderMoves(pos,&list,ProbePvMove(pos));
  for(int i=0;i<list.count;i++) {
+  if(i==1 && deferred) ScoreRemainingCaptures(pos,&list);
   PickNextMove(i,&list);
   int move=list.moves[i].move;
   int losing=!inCheck && !PROMOTED(move) && (move&MFLAGCAP) && (list.moves[i].see==INT_MAX?SEE(pos,move):list.moves[i].see)<0;
@@ -146,9 +166,11 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
   if(info->stopped) return 0;
   if(score>=beta && abs(score)<ISMATE) {info->nullCut++;return beta;}
  }
- S_MOVELIST list;GenerateAllMoves(pos,&list);OrderMoves(pos,&list,hashMove);
+ S_MOVELIST list;GenerateAllMoves(pos,&list);
+ int deferred=OrderMoves(pos,&list,hashMove);
  int legal=0,oldAlpha=alpha,best=-INFINITE,bestMove=NOMOVE;
  for(int i=0;i<list.count;i++) {
+  if(i==1 && deferred) ScoreRemainingCaptures(pos,&list);
   PickNextMove(i,&list);int move=list.moves[i].move;
   if(!pos->ply && !RootAllowed(info,move)) continue;
   int quiet=!(move&(MFLAGCAP|MFLAGPROM));
