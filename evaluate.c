@@ -132,22 +132,19 @@ static int PawnShield(const S_BOARD *pos,int side) {
  return score*attack/12;
 }
 
-int EvalPosition(const S_BOARD *pos) {
+typedef struct { int base,mg,eg; } S_PAWNSCORE;
+typedef struct {
+ U64 white,black;
+ S_PAWNSCORE score;
+ int valid;
+} S_PAWNENTRY;
+#define PAWN_CACHE_SIZE 4096u
+static S_PAWNENTRY pawnCache[PAWN_CACHE_SIZE];
 
-	ASSERT(CheckBoard(pos));
-
-	int pce;
-	int pceNum;
-	int sq;
-	int score = pos->material[WHITE] - pos->material[BLACK];
- int mg=0,eg=0;
- int phase=pos->pceNum[wN]+pos->pceNum[bN]+pos->pceNum[wB]+pos->pceNum[bB]+2*(pos->pceNum[wR]+pos->pceNum[bR])+4*(pos->pceNum[wQ]+pos->pceNum[bQ]);
- if(phase>24) phase=24;
-	
-	if(!pos->pceNum[wP] && !pos->pceNum[bP] && DeadMaterial(pos) == TRUE) {
-		return 0;
-	}
-	
+/* Only pawn-dependent terms belong here. King shelter, mobility, material,
+   phase and side-to-move remain outside the cache. */
+static S_PAWNSCORE CalculatePawnScore(const S_BOARD *pos) {
+ int pce,pceNum,sq,score=0,mg=0,eg=0;
 	pce = wP;	
 	for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
 		sq = pos->pList[pce][pceNum];
@@ -184,7 +181,67 @@ int EvalPosition(const S_BOARD *pos) {
 			score -= PawnPassed[7 - RanksBrd[sq]];
 		}
 	}	
-	
+
+ for(int side=WHITE;side<=BLACK;side++) {
+  int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
+   int pawn=wP+offset;
+   for(int i=0;i<pos->pceNum[pawn];i++) {
+    int square=pos->pList[pawn][i],rank=RanksBrd[square];
+    int relative=side==WHITE?rank:7-rank;
+    U64 passed=side==WHITE?WhitePassedMask[SQ64(square)]:BlackPassedMask[SQ64(square)];
+    if(!(passed&pos->pawns[side^1])) mg-=sign*(PawnPassed[relative]/2);
+    int behind=side==WHITE?-10:10;
+    int supported=pos->pieces[square+behind-1]==pawn || pos->pieces[square+behind+1]==pawn;
+    int connected=pos->pieces[square-1]==pawn || pos->pieces[square+1]==pawn;
+    if(supported || connected) {mg+=sign*5;eg+=sign*8;}
+    /* Penalize the rear pawn on a doubled file; avoid double-counting pairs. */
+    int ahead=FALSE,step=side==WHITE?10:-10;
+    for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
+    if(ahead) {
+     mg-=sign*10;eg-=sign*15;
+     if(!(passed&pos->pawns[side^1])) {mg-=sign*(PawnPassed[relative]-PawnPassed[relative]/2);eg-=sign*PawnPassed[relative];}
+    }
+   }
+ }
+ S_PAWNSCORE result={score,mg,eg};return result;
+}
+static unsigned PawnCacheIndex(U64 white,U64 black) {
+ U64 key=white^((black<<32)|(black>>32));
+ key^=key>>30;key*=0xbf58476d1ce4e5b9ULL;
+ key^=key>>27;key*=0x94d049bb133111ebULL;
+ key^=key>>31;
+ return (unsigned)(key&(PAWN_CACHE_SIZE-1u));
+}
+static S_PAWNSCORE PawnScore(const S_BOARD *pos) {
+ U64 white=pos->pawns[WHITE],black=pos->pawns[BLACK];
+ S_PAWNENTRY *entry=&pawnCache[PawnCacheIndex(white,black)];
+ /* Compare both complete bitboards: index collisions cannot change scores. */
+ if(entry->valid && entry->white==white && entry->black==black) return entry->score;
+ S_PAWNSCORE score=CalculatePawnScore(pos);
+ entry->white=white;entry->black=black;entry->score=score;entry->valid=TRUE;
+ return score;
+}
+
+int EvalPosition(const S_BOARD *pos) {
+
+	ASSERT(CheckBoard(pos));
+
+	int pce;
+	int pceNum;
+	int sq;
+	int score = pos->material[WHITE] - pos->material[BLACK];
+ int mg=0,eg=0;
+ int phase=pos->pceNum[wN]+pos->pceNum[bN]+pos->pceNum[wB]+pos->pceNum[bB]+2*(pos->pceNum[wR]+pos->pceNum[bR])+4*(pos->pceNum[wQ]+pos->pceNum[bQ]);
+ if(phase>24) phase=24;
+
+	if(!pos->pceNum[wP] && !pos->pceNum[bP] && DeadMaterial(pos) == TRUE) {
+		return 0;
+	}
+
+ S_PAWNSCORE pawns=PawnScore(pos);
+ score+=pawns.base;
+ if(EngineOptions->TaperedEval) {mg+=pawns.mg;eg+=pawns.eg;}
+
 	pce = wN;	
 	for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
 		sq = pos->pList[pce][pceNum];
@@ -200,7 +257,7 @@ int EvalPosition(const S_BOARD *pos) {
 		ASSERT(MIRROR64(SQ64(sq))>=0 && MIRROR64(SQ64(sq))<=63);
 		score -= KnightTable[MIRROR64(SQ64(sq))];
 	}			
-	
+
 	pce = wB;	
 	for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
 		sq = pos->pList[pce][pceNum];
@@ -246,7 +303,7 @@ int EvalPosition(const S_BOARD *pos) {
 			score -= RookSemiOpenFile;
 		}
 	}	
-	
+
 	pce = wQ;	
 	for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
 		sq = pos->pList[pce][pceNum];
@@ -284,24 +341,7 @@ int EvalPosition(const S_BOARD *pos) {
     int egWeight=piece==wN?3:piece==wB?4:piece==wR?3:2;
     mg+=sign*count*mgWeight;eg+=sign*count*egWeight;
    }
-   int pawn=wP+offset;
-   for(int i=0;i<pos->pceNum[pawn];i++) {
-    int square=pos->pList[pawn][i],rank=RanksBrd[square];
-    int relative=side==WHITE?rank:7-rank;
-    U64 passed=side==WHITE?WhitePassedMask[SQ64(square)]:BlackPassedMask[SQ64(square)];
-    if(!(passed&pos->pawns[side^1])) mg-=sign*(PawnPassed[relative]/2);
-    int behind=side==WHITE?-10:10;
-    int supported=pos->pieces[square+behind-1]==pawn || pos->pieces[square+behind+1]==pawn;
-    int connected=pos->pieces[square-1]==pawn || pos->pieces[square+1]==pawn;
-    if(supported || connected) {mg+=sign*5;eg+=sign*8;}
-    /* Penalize the rear pawn on a doubled file; avoid double-counting pairs. */
-    int ahead=FALSE,step=side==WHITE?10:-10;
-    for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
-    if(ahead) {
-     mg-=sign*10;eg-=sign*15;
-     if(!(passed&pos->pawns[side^1])) {mg-=sign*(PawnPassed[relative]-PawnPassed[relative]/2);eg-=sign*PawnPassed[relative];}
-    }
-   }
+
   }
   score+=(mg*phase+eg*(24-phase))/24;
  } else {
@@ -312,7 +352,7 @@ int EvalPosition(const S_BOARD *pos) {
 
 	if(pos->pceNum[wB] >= 2) score += BishopPair;
 	if(pos->pceNum[bB] >= 2) score -= BishopPair;
-	
+
 	if(pos->side == WHITE) {
 		return score;
 	} else {

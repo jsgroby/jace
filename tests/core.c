@@ -6,6 +6,7 @@ static void TestInput(S_SEARCHINFO *info) {(void)info;}
 #define ReadInput TestInput
 #include "search.c"
 #include "qsearch_reference.inc"
+#include "evaluate_reference.inc"
 #undef ReadInput
 /* Keep the prior SEE implementation as a differential oracle. */
 #define ExchangeBoard ReferenceExchangeBoard
@@ -101,6 +102,42 @@ static void TestRestrictedRoot(void) {
  EngineOptions->MultiPV=1;free(p.HashTable->pTable);
  puts("RESTRICTED ROOT TT TESTS PASS");
 }
+static void TestPawnEvaluation(void) {
+ /* Different structures mapping to cache slot 522 at the current table size. */
+ S_BOARD collisionA={0},collisionB={0};
+ fen(&collisionA,"7k/8/1p6/8/8/8/P7/K7 w - - 0 1");
+ fen(&collisionB,"7k/8/p7/8/8/8/1P6/K7 w - - 0 1");
+ for(int mode=0;mode<2;mode++) {
+  EngineOptions->TaperedEval=mode;
+  assert(ReferenceEvalPosition(&collisionA)!=ReferenceEvalPosition(&collisionB));
+  for(int repeat=0;repeat<3;repeat++) {
+   assert(EvalPosition(&collisionA)==ReferenceEvalPosition(&collisionA));
+   assert(EvalPosition(&collisionB)==ReferenceEvalPosition(&collisionB));
+  }
+ }
+
+ const char *positions[]={START_FEN,
+  "7k/8/8/3pP3/8/8/K7/3r4 w - d6 0 1",
+  "1r5k/P7/8/8/8/8/8/K7 w - - 0 1",
+  "7k/8/8/8/8/8/8/KR6 w - - 0 1",
+  "7k/8/8/8/8/8/PP6/KR6 w - - 0 1",
+  "6k1/8/8/8/8/8/PP6/1K1Q4 b - - 0 1"};
+ for(size_t k=0;k<sizeof positions/sizeof positions[0];k++) {
+  S_BOARD p={0};fen(&p,positions[k]);S_MOVELIST list;GenerateAllMoves(&p,&list);
+  for(int mode=0;mode<2;mode++) {
+   EngineOptions->TaperedEval=mode;
+   int expected=ReferenceEvalPosition(&p);
+   assert(EvalPosition(&p)==expected);assert(EvalPosition(&p)==expected);
+   for(int i=0;i<list.count;i++) if(MakeMove(&p,list.moves[i].move)) {
+    assert(EvalPosition(&p)==ReferenceEvalPosition(&p));
+    TakeMove(&p);assert(EvalPosition(&p)==expected);
+   }
+   S_BOARD mirror=p;MirrorBoard(&mirror);
+   assert(EvalPosition(&mirror)==ReferenceEvalPosition(&mirror));
+  }
+ }
+ EngineOptions->TaperedEval=TRUE;puts("PAWN EVALUATION DIFFERENTIAL TESTS PASS");
+}
 static void TestDeferredOrdering(void) {
  const char *positions[]={START_FEN,
   "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
@@ -189,7 +226,7 @@ static void TestPvDrawTermination(void) {
 int main(void) {
  setbuf(stdout,NULL);AllInit();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestDeferredOrdering();TestSeeCache();
+ TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}
@@ -230,7 +267,7 @@ int main(void) {
   fen(&p,START_FEN);
   for(int turn=0;turn<120;turn++) {
    assert(CheckBoard(&p));assert(GeneratePosKey(&p)==p.posKey);CompareSee(&p);
-   for(int mode=0;mode<=1;mode++) {EngineOptions->TaperedEval=mode;int eval=EvalPosition(&p);S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==eval);}
+   for(int mode=0;mode<=1;mode++) {EngineOptions->TaperedEval=mode;int eval=EvalPosition(&p);assert(eval==ReferenceEvalPosition(&p));S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==eval);}
    GenerateAllMoves(&p,&list);int legal[256],n=0;
    for(int i=0;i<list.count;i++) if(MakeMove(&p,list.moves[i].move)) {TakeMove(&p);legal[n++]=list.moves[i].move;}
    if(!n) break;
