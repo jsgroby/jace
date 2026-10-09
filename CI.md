@@ -17,7 +17,8 @@ The Polyglot book is not bundled; users may supply their own performance.bin.
 
 After a successful platform job, download its package from the workflow run's
 Artifacts section (requires repository access). Artifacts expire after 14 days.
-Each archive contains the executable, documentation, BUILD.json (source commit,
+Windows archives contain `jace-windows-arm64.exe` or `jace-windows-x64.exe`;
+Unix archives contain `jace-baseline`. Each archive contains the executable, documentation, BUILD.json (source commit,
 engine version, target, compiler, and run ID), and SHA256SUMS. Each archive also
 has a separate checksum file. Unix tar archives preserve executable permissions.
 

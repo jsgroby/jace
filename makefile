@@ -4,7 +4,21 @@ MODE ?= release
 TARGET := $(shell $(CC) -dumpmachine)
 WINDOWS := $(or $(findstring mingw,$(TARGET)),$(findstring windows,$(TARGET)))
 EXE := $(if $(WINDOWS),.exe,)
-PROGRAM = jace-baseline$(EXE)
+ifeq ($(strip $(WINDOWS)),)
+PROGRAM = jace-baseline
+BUILDROOT = build
+else
+ifneq ($(filter aarch64% arm64%,$(TARGET)),)
+WINARCH = arm64
+else ifneq ($(filter x86_64% amd64%,$(TARGET)),)
+WINARCH = x64
+else
+$(error Unsupported Windows compiler target: $(TARGET); use ARM64 or x64)
+endif
+PROGRAM = jace-windows-$(WINARCH).exe
+BUILDROOT = build/windows-$(WINARCH)
+endif
+BUILDDIR = $(BUILDROOT)/$(MODE)
 WARN = -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
 PLATFORM = $(if $(WINDOWS),-D_WIN32_WINNT=0x0600,-D_POSIX_C_SOURCE=200809L -D_DARWIN_C_SOURCE)
 BASE = -std=c11 $(PLATFORM) $(WARN) -MMD -MP
@@ -13,7 +27,7 @@ FLAGS_debug = -O0 -g3 -DDEBUG
 FLAGS_sanitize = -O1 -g3 -DDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer
 LINK_sanitize = -fsanitize=address,undefined
 SRCS = $(wildcard *.c)
-OBJS = $(patsubst %.c,build/$(MODE)/%.o,$(SRCS))
+OBJS = $(patsubst %.c,$(BUILDDIR)/%.o,$(SRCS))
 .PHONY: all release debug debug-sanitize build-mode clean rebuild test smoke
 all: release
 release:
@@ -22,16 +36,16 @@ debug:
 	$(MAKE) MODE=debug build-mode
 debug-sanitize:
 	$(MAKE) MODE=sanitize build-mode
-build-mode: build/$(MODE)/jace$(EXE)
+build-mode: $(BUILDDIR)/jace$(EXE)
 	cp $< $(PROGRAM)
-build/$(MODE)/jace$(EXE): $(OBJS)
+$(BUILDDIR)/jace$(EXE): $(OBJS)
 	$(CC) $(OBJS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
-build/$(MODE)/%.o: %.c
+$(BUILDDIR)/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 -include $(OBJS:.o=.d)
 clean:
-	rm -rf build jace-baseline jace-baseline.exe
+	rm -rf $(BUILDROOT) $(PROGRAM)
 rebuild:
 	$(MAKE) clean
 	$(MAKE) all
