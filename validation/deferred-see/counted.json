@@ -1,0 +1,102 @@
+{
+  "opening": {
+    "baseline": {
+      "milliseconds": [
+        858,
+        778,
+        806,
+        812,
+        1119
+      ],
+      "see_calls": 961462
+    },
+    "candidate": {
+      "milliseconds": [
+        792,
+        774,
+        800,
+        773,
+        785
+      ],
+      "see_calls": 886994
+    },
+    "time_reduction_pct": 3.325123152709364,
+    "see_reduction_pct": 7.745287905294229,
+    "nodes": 753366
+  },
+  "tactical": {
+    "baseline": {
+      "milliseconds": [
+        1123,
+        1122,
+        1124,
+        1125,
+        1144
+      ],
+      "see_calls": 1580737
+    },
+    "candidate": {
+      "milliseconds": [
+        1070,
+        1055,
+        1088,
+        1083,
+        1092
+      ],
+      "see_calls": 1500569
+    },
+    "time_reduction_pct": 3.6476868327402157,
+    "see_reduction_pct": 5.0715583933317205,
+    "nodes": 1489654
+  },
+  "endgame": {
+    "baseline": {
+      "milliseconds": [
+        336,
+        338,
+        346,
+        337,
+        322
+      ],
+      "see_calls": 46659
+    },
+    "candidate": {
+      "milliseconds": [
+        328,
+        314,
+        320,
+        329,
+        332
+      ],
+      "see_calls": 40128
+    },
+    "time_reduction_pct": 2.670623145400597,
+    "see_reduction_pct": 13.997299556355692,
+    "nodes": 1172778
+  },
+  "all": {
+    "baseline": {
+      "milliseconds": [
+        2317,
+        2238,
+        2276,
+        2274,
+        2585
+      ],
+      "see_calls": 2588858
+    },
+    "candidate": {
+      "milliseconds": [
+        2190,
+        2143,
+        2208,
+        2185,
+        2209
+      ],
+      "see_calls": 2427691
+    },
+    "time_reduction_pct": 3.778558875219684,
+    "see_reduction_pct": 6.225409041361097,
+    "nodes": 3415798
+  }
+}
