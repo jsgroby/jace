@@ -26,7 +26,7 @@ else:
 name = f'jace-{label}-{a.platform}'
 stage = root/'build'/'package'/name
 stage.mkdir(parents=True, exist_ok=False)
-exe = 'jace-baseline.exe' if a.platform.startswith('windows') else 'jace-baseline'
+exe = f'jace-{a.platform}.exe' if a.platform.startswith('windows') else 'jace-baseline'
 shutil.copy2(root/exe, stage/exe)
 for doc in ['README.md', 'BUILDING.md', 'CI.md']:
     shutil.copy2(root/doc, stage/doc)

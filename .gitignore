@@ -88,3 +88,6 @@ __pycache__/
 /validation/see-profile/profile
 
 /dist/
+
+/jace-windows-arm64.exe
+/jace-windows-x64.exe
