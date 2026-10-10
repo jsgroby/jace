@@ -1,0 +1,78 @@
+{
+  "opening": {
+    "baseline": {
+      "milliseconds": [
+        756
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        720
+      ],
+      "lookups": 596313,
+      "hits": 543789
+    },
+    "time_reduction_pct": 4.761904761904767,
+    "hit_pct": 91.1918740661364,
+    "nodes": 753366
+  },
+  "tactical": {
+    "baseline": {
+      "milliseconds": [
+        1068
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        1010
+      ],
+      "lookups": 1120355,
+      "hits": 1092990
+    },
+    "time_reduction_pct": 5.4307116104868935,
+    "hit_pct": 97.55747062315069,
+    "nodes": 1489654
+  },
+  "endgame": {
+    "baseline": {
+      "milliseconds": [
+        317
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        313
+      ],
+      "lookups": 682792,
+      "hits": 679678
+    },
+    "time_reduction_pct": 1.2618296529968487,
+    "hit_pct": 99.54393138759681,
+    "nodes": 1172778
+  },
+  "all": {
+    "baseline": {
+      "milliseconds": [
+        2141
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        2043
+      ],
+      "lookups": 2399460,
+      "hits": 2316457
+    },
+    "time_reduction_pct": 4.577300326950018,
+    "hit_pct": 96.5407633384178,
+    "nodes": 3415798
+  }
+}
