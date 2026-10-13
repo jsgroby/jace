@@ -1,0 +1,142 @@
+{
+  "opening": {
+    "baseline": {
+      "milliseconds": [
+        740,
+        748,
+        801,
+        770,
+        752,
+        727,
+        723,
+        701,
+        707
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        721,
+        733,
+        711,
+        718,
+        693,
+        713,
+        731,
+        694,
+        721
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 2.972972972972976,
+    "hit_pct": null,
+    "nodes": 753366
+  },
+  "tactical": {
+    "baseline": {
+      "milliseconds": [
+        1027,
+        1059,
+        1041,
+        1097,
+        1015,
+        1047,
+        1031,
+        995,
+        1033
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        1030,
+        1030,
+        1033,
+        1004,
+        993,
+        1021,
+        1041,
+        986,
+        1061
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 0.2904162633107443,
+    "hit_pct": null,
+    "nodes": 1489654
+  },
+  "endgame": {
+    "baseline": {
+      "milliseconds": [
+        325,
+        339,
+        315,
+        330,
+        313,
+        316,
+        315,
+        313,
+        331
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        324,
+        329,
+        312,
+        314,
+        312,
+        320,
+        305,
+        307,
+        310
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 1.2658227848101222,
+    "hit_pct": null,
+    "nodes": 1172778
+  },
+  "all": {
+    "baseline": {
+      "milliseconds": [
+        2092,
+        2146,
+        2157,
+        2197,
+        2080,
+        2090,
+        2069,
+        2009,
+        2071
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        2075,
+        2092,
+        2056,
+        2036,
+        1998,
+        2054,
+        2077,
+        1987,
+        2092
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 1.6267942583732098,
+    "hit_pct": null,
+    "nodes": 3415798
+  }
+}

@@ -117,6 +117,10 @@ static void TestPawnEvaluation(void) {
  }
 
  const char *positions[]={START_FEN,
+  /* Edge-file pawn attacks must not wrap; knights/bishops exercise mobility. */
+  "7k/7p/8/6N1/1B6/8/P7/K7 w - - 0 1",
+  "7k/p7/8/1N6/6B1/8/7P/K7 w - - 0 1",
+  "7k/8/P6p/2b5/5n2/p6P/8/K7 b - - 0 1",
   "7k/8/8/3pP3/8/8/K7/3r4 w - d6 0 1",
   "1r5k/P7/8/8/8/8/8/K7 w - - 0 1",
   "7k/8/8/8/8/8/8/KR6 w - - 0 1",

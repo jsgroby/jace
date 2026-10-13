@@ -11,10 +11,12 @@ import subprocess
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--baseline-ref', required=True)
+parser.add_argument('--depth-offset', type=int, default=0, help='Increase all benchmark depths by this amount')
 parser.add_argument('--repeats', type=int, default=5)
 parser.add_argument('--no-counters', action='store_true', help='Time production search without cache instrumentation')
 args = parser.parse_args()
 assert args.repeats > 0
+assert 0 <= args.depth_offset <= 4
 src = Path(__file__).resolve().parents[1]
 out = src/'build'/('pawn-timing' if args.no_counters else 'pawn-benchmark')
 out.mkdir(parents=True, exist_ok=True)
@@ -51,6 +53,7 @@ int main(int argc,char **argv) {
  fclose(f);free(p.HashTable->pTable);CleanPolyBook();return 0;
 }
 '''
+harness = harness.replace('info.depth=n>=20?8:6;', f'info.depth=(n>=20?8:6)+{args.depth_offset};')
 common = [os.environ.get('CC', 'cc'), '-std=c11', '-O3', '-DNDEBUG',
           '-D_POSIX_C_SOURCE=200809L', '-D_DARWIN_C_SOURCE', '-I'+str(src)]
 sources = [str(p) for p in src.glob('*.c') if p.name not in ('jace.c', 'search.c', 'evaluate.c')]

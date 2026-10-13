@@ -1,0 +1,110 @@
+{
+  "opening": {
+    "baseline": {
+      "milliseconds": [
+        1733,
+        1754,
+        1703,
+        1711,
+        1764
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        1671,
+        1706,
+        1726,
+        1657,
+        1695
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 2.1927293710328866,
+    "hit_pct": null,
+    "nodes": 1800623
+  },
+  "tactical": {
+    "baseline": {
+      "milliseconds": [
+        2501,
+        2558,
+        2461,
+        2413,
+        2458
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        2406,
+        2491,
+        2476,
+        2396,
+        2452
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 0.365704997968308,
+    "hit_pct": null,
+    "nodes": 5399544
+  },
+  "endgame": {
+    "baseline": {
+      "milliseconds": [
+        1594,
+        1570,
+        1780,
+        1583,
+        1601
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        1559,
+        1634,
+        1569,
+        1571,
+        1589
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 1.4429109159347586,
+    "hit_pct": null,
+    "nodes": 6035720
+  },
+  "all": {
+    "baseline": {
+      "milliseconds": [
+        5828,
+        5882,
+        5944,
+        5707,
+        5823
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "candidate": {
+      "milliseconds": [
+        5636,
+        5831,
+        5771,
+        5624,
+        5736
+      ],
+      "lookups": 0,
+      "hits": 0
+    },
+    "time_reduction_pct": 1.5785861358956765,
+    "hit_pct": null,
+    "nodes": 13235887
+  }
+}

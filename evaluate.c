@@ -98,10 +98,12 @@ int DeadMaterial(const S_BOARD *pos) {
 
 #define ENDGAME_MAT (1 * PieceVal[wR] + 2 * PieceVal[wN] + 2 * PieceVal[wP] + PieceVal[wK])
 
-static int PawnAttacked(const S_BOARD *pos,int sq,int enemy) {
- return enemy==WHITE ? pos->pieces[sq-9]==wP || pos->pieces[sq-11]==wP : pos->pieces[sq+9]==bP || pos->pieces[sq+11]==bP;
+/* Mask source files before shifting so attacks cannot wrap across a/h files. */
+static U64 PawnAttackMap(U64 pawns,int side) {
+ return side==WHITE ? ((pawns&~FileBBMask[FILE_A])<<7)|((pawns&~FileBBMask[FILE_H])<<9)
+                    : ((pawns&~FileBBMask[FILE_H])>>7)|((pawns&~FileBBMask[FILE_A])>>9);
 }
-static int Mobility(const S_BOARD *pos,int sq,int piece,int side) {
+static int Mobility(const S_BOARD *pos,int sq,int piece,int side,U64 enemyPawnAttacks) {
  int n=0;
  for(int i=0;i<8;i++) {
   int dir=IsKn(piece)?KnDir[i]:KiDir[i];
@@ -109,7 +111,7 @@ static int Mobility(const S_BOARD *pos,int sq,int piece,int side) {
   for(int to=sq+dir;pos->pieces[to]!=OFFBOARD;to+=dir) {
    int victim=pos->pieces[to];
    if(victim!=EMPTY && PieceCol[victim]==side) break;
-   if(!PawnAttacked(pos,to,side^1)) n++;
+   if(!(enemyPawnAttacks&SetMask[SQ64(to)])) n++;
    if(victim!=EMPTY || IsKn(piece)) break;
   }
  }
@@ -333,10 +335,11 @@ int EvalPosition(const S_BOARD *pos) {
   mg += KingO[SQ64(pos->KingSq[WHITE])] - KingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
+  U64 pawnAttacks[2]={PawnAttackMap(pos->pawns[WHITE],WHITE),PawnAttackMap(pos->pawns[BLACK],BLACK)};
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
-    int count=Mobility(pos,pos->pList[piece+offset][i],piece+offset,side);
+    int count=Mobility(pos,pos->pList[piece+offset][i],piece+offset,side,pawnAttacks[side^1]);
     int mgWeight=piece==wN?4:piece==wB?4:piece==wR?2:1;
     int egWeight=piece==wN?3:piece==wB?4:piece==wR?3:2;
     mg+=sign*count*mgWeight;eg+=sign*count*egWeight;
