@@ -1,5 +1,8 @@
 # JACE 1.3
 
+GUI connections use UCI. XBoard/WinBoard is no longer supported; configure
+your GUI to use UCI. The interactive console (type `jace`) and perft remain available.
+
 Current baseline: promoted SEE caching from Jace 1.2 SEE Test, plus a fix
 that stops printed analysis lines at threefold repetition, the fifty-move
 threshold, or insufficient material. Both ordinary and restricted/MultiPV

@@ -62,10 +62,6 @@ int main(int argc, char *argv[]) {
 			Uci_Loop(pos, info);
 			if(info->quit == TRUE) break;
 			continue;
-		} else if (!strncmp(line, "xboard",6))	{
-			XBoard_Loop(pos, info);
-			if(info->quit == TRUE) break;
-			continue;
 		} else if (!strncmp(line, "jace",4))	{
 			Console_Loop(pos, info);
 			if(info->quit == TRUE) break;

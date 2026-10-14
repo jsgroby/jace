@@ -1,3 +1,6 @@
+> Historical development notes: XBoard/WinBoard support described below has since
+> been removed. Current GUI connections use UCI; console mode remains available.
+
 Historical notes below; README.md describes the current SEE experiment.
 
 Historical notes follow. README.md describes Jace 1.2 Analysis, its build name,

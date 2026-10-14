@@ -27,13 +27,13 @@ class Engine:
   self.buffer=b''
  def send(self,s):
   self.p.stdin.write((s+'\n').encode());self.p.stdin.flush()
- def until(self,prefix,timeout=15):
+ def until(self,prefix,timeout=15,contains=False):
   end=time.monotonic()+timeout
   while time.monotonic()<end:
    while b'\n' in self.buffer:
     line,self.buffer=self.buffer.split(b'\n',1)
     text=line.decode('ascii')
-    if text.startswith(prefix):return text
+    if (prefix in text if contains else text.startswith(prefix)):return text
    if select.select([self.p.stdout],[],[],max(0,end-time.monotonic()))[0]:
     data=os.read(self.p.stdout.fileno(),65536)
     if not data:raise AssertionError(self.p.stderr.read().decode())
@@ -74,10 +74,13 @@ with tempfile.TemporaryDirectory() as td:
  e.send('position startpos');e.send('go depth 1');assert e.until('bestmove ')=='bestmove e2e4'
  e.send('position fen 4k3/8/8/8/8/8/8/4K2R w K - 0 1');e.send('go depth 1');assert e.until('bestmove ')=='bestmove e1g1'
  e.close();print('BOOK TESTS PASS')
-# XBoard result and fixed-time handling use the real executable.
-e=Engine(str(root/'build/sanitize/jace'));e.send('xboard');e.until('feature done=1')
-e.send('force');e.send('setboard 7k/6Q1/5K2/8/8/8/8/8 b - - 0 1');e.send('go');e.until('1-0 ')
-e.send('force');e.send('setboard rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');e.send('st 0');e.send('go');assert e.until('move ')!='move 0000';e.close();print('XBOARD TESTS PASS')
+# Console remains supported after removing the XBoard interface.
+e=Engine(str(root/'build/sanitize/jace'));e.send('jace');e.until('Welcome to Jace In Console Mode!')
+e.send('force');e.send('setboard 7k/6Q1/5K2/8/8/8/8/8 b - - 0 1');e.send('go')
+e.until('1-0 {checkmate}',contains=True)
+e.send('force');e.send('new');e.send('depth 1');e.send('go')
+e.until('Jace plays ',contains=True)
+e.close();print('CONSOLE TESTS PASS')
 subprocess.run([sys.executable,'tests/features.py'],check=True,env=env,timeout=120)
 for mode in ('release','sanitize'):
  subprocess.run([sys.executable,'tests/perft_input.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
