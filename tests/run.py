@@ -21,6 +21,9 @@ cmd=['cc','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG',
 subprocess.run(cmd,check=True)
 env=dict(os.environ,UBSAN_OPTIONS='halt_on_error=1',ASAN_OPTIONS='detect_leaks=0')
 subprocess.run(['build/sanitize/core-tests'],check=True,env=env,timeout=120)
+option_sources=[s for s in sources if pathlib.Path(s).name!='uci.c']
+subprocess.run(['cc','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I.','tests/uci_options.c',*option_sources,'-o','build/sanitize/uci-options'],check=True)
+subprocess.run(['build/sanitize/uci-options'],check=True,env=env,timeout=30)
 class Engine:
  def __init__(self,path,cwd=None):
   self.p=subprocess.Popen([path,'NoBook'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env,cwd=cwd)
@@ -84,6 +87,7 @@ e.close();print('CONSOLE TESTS PASS')
 subprocess.run([sys.executable,'tests/features.py'],check=True,env=env,timeout=120)
 for mode in ('release','sanitize'):
  subprocess.run([sys.executable,'tests/perft_input.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
+ subprocess.run([sys.executable,'tests/portable_smoke.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
 # Leave the convenient executable as the release build.
 subprocess.run(['make','release'],check=True)
 print('ALL TESTS PASS')

@@ -201,6 +201,17 @@ static void AcceptLine(S_SEARCHINFO *info) {
  }
  used=out;partial[used]='\0';
  if(!inputOverflow && used) {
+  /* Unknown UCI input must not end a running search. Console input keeps
+     its existing queue-and-interrupt behavior. */
+  if(info && info->GAME_MODE==UCIMODE) {
+   if(UciDebugCommand(partial)) goto consumed;
+   if(strcmp(partial,"isready") && strcmp(partial,"ponderhit") &&
+      strcmp(partial,"stop") && strcmp(partial,"quit") &&
+      strcmp(partial,"uci") && strcmp(partial,"ucinewgame") &&
+      strcmp(partial,"go") && strncmp(partial,"go ",3) &&
+      strncmp(partial,"position ",9) && strncmp(partial,"setoption ",10))
+    goto consumed;
+  }
   if(info && strcmp(partial,"isready")==0) {printf("readyok\n");fflush(stdout);}
   else if(info && strcmp(partial,"ponderhit")==0) {
    if(info->pondering) {
@@ -214,6 +225,7 @@ static void AcceptLine(S_SEARCHINFO *info) {
   else if(info && strcmp(partial,"quit")==0) {info->stopped=TRUE;info->quit=TRUE;}
   else {memcpy(queued[tail],partial,used+1);tail=(tail+1)%INPUT_QUEUE;pending++;if(info) {info->stopped=TRUE;info->pondering=info->infinite=FALSE;}}
  }
+consumed:
  used=0;inputOverflow=0;
 }
 static void ReadChar(S_SEARCHINFO *info) {

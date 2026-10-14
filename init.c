@@ -186,6 +186,7 @@ void AllInit(void) {
 	EngineOptions->TaperedEval = TRUE;
  EngineOptions->MultiPV = 1;
  EngineOptions->Ponder = FALSE;
+ EngineOptions->MoveOverhead = 50;
 	InitSq120To64();
 	InitBitMasks();
 	InitHashKeys();

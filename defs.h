@@ -175,6 +175,7 @@ typedef struct {
 	int UseBook;
 	int TaperedEval;
  int MultiPV, Ponder;
+ int MoveOverhead;
 } S_OPTIONS;
 
 
@@ -356,6 +357,7 @@ extern void MirrorEvalTest(S_BOARD *pos) ;
 
 // uci.c
 extern void Uci_Loop(S_BOARD *pos, S_SEARCHINFO *info);
+extern int UciDebugCommand(const char *line);
 
 // console.c
 extern void Console_Loop(S_BOARD *pos, S_SEARCHINFO *info);

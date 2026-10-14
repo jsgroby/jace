@@ -1,7 +1,75 @@
 #include "defs.h"
 #include <string.h>
 #include <limits.h>
+#include <ctype.h>
+#include <errno.h>
 
+/* Option identifiers and values are case-insensitive; command keywords are not. */
+static int EqualOption(const char *a,const char *b) {
+ while(*a && *b) {
+  if(tolower((unsigned char)*a)!=tolower((unsigned char)*b)) return FALSE;
+  a++;b++;
+ }
+ return *a==*b;
+}
+int UciDebugCommand(const char *line) {
+ static int enabled=FALSE;
+ if(!strcmp(line,"debug") || !strncmp(line,"debug ",6)) {
+  if(!strcmp(line,"debug on")) enabled=TRUE;
+  else if(!strcmp(line,"debug off")) enabled=FALSE;
+  if(enabled) printf("info string debug on\n");
+  return TRUE;
+ }
+ if(enabled) printf("info string received %s\n",line);
+ return FALSE;
+}
+static int OptionNumber(const char *text,long long *value) {
+ char *end;errno=0;
+ long long n=strtoll(text,&end,10);
+ if(end==text || *end || errno==ERANGE) return FALSE;
+ *value=n;return TRUE;
+}
+static void SetOption(char *line,S_BOARD *pos) {
+ char *name=line+15,*value=NULL;
+ /* Input whitespace is normalized before reaching this parser. */
+ for(char *p=name;*p;p++) {
+  if(*p==' ' && strlen(p)>=7 &&
+     tolower((unsigned char)p[1])=='v' && tolower((unsigned char)p[2])=='a' &&
+     tolower((unsigned char)p[3])=='l' && tolower((unsigned char)p[4])=='u' &&
+     tolower((unsigned char)p[5])=='e' && p[6]==' ') {
+   *p=0;value=p+7;break;
+  }
+ }
+ if(EqualOption(name,"Clear Hash")) {ClearHashTable(pos->HashTable);return;}
+ if(!value) return;
+ long long n;
+ if(EqualOption(name,"Hash") || EqualOption(name,"MultiPV") || EqualOption(name,"Move Overhead")) {
+  if(!OptionNumber(value,&n)) return;
+  if(EqualOption(name,"Hash")) {
+   if(n<4)n=4;
+   if(n>MAX_HASH)n=MAX_HASH;
+   InitHashTable(pos->HashTable,(int)n);
+  } else if(EqualOption(name,"MultiPV")) {
+   if(n<1)n=1;
+   if(n>16)n=16;
+   EngineOptions->MultiPV=(int)n;
+  } else {
+   if(n<0)n=0;
+   if(n>5000)n=5000;
+   EngineOptions->MoveOverhead=(int)n;
+  }
+ } else {
+  int flag;
+  if(EqualOption(value,"true")) flag=TRUE;
+  else if(EqualOption(value,"false")) flag=FALSE;
+  else return;
+  if(EqualOption(name,"Ponder")) EngineOptions->Ponder=flag;
+  else if(EqualOption(name,"Book")) EngineOptions->UseBook=flag;
+  else if(EqualOption(name,"TaperedEval")) {
+   EngineOptions->TaperedEval=flag;ClearHashTable(pos->HashTable);
+  }
+ }
+}
 static long long Number(const char *line,const char *token,long long fallback) {
  const char *p=strstr(line,token);
  if(!p) return fallback;
@@ -57,7 +125,9 @@ static void ParseGo(char *line,S_SEARCHINFO *info,S_BOARD *pos) {
   long long budget;
   if(fixed>=0) budget=fixed;
   else {
-   long long reserve=time>1000?50:time/20;
+   /* Preserve the old default reserve; never reserve over 5% of the clock. */
+   long long reserve=EngineOptions->MoveOverhead;
+   if(reserve>time/20) reserve=time/20;
    budget=time/mtg+inc*3/4;
    if(budget>time-reserve) budget=time-reserve;
   }
@@ -87,24 +157,21 @@ static void ParsePosition(char *line,S_BOARD *pos) {
 static void Identify(void) {
  printf("id name %s\nid author %s\n",NAME,ENGINE_AUTHOR);
  printf("option name Hash type spin default 64 min 4 max %d\n",MAX_HASH);
+ printf("option name Clear Hash type button\n");
+ printf("option name Move Overhead type spin default 50 min 0 max 5000\n");
  printf("option name Book type check default true\noption name TaperedEval type check default true\noption name MultiPV type spin default 1 min 1 max 16\noption name Ponder type check default false\nuciok\n");
 }
 void Uci_Loop(S_BOARD *pos,S_SEARCHINFO *info) {
  info->GAME_MODE=UCIMODE;setbuf(stdin,NULL);setbuf(stdout,NULL);Identify();
  char line[4096];
  while(!info->quit && NextInputLine(line,sizeof line)) {
+  if(UciDebugCommand(line)) continue;
   if(!strcmp(line,"isready")) printf("readyok\n");
   else if(!strncmp(line,"position ",9)) ParsePosition(line,pos);
   else if(!strcmp(line,"ucinewgame")) {ClearHashTable(pos->HashTable);ParseFen(START_FEN,pos);}
   else if(!strcmp(line,"go") || !strncmp(line,"go ",3)) ParseGo(line,info,pos);
   else if(!strcmp(line,"quit")) info->quit=TRUE;
   else if(!strcmp(line,"uci")) Identify();
-  else if(!strncmp(line,"setoption name Hash value ",26)) {
-   long long mb=Number(line,"value ",64);if(mb<4) mb=4;if(mb>MAX_HASH) mb=MAX_HASH;InitHashTable(pos->HashTable,(int)mb);
-  } else if(!strncmp(line,"setoption name MultiPV value ",28)) {
-   long long n=Number(line,"value ",1);if(n<1)n=1;if(n>16)n=16;EngineOptions->MultiPV=(int)n;
-  } else if(!strncmp(line,"setoption name Ponder value ",27)) EngineOptions->Ponder=strstr(line+27,"true")!=NULL;
-  else if(!strncmp(line,"setoption name Book value ",26)) EngineOptions->UseBook=strstr(line+26,"true")!=NULL;
-  else if(!strncmp(line,"setoption name TaperedEval value ",33)) {EngineOptions->TaperedEval=strstr(line+33,"true")!=NULL;ClearHashTable(pos->HashTable);}
+  else if(!strncmp(line,"setoption name ",15)) SetOption(line,pos);
  }
 }
