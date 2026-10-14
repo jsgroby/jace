@@ -2,6 +2,7 @@
 
 #include "stdio.h"
 #include "defs.h"
+#include <string.h>
 
 #define MOVE(f,t,ca,pro,fl) ( (f) | ((t) << 7) | ( (ca) << 14 ) | ( (pro) << 20 ) | (fl))
 #define SQOFFBOARD(sq) (FilesBrd[(sq)] == OFFBOARD)
@@ -185,179 +186,12 @@ static void AddBlackPawnMove( const S_BOARD *pos, const int from, const int to, 
 }
 
 void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
-
-	ASSERT(CheckBoard(pos));
-
-	list->count = 0;
-
-	int pce = EMPTY;
-	int side = pos->side;
-	int sq = 0; int t_sq = 0;
-	int pceNum = 0;
-	int dir = 0;
-	int index = 0;
-	int pceIndex = 0;
-
-	if(side == WHITE) {
-
-		for(pceNum = 0; pceNum < pos->pceNum[wP]; ++pceNum) {
-			sq = pos->pList[wP][pceNum];
-			ASSERT(SqOnBoard(sq));
-
-			if(pos->pieces[sq + 10] == EMPTY) {
-				AddWhitePawnMove(pos, sq, sq+10, list);
-				if(RanksBrd[sq] == RANK_2 && pos->pieces[sq + 20] == EMPTY) {
-					AddQuietMove(pos, MOVE(sq,(sq+20),EMPTY,EMPTY,MFLAGPS),list);
-				}
-			}
-
-			if(!SQOFFBOARD(sq + 9) && PieceCol[pos->pieces[sq + 9]] == BLACK) {
-				AddWhitePawnCapMove(pos, sq, sq+9, pos->pieces[sq + 9], list);
-			}
-			if(!SQOFFBOARD(sq + 11) && PieceCol[pos->pieces[sq + 11]] == BLACK) {
-				AddWhitePawnCapMove(pos, sq, sq+11, pos->pieces[sq + 11], list);
-			}
-			// EnPassant White
-			if(pos->enPas != NO_SQ) {
-				if(sq + 9 == pos->enPas) {
-					AddEnPassantMove(pos, MOVE(sq,sq + 9,EMPTY,EMPTY,MFLAGEP), list);
-				}
-				if(sq + 11 == pos->enPas) {
-					AddEnPassantMove(pos, MOVE(sq,sq + 11,EMPTY,EMPTY,MFLAGEP), list);
-				}
-			}
-		}
-		// castling white kingside
-		if(pos->castlePerm & WKCA) {
-			if(pos->pieces[F1] == EMPTY && pos->pieces[G1] == EMPTY) {
-				if(!SqAttacked(E1,BLACK,pos) && !SqAttacked(F1,BLACK,pos) ) {
-					AddQuietMove(pos, MOVE(E1, G1, EMPTY, EMPTY, MFLAGCA), list);
-				}
-			}
-		}
-		// castling white queenside
-		if(pos->castlePerm & WQCA) {
-			if(pos->pieces[D1] == EMPTY && pos->pieces[C1] == EMPTY && pos->pieces[B1] == EMPTY) {
-				if(!SqAttacked(E1,BLACK,pos) && !SqAttacked(D1,BLACK,pos) ) {
-					AddQuietMove(pos, MOVE(E1, C1, EMPTY, EMPTY, MFLAGCA), list);
-				}
-			}
-		}
-
-	} else {
-
-		for(pceNum = 0; pceNum < pos->pceNum[bP]; ++pceNum) {
-			sq = pos->pList[bP][pceNum];
-			ASSERT(SqOnBoard(sq));
-
-			if(pos->pieces[sq - 10] == EMPTY) {
-				AddBlackPawnMove(pos, sq, sq-10, list);
-				if(RanksBrd[sq] == RANK_7 && pos->pieces[sq - 20] == EMPTY) {
-					AddQuietMove(pos, MOVE(sq,(sq-20),EMPTY,EMPTY,MFLAGPS),list);
-				}
-			}
-
-			if(!SQOFFBOARD(sq - 9) && PieceCol[pos->pieces[sq - 9]] == WHITE) {
-				AddBlackPawnCapMove(pos, sq, sq-9, pos->pieces[sq - 9], list);
-			}
-
-			if(!SQOFFBOARD(sq - 11) && PieceCol[pos->pieces[sq - 11]] == WHITE) {
-				AddBlackPawnCapMove(pos, sq, sq-11, pos->pieces[sq - 11], list);
-			}
-			// EnPassant Black
-			if(pos->enPas != NO_SQ) {
-				if(sq - 9 == pos->enPas) {
-					AddEnPassantMove(pos, MOVE(sq,sq - 9,EMPTY,EMPTY,MFLAGEP), list);
-				}
-				if(sq - 11 == pos->enPas) {
-					AddEnPassantMove(pos, MOVE(sq,sq - 11,EMPTY,EMPTY,MFLAGEP), list);
-				}
-			}
-		}
-
-		// castling black kingside
-		if(pos->castlePerm &  BKCA) {
-			if(pos->pieces[F8] == EMPTY && pos->pieces[G8] == EMPTY) {
-				if(!SqAttacked(E8,WHITE,pos) && !SqAttacked(F8,WHITE,pos) ) {
-					AddQuietMove(pos, MOVE(E8, G8, EMPTY, EMPTY, MFLAGCA), list);
-				}
-			}
-		}
-		// castling black queenside
-		if(pos->castlePerm &  BQCA) {
-			if(pos->pieces[D8] == EMPTY && pos->pieces[C8] == EMPTY && pos->pieces[B8] == EMPTY) {
-				if(!SqAttacked(E8,WHITE,pos) && !SqAttacked(D8,WHITE,pos) ) {
-					AddQuietMove(pos, MOVE(E8, C8, EMPTY, EMPTY, MFLAGCA), list);
-				}
-			}
-		}
-	}
-
-	/* Loop for slide pieces */
-	pceIndex = LoopSlideIndex[side];
-	pce = LoopSlidePce[pceIndex++];
-	while( pce != 0) {
-		ASSERT(PieceValid(pce));
-
-		for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
-			sq = pos->pList[pce][pceNum];
-			ASSERT(SqOnBoard(sq));
-
-			for(index = 0; index < NumDir[pce]; ++index) {
-				dir = PceDir[pce][index];
-				t_sq = sq + dir;
-
-				while(!SQOFFBOARD(t_sq)) {
-					// BLACK ^ 1 == WHITE       WHITE ^ 1 == BLACK
-					if(pos->pieces[t_sq] != EMPTY) {
-						if( PieceCol[pos->pieces[t_sq]] == (side ^ 1)) {
-							AddCaptureMove(pos, MOVE(sq, t_sq, pos->pieces[t_sq], EMPTY, 0), list);
-						}
-						break;
-					}
-					AddQuietMove(pos, MOVE(sq, t_sq, EMPTY, EMPTY, 0), list);
-					t_sq += dir;
-				}
-			}
-		}
-
-		pce = LoopSlidePce[pceIndex++];
-	}
-
-	/* Loop for non slide */
-	pceIndex = LoopNonSlideIndex[side];
-	pce = LoopNonSlidePce[pceIndex++];
-
-	while( pce != 0) {
-		ASSERT(PieceValid(pce));
-
-		for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
-			sq = pos->pList[pce][pceNum];
-			ASSERT(SqOnBoard(sq));
-
-			for(index = 0; index < NumDir[pce]; ++index) {
-				dir = PceDir[pce][index];
-				t_sq = sq + dir;
-
-				if(SQOFFBOARD(t_sq)) {
-					continue;
-				}
-
-				// BLACK ^ 1 == WHITE       WHITE ^ 1 == BLACK
-				if(pos->pieces[t_sq] != EMPTY) {
-					if( PieceCol[pos->pieces[t_sq]] == (side ^ 1)) {
-						AddCaptureMove(pos, MOVE(sq, t_sq, pos->pieces[t_sq], EMPTY, 0), list);
-					}
-					continue;
-				}
-				AddQuietMove(pos, MOVE(sq, t_sq, EMPTY, EMPTY, 0), list);
-			}
-		}
-
-		pce = LoopNonSlidePce[pceIndex++];
-	}
-
-    ASSERT(MoveListOk(list,pos));
+ ASSERT(CheckBoard(pos));
+ list->count=0;
+#define PAWN_SQUARE(i) pos->pList[pos->side==WHITE?wP:bP][i]
+#include "movegen_all.inc"
+#undef PAWN_SQUARE
+ ASSERT(MoveListOk(list,pos));
 }
 
 
@@ -489,8 +323,42 @@ void GenerateAllCaps(const S_BOARD *pos, S_MOVELIST *list) {
 	}
     ASSERT(MoveListOk(list,pos));
 }
+static int TryLegalMove(S_BOARD *pos,int move) {
+ if(!MakeMove(pos,move)) return FALSE;
+ TakeMove(pos);
+ return TRUE;
+}
+static int TryLegalPawnMove(S_BOARD *pos,int from,int to,int cap,int side) {
+ int rank=side==WHITE?RANK_7:RANK_2;
+ if(RanksBrd[from]!=rank) return TryLegalMove(pos,MOVE(from,to,cap,EMPTY,0));
+ const int promotions[2][4]={{wQ,wR,wB,wN},{bQ,bR,bB,bN}};
+ for(int i=0;i<4;i++)
+  if(TryLegalMove(pos,MOVE(from,to,cap,promotions[side][i],0))) return TRUE;
+ return FALSE;
+}
 int HasLegalMove(S_BOARD *pos) {
- S_MOVELIST list; GenerateAllMoves(pos,&list);
- for(int i=0;i<list.count;i++) if(MakeMove(pos,list.moves[i].move)) { TakeMove(pos); return TRUE; }
+ ASSERT(CheckBoard(pos));
+ /* Promotion make/unmake can reorder the pawn list, even when illegal.
+    Enumerate the original squares just as a pre-generated move list does.
+    Other friendly piece lists retain their order through these probes. */
+ int pawnSquares[10];
+ memcpy(pawnSquares,pos->pList[pos->side==WHITE?wP:bP],sizeof pawnSquares);
+#define PAWN_SQUARE(i) pawnSquares[i]
+#define AddQuietMove(p,m,l) do {if(TryLegalMove(p,m)) return TRUE;} while(0)
+#define AddCaptureMove(p,m,l) AddQuietMove(p,m,l)
+#define AddEnPassantMove(p,m,l) AddQuietMove(p,m,l)
+#define AddWhitePawnMove(p,f,t,l) do {if(TryLegalPawnMove(p,f,t,EMPTY,WHITE)) return TRUE;} while(0)
+#define AddBlackPawnMove(p,f,t,l) do {if(TryLegalPawnMove(p,f,t,EMPTY,BLACK)) return TRUE;} while(0)
+#define AddWhitePawnCapMove(p,f,t,c,l) do {if(TryLegalPawnMove(p,f,t,c,WHITE)) return TRUE;} while(0)
+#define AddBlackPawnCapMove(p,f,t,c,l) do {if(TryLegalPawnMove(p,f,t,c,BLACK)) return TRUE;} while(0)
+#include "movegen_all.inc"
+#undef PAWN_SQUARE
+#undef AddQuietMove
+#undef AddCaptureMove
+#undef AddEnPassantMove
+#undef AddWhitePawnMove
+#undef AddBlackPawnMove
+#undef AddWhitePawnCapMove
+#undef AddBlackPawnCapMove
  return FALSE;
 }

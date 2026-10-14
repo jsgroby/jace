@@ -1,0 +1,90 @@
+{
+  "opening": {
+    "baseline": {
+      "milliseconds": [
+        1703,
+        1748,
+        1719,
+        1815,
+        1810
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        1581,
+        1548,
+        1535,
+        1688,
+        1654
+      ]
+    },
+    "time_reduction_pct": 9.553775743707094,
+    "nodes": 1800623
+  },
+  "tactical": {
+    "baseline": {
+      "milliseconds": [
+        2475,
+        2460,
+        2559,
+        2636,
+        2645
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        2272,
+        2335,
+        2289,
+        2418,
+        2417
+      ]
+    },
+    "time_reduction_pct": 8.753419304415788,
+    "nodes": 5399544
+  },
+  "endgame": {
+    "baseline": {
+      "milliseconds": [
+        1597,
+        1585,
+        1590,
+        1769,
+        1714
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        1507,
+        1515,
+        1509,
+        1607,
+        1599
+      ]
+    },
+    "time_reduction_pct": 5.134627426424543,
+    "nodes": 6035720
+  },
+  "all": {
+    "baseline": {
+      "milliseconds": [
+        5775,
+        5793,
+        5868,
+        6220,
+        6169
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        5360,
+        5398,
+        5333,
+        5713,
+        5670
+      ]
+    },
+    "time_reduction_pct": 8.009543285616905,
+    "nodes": 13235887
+  }
+}
