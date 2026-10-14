@@ -314,8 +314,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
    printf("\n");
   }
  } else if(bestMove!=NOMOVE) {
-  if(info->GAME_MODE==XBOARDMODE) printf("move %s\n",PrMove(bestMove));
-  else printf("Jace plays %s\n",PrMove(bestMove));
+  printf("Jace plays %s\n",PrMove(bestMove));
   (void)MakeMove(pos,bestMove);pos->ply=0;
  }
 }
