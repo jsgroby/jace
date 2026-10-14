@@ -24,3 +24,18 @@ suite is `make smoke`. Build a release executable again after debug builds.
 
 See validation/ for the draw fix patch, test results and SEE profiling report.
 Prior historical development notes are retained in UPGRADE.md.
+
+
+UCI conveniences:
+- `Clear Hash` is a button that clears the transposition table without changing
+  the current position, move history, hash allocation, or other options.
+- `Move Overhead` accepts 0–5000 milliseconds (default 50). It is the maximum
+  reserve kept on the remaining game clock, capped at 5% of that clock to avoid
+  consuming a large fraction of very short time controls. It caps the computed
+  move budget at remaining time minus reserve; it is not subtracted from every
+  normal move allocation. The default reproduces the previous time allocation.
+  Fixed `go movetime`, depth/node limits and infinite analysis are unaffected.
+  Pondering applies the reserved budget after `ponderhit`.
+- Option names and boolean values are case-insensitive. Invalid option values
+  are ignored. Unknown commands and `debug on/off` do not stop UCI searches.
+  Debug mode defaults off and reports received commands using `info string`.
