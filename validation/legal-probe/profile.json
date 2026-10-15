@@ -1,0 +1,42 @@
+{
+  "opening": {
+    "calls": 396455,
+    "generated": 15325928,
+    "tried": 397585,
+    "probe_ns": 82745000,
+    "search_ns": 741090000,
+    "instrumented_time_pct": 11.165310556072813,
+    "generated_per_call": 38.65742139713208,
+    "tried_per_call": 1.0028502604330882
+  },
+  "tactical": {
+    "calls": 868072,
+    "generated": 24330578,
+    "tried": 1056160,
+    "probe_ns": 149453000,
+    "search_ns": 1113411000,
+    "instrumented_time_pct": 13.42298576177171,
+    "generated_per_call": 28.02829488798164,
+    "tried_per_call": 1.2166732713415478
+  },
+  "endgame": {
+    "calls": 679648,
+    "generated": 9329990,
+    "tried": 951605,
+    "probe_ns": 68551000,
+    "search_ns": 346061000,
+    "instrumented_time_pct": 19.808935418900138,
+    "generated_per_call": 13.727679622392769,
+    "tried_per_call": 1.4001438980177974
+  },
+  "all": {
+    "calls": 1944175,
+    "generated": 48986496,
+    "tried": 2405350,
+    "probe_ns": 300749000,
+    "search_ns": 2200562000,
+    "instrumented_time_pct": 13.66691781463099,
+    "generated_per_call": 25.196546607172706,
+    "tried_per_call": 1.2372085846181542
+  }
+}

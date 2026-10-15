@@ -23,6 +23,70 @@ static void TestInput(S_SEARCHINFO *info) {(void)info;}
 #define SEE IncludedSEE
 #include "see.c"
 #undef SEE
+#define LoopSlidePce ReferenceLoopSlidePce
+#define LoopNonSlidePce ReferenceLoopNonSlidePce
+#define LoopSlideIndex ReferenceLoopSlideIndex
+#define LoopNonSlideIndex ReferenceLoopNonSlideIndex
+#define PceDir ReferencePceDir
+#define NumDir ReferenceNumDir
+#define VictimScore ReferenceVictimScore
+#define InitMvvLva ReferenceInitMvvLva
+#define MoveExists ReferenceMoveExists
+#define GenerateAllMoves ReferenceGenerateAllMoves
+#define GenerateAllCaps ReferenceGenerateAllCaps
+#define HasLegalMove ReferenceHasLegalMove
+void ReferenceGenerateAllMoves(const S_BOARD *pos,S_MOVELIST *list);
+#include "movegen_reference.inc"
+#undef LoopSlidePce
+#undef LoopNonSlidePce
+#undef LoopSlideIndex
+#undef LoopNonSlideIndex
+#undef PceDir
+#undef NumDir
+#undef VictimScore
+#undef InitMvvLva
+#undef MoveExists
+#undef GenerateAllMoves
+#undef GenerateAllCaps
+#undef HasLegalMove
+#undef MOVE
+#undef SQOFFBOARD
+static unsigned long legalComparisons;
+static void CompareLegalProbe(S_BOARD *pos) {
+ S_MOVELIST a,b;
+ ReferenceGenerateAllMoves(pos,&a);GenerateAllMoves(pos,&b);
+ assert(a.count==b.count);
+ for(int i=0;i<a.count;i++) {
+  assert(a.moves[i].move==b.moves[i].move);
+  assert(a.moves[i].score==b.moves[i].score);
+ }
+ S_BOARD original=*pos,reference=*pos,candidate=*pos;
+ int expected=ReferenceHasLegalMove(&reference);
+ assert(HasLegalMove(&candidate)==expected);
+ /* Include piece-list order and overwritten undo slots, not just the board key. */
+ assert(memcmp(&reference,&candidate,sizeof reference)==0);
+ assert(candidate.posKey==original.posKey && CheckBoard(&candidate));
+ assert(memcmp(candidate.pieces,original.pieces,sizeof candidate.pieces)==0);
+ legalComparisons++;
+}
+static void TestLegalProbe(void) {
+ const char *positions[]={
+  START_FEN,
+  "7k/6Q1/5K2/8/8/8/8/8 b - - 0 1",
+  "7k/5K2/6Q1/8/8/8/8/8 b - - 0 1",
+  "k3r3/8/8/3pP3/8/8/8/4K3 w - d6 0 1",
+  "7k/8/8/3pP3/8/8/K7/8 w - d6 0 1",
+  "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",
+  "7r/1P3P1k/8/8/8/8/8/7K w - - 0 1",
+  "r6k/1P6/8/8/8/8/8/7K w - - 0 1",
+  "7k/P7/8/8/8/8/8/7K w - - 0 1",
+#include "qsearch_positions.inc"
+ };
+ for(size_t i=0;i<sizeof positions/sizeof positions[0];i++) {
+  S_BOARD pos={0};assert(ParseFen((char*)positions[i],&pos)==0);
+  CompareLegalProbe(&pos);MirrorBoard(&pos);CompareLegalProbe(&pos);
+ }
+}
 static unsigned long seeComparisons,attackComparisons;
 static void CompareSee(S_BOARD *p) {
  ExchangeBoard b;ReferenceExchangeBoard ref;
@@ -224,7 +288,8 @@ static void TestPvDrawTermination(void) {
 }
 
 int main(void) {
- setbuf(stdout,NULL);AllInit();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
+ ReferenceInitMvvLva();
+ setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
  TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
@@ -266,7 +331,7 @@ int main(void) {
  for(int game=0;game<40;game++) {
   fen(&p,START_FEN);
   for(int turn=0;turn<120;turn++) {
-   assert(CheckBoard(&p));assert(GeneratePosKey(&p)==p.posKey);CompareSee(&p);
+   assert(CheckBoard(&p));assert(GeneratePosKey(&p)==p.posKey);CompareSee(&p);CompareLegalProbe(&p);
    for(int mode=0;mode<=1;mode++) {EngineOptions->TaperedEval=mode;int eval=EvalPosition(&p);assert(eval==ReferenceEvalPosition(&p));S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==eval);}
    GenerateAllMoves(&p,&list);int legal[256],n=0;
    for(int i=0;i<list.count;i++) if(MakeMove(&p,list.moves[i].move)) {TakeMove(&p);legal[n++]=list.moves[i].move;}
@@ -283,5 +348,5 @@ int main(void) {
  /* A complete search must still select a legal move with no table. */
  free(p.HashTable->pTable);p.HashTable->pTable=NULL;p.HashTable->numEntries=0;info.depth=2;info.starttime=GetTimeMs();SearchPosition(&p,&info);assert(rootBestMove!=NOMOVE && MoveExists(&p,rootBestMove));
  fen(&p,"7k/6Q1/5K2/8/8/8/8/8 b - - 0 1");SearchPosition(&p,&info);
- printf("SEE differential: %lu captures, %lu attack queries PASS\n",seeComparisons,attackComparisons);CleanPolyBook();puts("CORE TESTS PASS");return 0;
+ printf("SEE differential: %lu captures, %lu attack queries PASS\n",seeComparisons,attackComparisons);CleanPolyBook();printf("Legal probe differential: %lu positions PASS\n",legalComparisons);puts("CORE TESTS PASS");return 0;
 }
