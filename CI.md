@@ -16,7 +16,7 @@ not notarized. Linux binaries target Ubuntu 24.04's runtime, not every older Lin
 The Polyglot book is not bundled; users may supply their own performance.bin.
 
 After a successful platform job, download its package from the workflow run's
-Artifacts section (requires repository access). Artifacts expire after 14 days.
+Artifacts section (requires a GitHub sign-in). Artifacts expire after 14 days.
 Windows archives contain `jace-windows-arm64.exe` or `jace-windows-x64.exe`;
 Unix archives contain `jace-baseline`. Each archive contains the executable, documentation, BUILD.json (source commit,
 engine version, target, compiler, and run ID), and SHA256SUMS. Each archive also
@@ -46,8 +46,7 @@ is created with the packages. Review and publish that draft manually. Re-running
 may replace draft assets but refuses to replace a published release.
 
 Tags name packages; BUILD.json also records the actual compiled ENGINE_VERSION.
-A public download requires public distribution access; a release in this private
-repository remains private. The current tree contains no top-level license file.
-Packaging copies LICENSE/COPYING/NOTICE documents when present, but does not invent
-licensing terms. Resolve attribution and licensing documentation before public
-redistribution. A draft release is not a claim that distribution is cleared.
+This repository is public. Published release assets provide stable public
+downloads; workflow artifacts expire and draft releases are not public downloads.
+Packages include the MIT LICENSE, CREDITS.md, PLAYING.md and RELEASE_NOTES.md.
+The optional opening book is excluded. See CREDITS.md for source origins.

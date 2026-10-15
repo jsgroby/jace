@@ -26,7 +26,7 @@ exit(1);}
 
 typedef unsigned long long U64;
 
-#define ENGINE_VERSION "1.3"
+#define ENGINE_VERSION "1.4"
 #define ENGINE_AUTHOR "Jeffrey S. Groby"
 #define NAME "Jace " ENGINE_VERSION
 #define BRD_SQ_NUM 120

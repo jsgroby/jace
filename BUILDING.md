@@ -1,7 +1,8 @@
-# Jace 1.3 baseline
+# Jace 1.4 baseline
 
-This baseline includes the promoted SEE cache and PV draw-termination fix.
-The engine reports `Jace 1.3`, author `Jeffrey S. Groby`.
+This release packages the accepted baseline, including SEE and pawn caching,
+early-exit legal-move probing, and UCI control improvements.
+The engine reports `Jace 1.4`, author `Jeffrey S. Groby`.
 The executable is `jace-baseline` on macOS/Linux, `jace-windows-arm64.exe` on
 Windows ARM64, and `jace-windows-x64.exe` on Windows x64.
 Keep previous engines in separate folders for comparison/rollback.
