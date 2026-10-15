@@ -1,0 +1,2 @@
+# Do not redistribute the optional book in Git source archives.
+performance.bin export-ignore

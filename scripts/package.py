@@ -19,6 +19,8 @@ sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True)
 ref = os.environ.get('GITHUB_REF', '')
 if ref.startswith('refs/tags/'):
     label = ref.removeprefix('refs/tags/')
+    if label != f'v{version}':
+        raise SystemExit('Release tag must match ENGINE_VERSION')
     if not re.fullmatch(r'v[0-9]+(?:\.[0-9]+){1,2}(?:-[A-Za-z0-9.-]+)?', label):
         raise SystemExit('Unsupported release tag format')
 else:
@@ -28,7 +30,7 @@ stage = root/'build'/'package'/name
 stage.mkdir(parents=True, exist_ok=False)
 exe = f'jace-{a.platform}.exe' if a.platform.startswith('windows') else 'jace-baseline'
 shutil.copy2(root/exe, stage/exe)
-for doc in ['README.md', 'BUILDING.md', 'CI.md']:
+for doc in ['README.md', 'BUILDING.md', 'CI.md', 'PLAYING.md', 'CREDITS.md', 'RELEASE_NOTES.md', 'LICENSE']:
     shutil.copy2(root/doc, stage/doc)
 # Preserve licensing documents if supplied, without inventing a project license.
 for pattern in ['LICENSE*', 'COPYING*', 'NOTICE*']:

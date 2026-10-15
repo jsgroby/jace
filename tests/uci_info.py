@@ -30,7 +30,7 @@ fens=re.findall(r'^"(.*)",$',(root/'tests/qsearch_positions.inc').read_text(),re
 def run(path,new):
  e=Engine(str(path));e.send('uci')
  if new:
-  assert e.until('id name ')=='id name Jace 1.3'
+  assert e.until('id name ')=='id name Jace 1.4'
   assert e.until('id author ')=='id author Jeffrey S. Groby'
  e.until('uciok');e.send('setoption name Book value false')
  results=[]
