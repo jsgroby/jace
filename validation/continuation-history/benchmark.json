@@ -1,0 +1,90 @@
+{
+  "opening": {
+    "baseline": {
+      "milliseconds": [
+        1526,
+        1526,
+        1523
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        1541,
+        1551,
+        1554
+      ]
+    },
+    "time_reduction_pct": -1.6382699868938477,
+    "nodes": {
+      "baseline": 1800623,
+      "candidate": 1792477
+    },
+    "bestmove_changes": 3
+  },
+  "tactical": {
+    "baseline": {
+      "milliseconds": [
+        2241,
+        2251,
+        2265
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        1968,
+        1961,
+        1977
+      ]
+    },
+    "time_reduction_pct": 12.572190137716566,
+    "nodes": {
+      "baseline": 5399544,
+      "candidate": 4340337
+    },
+    "bestmove_changes": 0
+  },
+  "endgame": {
+    "baseline": {
+      "milliseconds": [
+        1494,
+        1485,
+        1535
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        1534,
+        1539,
+        1523
+      ]
+    },
+    "time_reduction_pct": -2.677376171352086,
+    "nodes": {
+      "baseline": 6035720,
+      "candidate": 5975916
+    },
+    "bestmove_changes": 0
+  },
+  "all": {
+    "baseline": {
+      "milliseconds": [
+        5261,
+        5262,
+        5323
+      ]
+    },
+    "candidate": {
+      "milliseconds": [
+        5043,
+        5051,
+        5054
+      ]
+    },
+    "time_reduction_pct": 4.009882174078294,
+    "nodes": {
+      "baseline": 13235887,
+      "candidate": 12108730
+    },
+    "bestmove_changes": 3
+  }
+}

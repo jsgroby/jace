@@ -287,11 +287,60 @@ static void TestPvDrawTermination(void) {
  free(p.HashTable->pTable);puts("PV DRAW TERMINATION TESTS PASS");
 }
 
+static int OrderedScore(S_MOVELIST *list,int move) {
+ for(int i=0;i<list->count;i++) if(list->moves[i].move==move) return list->moves[i].score;
+ assert(0);return 0;
+}
+static void TestContinuation(void) {
+ S_BOARD p={0};S_SEARCHINFO info={0};S_MOVELIST list;
+ fen(&p,START_FEN);ClearForSearch(&p,&info);
+ assert(ContinuationContext(&p)==NULL);
+ assert(MakeMove(&p,ParseMove("e2e4",&p)));
+ int16_t (*ctx)[64]=ContinuationContext(&p);
+ assert(ctx==continuationHistory[wP][SQ64(E4)]);
+ int a=ParseMove("g8f6",&p),b=ParseMove("b8c6",&p);
+ UpdateContinuation(&ctx[bN][SQ64(F6)],512);
+ UpdateContinuation(&ctx[bN][SQ64(C6)],-512);
+ GenerateAllMoves(&p,&list);OrderMoves(&p,&list,NOMOVE);
+ assert(OrderedScore(&list,a)>OrderedScore(&list,b));
+ /* Neither learned penalties nor bonuses may displace priority moves. */
+ p.searchKillers[0][p.ply]=b;
+ GenerateAllMoves(&p,&list);OrderMoves(&p,&list,NOMOVE);
+ assert(OrderedScore(&list,b)>OrderedScore(&list,a));
+ counterMoves[wP][E4]=a;
+ GenerateAllMoves(&p,&list);OrderMoves(&p,&list,NOMOVE);
+ assert(OrderedScore(&list,a)==700000);
+ GenerateAllMoves(&p,&list);OrderMoves(&p,&list,a);
+ assert(OrderedScore(&list,a)==2000000);
+ MakeNullMove(&p);assert(ContinuationContext(&p)==NULL);TakeNullMove(&p);
+ assert(ContinuationContext(&p)==ctx);
+ int16_t value=0;
+ for(int i=0;i<100000;i++) UpdateContinuation(&value,512);
+ assert(value>0 && value<=CONTINUATION_LIMIT);
+ for(int i=0;i<100000;i++) UpdateContinuation(&value,-512);
+ assert(value<0 && value>=-CONTINUATION_LIMIT);
+ ClearForSearch(&p,&info);assert(ctx[bN][SQ64(F6)]==0);
+ /* A promoted predecessor is indexed as the piece now on its destination. */
+ fen(&p,"7k/P7/8/8/8/8/8/7K w - - 0 1");
+ assert(MakeMove(&p,ParseMove("a7a8q",&p)));
+ assert(ContinuationContext(&p)==continuationHistory[wQ][SQ64(A8)]);
+ fen(&p,START_FEN);assert(MakeMove(&p,ParseMove("e2e4",&p)));
+ ClearForSearch(&p,&info);info.starttime=GetTimeMs();
+ AlphaBeta(-INFINITE,INFINITE,4,&p,&info,TRUE);
+ int positive=0,negative=0;
+ for(int a1=0;a1<13;a1++) for(int b1=0;b1<64;b1++)
+ for(int c=0;c<13;c++) for(int d=0;d<64;d++) {
+  positive+=continuationHistory[a1][b1][c][d]>0;
+  negative+=continuationHistory[a1][b1][c][d]<0;
+ }
+ assert(positive && negative);assert(CheckBoard(&p));
+ ClearForSearch(&p,&info);puts("CONTINUATION HISTORY TESTS PASS");
+}
 int main(void) {
  ReferenceInitMvvLva();
  setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
+ TestContinuation();TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}

@@ -3,6 +3,23 @@
 #include <limits.h>
 
 static int counterMoves[13][BRD_SQ_NUM];
+/* Previous piece/destination -> current piece/destination. 1.32 MiB,
+   reset for each search like the ordinary history and counter-move tables. */
+static int16_t continuationHistory[13][64][13][64];
+#define CONTINUATION_LIMIT 16384
+static int16_t (*ContinuationContext(const S_BOARD *pos))[64] {
+ if(pos->hisPly<=0) return NULL;
+ int prev=pos->history[pos->hisPly-1].move;
+ if(prev==NOMOVE) return NULL; /* A null move is not a played reply context. */
+ int to=TOSQ(prev),piece=pos->pieces[to];
+ ASSERT(piece>=wP && piece<=bK);
+ return continuationHistory[piece][SQ64(to)];
+}
+static void UpdateContinuation(int16_t *entry,int bonus) {
+ int value=*entry;
+ value+=bonus-value*abs(bonus)/CONTINUATION_LIMIT;
+ *entry=(int16_t)value;
+}
 static int rootBestMove;
 
 /* Sample current-search TT entries, reported in UCI permille (0..1000). */
@@ -42,6 +59,7 @@ static void ClearForSearch(S_BOARD *pos,S_SEARCHINFO *info) {
   pos->hisPly=keep;
  }
  memset(counterMoves,0,sizeof counterMoves);
+ memset(continuationHistory,0,sizeof continuationHistory);
  memset(pos->searchHistory,0,sizeof pos->searchHistory);
  memset(pos->searchKillers,0,sizeof pos->searchKillers);
  memset(pos->PvArray,0,sizeof pos->PvArray);
@@ -63,6 +81,7 @@ static int OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove) {
  if(hashMove!=NOMOVE) for(int i=0;i<list->count;i++) {
   if(list->moves[i].move==hashMove) {deferred=TRUE;break;}
  }
+ int16_t (*continuation)[64]=ContinuationContext(pos);
  int reply=NOMOVE;
  if(pos->hisPly>0) {
   int prev=pos->history[pos->hisPly-1].move;
@@ -80,6 +99,8 @@ static int OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove) {
     if(list->moves[i].see<0) list->moves[i].score-=1500000;
    }
   } else if(move==reply && list->moves[i].score<700000) list->moves[i].score=700000;
+  else if(continuation && list->moves[i].score<700000)
+   list->moves[i].score+=continuation[pos->pieces[FROMSQ(move)]][SQ64(TOSQ(move))];
  }
  return deferred;
 }
@@ -169,6 +190,8 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
  S_MOVELIST list;GenerateAllMoves(pos,&list);
  int deferred=OrderMoves(pos,&list,hashMove);
  int legal=0,oldAlpha=alpha,best=-INFINITE,bestMove=NOMOVE;
+ int quiets[MAXPOSITIONMOVES],quietCount=0;
+ int16_t (*continuation)[64]=ContinuationContext(pos);
  for(int i=0;i<list.count;i++) {
   if(i==1 && deferred) ScoreRemainingCaptures(pos,&list);
   PickNextMove(i,&list);int move=list.moves[i].move;
@@ -200,6 +223,14 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
      int *history=&pos->searchHistory[pos->pieces[FROMSQ(move)]][TOSQ(move)];
      int bonus=depth*depth;if(bonus>512) bonus=512;
      *history+=bonus-(*history*bonus)/16384;
+     if(continuation) {
+      UpdateContinuation(&continuation[pos->pieces[FROMSQ(move)]][SQ64(TOSQ(move))],bonus);
+      /* Penalize only earlier legal, searched quiet moves at this node. */
+      for(int q=0;q<quietCount;q++) {
+       int tried=quiets[q];
+       UpdateContinuation(&continuation[pos->pieces[FROMSQ(tried)]][SQ64(TOSQ(tried))],-bonus);
+      }
+     }
      if(pos->hisPly>0) {
       int prev=pos->history[pos->hisPly-1].move;
       if(prev!=NOMOVE) counterMoves[pos->pieces[TOSQ(prev)]][TOSQ(prev)]=move;
@@ -210,6 +241,7 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
    }
    alpha=score;
   }
+  if(quiet && continuation) quiets[quietCount++]=move;
  }
  if(!legal) return inCheck ? -MATE+pos->ply : 0;
  if(pos->ply || (!info->restricted && EngineOptions->MultiPV<=1)) StoreHashEntry(pos,bestMove,alpha,alpha>oldAlpha?HFEXACT:HFALPHA,depth);
