@@ -36,6 +36,9 @@ For automated packages and the release process, see [CI.md](CI.md).
 - Optional Polyglot opening books; console mode and perft diagnostics.
 
 JACE searches on one CPU thread. XBoard/WinBoard is not supported.
+Startup is silent; send `uci` for identification and options, or `jace` to
+enter interactive console mode. Console and perft diagnostics remain available.
+Actual initialization failures are still reported on standard error.
 For engine comparisons, use MultiPV 1, Ponder false, Book false,
 TaperedEval true, and equal hash allocations for both engines.
 

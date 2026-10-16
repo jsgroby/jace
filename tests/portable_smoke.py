@@ -1,6 +1,13 @@
 """Native Windows/macOS/Linux UCI smoke test; no select() on Windows pipes."""
 import pathlib, queue, subprocess, sys, threading, time
 exe = pathlib.Path(sys.argv[1]).resolve()
+# Normal startup/exit must be silent on both streams, including NoBook mode.
+for startup_args in ([], ['NoBook']):
+    startup = subprocess.run([str(exe), *startup_args], input='quit\n',
+                             capture_output=True, text=True, timeout=10)
+    assert startup.returncode == 0, startup.stderr
+    assert startup.stdout == '' and startup.stderr == '', (startup.stdout, startup.stderr)
+
 p = subprocess.Popen([str(exe)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE, text=True, bufsize=1)
 lines = queue.Queue()

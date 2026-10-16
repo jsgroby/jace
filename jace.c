@@ -15,9 +15,6 @@
 
 int main(int argc, char *argv[]) {
 
-	// print date and time - add function to misc.c for this to handle all systems
-	int numofcpus = getNumberOfCores();
-	fprintf(stderr,"%d logical cores detected\n",numofcpus);
 	
 	AllInit();
 
@@ -43,12 +40,8 @@ int main(int argc, char *argv[]) {
     for(ArgNum = 0; ArgNum < argc; ++ArgNum) {
     	if(strncmp(argv[ArgNum], "NoBook", 6) == 0) {
     		EngineOptions->UseBook = FALSE;
-    		fprintf(stderr,"Book Off\n");
     	}
     }
-	fprintf(stderr,"\n");
-	fprintf(stderr,"\"How about a nice game of chess?\"\n\n");
-	fprintf(stderr,"Welcome to Jace! Type 'jace' for console mode...\n");
 
 	char line[256];
 	while (TRUE) {
