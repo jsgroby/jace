@@ -132,7 +132,6 @@ void InitHashTable(S_HASHTABLE *table, const int MB) {
 			table->numEntries = entries;
 			ClearHashTable(table);
 
-			fprintf(stderr,"%dMB HashTable initialization complete with %d entries\n", mbTry, table->numEntries);
 			return;
 		}
 
