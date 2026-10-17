@@ -158,6 +158,7 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
  if(pos->ply && (IsRepetition(pos) || pos->fiftyMove>=100 || DeadMaterial(pos))) return DrawScore(pos,inCheck);
  if(inCheck && depth<MAXDEPTH-1) depth++;
  if(depth>MAXDEPTH-1) depth=MAXDEPTH-1;
+ const int pvNode=beta-alpha>1;
  int score=-INFINITE,hashMove=NOMOVE;
  int hit=ProbeHashEntry(pos,&hashMove,&score,alpha,beta,depth);
  if(hit && pos->ply) {pos->HashTable->cut++;return score;}
@@ -180,7 +181,10 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
   int childDepth=depth-1,reduced=childDepth;
   int givesCheck=SqAttacked(pos->KingSq[pos->side],pos->side^1,pos);
   if(!inCheck && quiet && !givesCheck && !killer && depth>=3 && legal>=4) {
-   reduced-=depth>=6 && legal>=8 ? 2:1;
+   int reduction=depth>=6 && legal>=8 ? 2:1;
+   /* Keep one extra ply on wide-window nodes establishing the principal line. */
+   if(pvNode) reduction--;
+   reduced-=reduction;
    if(reduced<1) reduced=1;
   }
   if(legal==1) score=-AlphaBeta(-beta,-alpha,childDepth,pos,info,TRUE);
