@@ -132,6 +132,38 @@ static int PawnShield(const S_BOARD *pos,int side) {
  return score*attack/12;
 }
 
+/* King-dependent passer support belongs outside the pawn-only cache.
+ * Chebyshev distance counts king steps to the pawn's next square; it is a
+ * positional hint, not a proof that a king can catch or escort the pawn. */
+static int KingDistance(int king,int square) {
+ int file=abs(FilesBrd[king]-FilesBrd[square]);
+ int rank=abs(RanksBrd[king]-RanksBrd[square]);
+ return file>rank?file:rank;
+}
+static int PassedKingProximity(const S_BOARD *pos) {
+ static const int weight[8]={0,0,0,2,4,6,8,0};
+ int score=0;
+ for(int side=WHITE;side<=BLACK;side++) {
+  int pawn=side==WHITE?wP:bP,step=side==WHITE?10:-10;
+  for(int i=0;i<pos->pceNum[pawn];i++) {
+   int square=pos->pList[pawn][i];
+   int rank=side==WHITE?RanksBrd[square]:7-RanksBrd[square];
+   if(!weight[rank]) continue;
+   U64 mask=side==WHITE?WhitePassedMask[SQ64(square)]:BlackPassedMask[SQ64(square)];
+   if(mask&pos->pawns[side^1]) continue;
+   /* Only the front pawn on a doubled file receives this adjustment. */
+   int front=TRUE;
+   for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step)
+    if(pos->pieces[to]==pawn) {front=FALSE;break;}
+   if(!front) continue;
+   int next=square+step;
+   int value=weight[rank]*(KingDistance(pos->KingSq[side^1],next)-KingDistance(pos->KingSq[side],next));
+   score+=side==WHITE?value:-value;
+  }
+ }
+ return score;
+}
+
 typedef struct { int base,mg,eg; } S_PAWNSCORE;
 typedef struct {
  U64 white,black;
@@ -333,6 +365,7 @@ int EvalPosition(const S_BOARD *pos) {
   mg += KingO[SQ64(pos->KingSq[WHITE])] - KingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
+  if(phase<24) eg += PassedKingProximity(pos);
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {

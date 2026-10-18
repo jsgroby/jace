@@ -166,6 +166,41 @@ static void TestRestrictedRoot(void) {
  EngineOptions->MultiPV=1;free(p.HashTable->pTable);
  puts("RESTRICTED ROOT TT TESTS PASS");
 }
+static void TestPassedKings(void) {
+ const struct {const char *fen;int delta;} cases[]={
+  {"7k/8/8/4P3/4K3/8/8/8 w - - 0 1",4},
+  {"7k/8/8/3KP3/8/8/8/8 w - - 0 1",8},
+  {"8/4k3/8/4P3/4K3/8/8/8 w - - 0 1",-4},
+  {"8/8/4k3/4P3/4K3/8/8/8 w - - 0 1",-8},
+  {"7k/8/8/4P3/4P3/4K3/8/8 w - - 0 1",0},
+  {"7k/8/8/8/8/4K3/4P3/8 w - - 0 1",0},
+  {"7k/8/4p3/4P3/4K3/8/8/8 w - - 0 1",0},
+  {"7k/P7/1K6/8/8/8/8/8 w - - 0 1",40},
+  {"7k/8/8/8/8/8/8/K7 w - - 0 1",0}
+ };
+ for(size_t i=0;i<sizeof cases/sizeof cases[0];i++) {
+  S_BOARD p={0};fen(&p,cases[i].fen);
+  EngineOptions->TaperedEval=TRUE;referenceKingProximity=FALSE;
+  int old=ReferenceEvalPosition(&p);referenceKingProximity=TRUE;
+  assert(EvalPosition(&p)-old==cases[i].delta);
+  assert(EvalPosition(&p)==ReferenceEvalPosition(&p));
+  S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==EvalPosition(&p));
+  EngineOptions->TaperedEval=FALSE;referenceKingProximity=FALSE;
+  assert(EvalPosition(&p)==ReferenceEvalPosition(&p));referenceKingProximity=TRUE;
+ }
+ /* A king move must change this term even on a pawn-cache hit, then undo. */
+ S_BOARD p={0};fen(&p,cases[0].fen);EngineOptions->TaperedEval=TRUE;
+ int before=EvalPosition(&p);U64 pawns=p.pawns[BOTH];
+ int move=ParseMove("e4d5",&p);assert(MakeMove(&p,move));
+ assert(p.pawns[BOTH]==pawns);assert(EvalPosition(&p)==ReferenceEvalPosition(&p));
+ referenceKingProximity=FALSE;assert(EvalPosition(&p)-ReferenceEvalPosition(&p)==-8);
+ referenceKingProximity=TRUE;TakeMove(&p);assert(EvalPosition(&p)==before);
+ /* Full middlegame material suppresses the endgame-only adjustment. */
+ fen(&p,"rnbqkbnr/pp3ppp/8/3P4/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1");
+ assert(ReferencePassedKings(&p)!=0);
+ referenceKingProximity=FALSE;assert(EvalPosition(&p)==ReferenceEvalPosition(&p));referenceKingProximity=TRUE;
+ puts("PASSED PAWN KING PROXIMITY TESTS PASS");
+}
 static void TestPawnEvaluation(void) {
  /* Different structures mapping to cache slot 522 at the current table size. */
  S_BOARD collisionA={0},collisionB={0};
@@ -291,7 +326,7 @@ int main(void) {
  ReferenceInitMvvLva();
  setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
+ TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}
