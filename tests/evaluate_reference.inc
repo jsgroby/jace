@@ -133,6 +133,36 @@ static int ReferencePawnShield(const S_BOARD *pos,int side) {
  return score*attack/12;
 }
 
+/* Independent slow board scan for the new term; legacy terms below remain
+ * the uncached differential oracle. Tests can disable only this adjustment. */
+static int referenceKingProximity=TRUE;
+static int ReferencePassedKings(const S_BOARD *pos) {
+ int score=0;
+ for(int rank=1;rank<=6;rank++) for(int file=0;file<8;file++) {
+  int piece=pos->pieces[FR2SQ(file,rank)];
+  if(piece!=wP && piece!=bP) continue;
+  int side=piece==wP?WHITE:BLACK,step=side==WHITE?1:-1;
+  int relative=side==WHITE?rank:7-rank;
+  if(relative<3) continue;
+  int eligible=TRUE;
+  for(int r=rank+step;r>=0 && r<8;r+=step) for(int f=0;f<8;f++) {
+   int occupant=pos->pieces[FR2SQ(f,r)];
+   if((f==file && occupant==piece) ||
+      (abs(f-file)<=1 && occupant==(side==WHITE?bP:wP))) eligible=FALSE;
+  }
+  if(!eligible) continue;
+  int distances[2];
+  for(int color=WHITE;color<=BLACK;color++) {
+   int df=abs(FilesBrd[pos->KingSq[color]]-file);
+   int dr=abs(RanksBrd[pos->KingSq[color]]-(rank+step));
+   distances[color]=(df+dr+abs(df-dr))/2;
+  }
+  int value=2*(relative-2)*(distances[side^1]-distances[side]);
+  score+=side==WHITE?value:-value;
+ }
+ return score;
+}
+
 int ReferenceEvalPosition(const S_BOARD *pos) {
 
 	ASSERT(CheckBoard(pos));
@@ -277,6 +307,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
   mg += ReferenceKingO[SQ64(pos->KingSq[WHITE])] - ReferenceKingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += ReferenceKingE[SQ64(pos->KingSq[WHITE])] - ReferenceKingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += ReferencePawnShield(pos,WHITE)-ReferencePawnShield(pos,BLACK);
+  if(referenceKingProximity) eg += ReferencePassedKings(pos);
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
