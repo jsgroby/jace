@@ -201,6 +201,22 @@ static void TestPassedKings(void) {
  referenceKingProximity=FALSE;assert(EvalPosition(&p)==ReferenceEvalPosition(&p));referenceKingProximity=TRUE;
  puts("PASSED PAWN KING PROXIMITY TESTS PASS");
 }
+static void TestPasserCacheCollision(void) {
+ /* Both pawn structures hash to slot 4094; only the second has eligible passers. */
+ S_BOARD a={0},b={0};
+ fen(&a,"7k/1p6/8/5p2/1P6/8/5P2/K7 w - - 0 1");
+ fen(&b,"7k/8/2P3p1/8/8/2P5/7p/K7 w - - 0 1");
+ assert(ReferencePassedKings(&a)==0 && ReferencePassedKings(&b)!=0);
+ for(int mode=0;mode<2;mode++) {
+  EngineOptions->TaperedEval=mode;
+  for(int repeat=0;repeat<4;repeat++) {
+   assert(EvalPosition(&a)==ReferenceEvalPosition(&a));
+   assert(EvalPosition(&b)==ReferenceEvalPosition(&b));
+  }
+ }
+ EngineOptions->TaperedEval=TRUE;
+ puts("PASSED PAWN CACHE COLLISION TESTS PASS");
+}
 static void TestPawnEvaluation(void) {
  /* Different structures mapping to cache slot 522 at the current table size. */
  S_BOARD collisionA={0},collisionB={0};
@@ -326,7 +342,7 @@ int main(void) {
  ReferenceInitMvvLva();
  setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
+ TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestPasserCacheCollision();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}

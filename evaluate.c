@@ -140,31 +140,21 @@ static int KingDistance(int king,int square) {
  int rank=abs(RanksBrd[king]-RanksBrd[square]);
  return file>rank?file:rank;
 }
-static int PassedKingProximity(const S_BOARD *pos) {
+static int PassedKingProximity(const S_BOARD *pos,U64 eligible) {
  static const int weight[8]={0,0,0,2,4,6,8,0};
  int score=0;
- for(int side=WHITE;side<=BLACK;side++) {
-  int pawn=side==WHITE?wP:bP,step=side==WHITE?10:-10;
-  for(int i=0;i<pos->pceNum[pawn];i++) {
-   int square=pos->pList[pawn][i];
-   int rank=side==WHITE?RanksBrd[square]:7-RanksBrd[square];
-   if(!weight[rank]) continue;
-   U64 mask=side==WHITE?WhitePassedMask[SQ64(square)]:BlackPassedMask[SQ64(square)];
-   if(mask&pos->pawns[side^1]) continue;
-   /* Only the front pawn on a doubled file receives this adjustment. */
-   int front=TRUE;
-   for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step)
-    if(pos->pieces[to]==pawn) {front=FALSE;break;}
-   if(!front) continue;
-   int next=square+step;
-   int value=weight[rank]*(KingDistance(pos->KingSq[side^1],next)-KingDistance(pos->KingSq[side],next));
-   score+=side==WHITE?value:-value;
-  }
+ while(eligible) {
+  int square=SQ120(POP(&eligible));
+  int side=PieceCol[pos->pieces[square]],step=side==WHITE?10:-10;
+  int rank=side==WHITE?RanksBrd[square]:7-RanksBrd[square];
+  int next=square+step;
+  int value=weight[rank]*(KingDistance(pos->KingSq[side^1],next)-KingDistance(pos->KingSq[side],next));
+  score+=side==WHITE?value:-value;
  }
  return score;
 }
 
-typedef struct { int base,mg,eg; } S_PAWNSCORE;
+typedef struct { int base,mg,eg; U64 eligiblePassers; } S_PAWNSCORE;
 typedef struct {
  U64 white,black;
  S_PAWNSCORE score;
@@ -177,6 +167,7 @@ static S_PAWNENTRY pawnCache[PAWN_CACHE_SIZE];
    phase and side-to-move remain outside the cache. */
 static S_PAWNSCORE CalculatePawnScore(const S_BOARD *pos) {
  int pce,pceNum,sq,score=0,mg=0,eg=0;
+ U64 eligiblePassers=0;
 	pce = wP;	
 	for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
 		sq = pos->pList[pce][pceNum];
@@ -229,13 +220,16 @@ static S_PAWNSCORE CalculatePawnScore(const S_BOARD *pos) {
     /* Penalize the rear pawn on a doubled file; avoid double-counting pairs. */
     int ahead=FALSE,step=side==WHITE?10:-10;
     for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
+    /* Eligibility is pawn-only; distances to kings are evaluated on each call. */
+    if(!ahead && relative>=3 && relative<=6 && !(passed&pos->pawns[side^1]))
+     eligiblePassers |= 1ULL << SQ64(square);
     if(ahead) {
      mg-=sign*10;eg-=sign*15;
      if(!(passed&pos->pawns[side^1])) {mg-=sign*(PawnPassed[relative]-PawnPassed[relative]/2);eg-=sign*PawnPassed[relative];}
     }
    }
  }
- S_PAWNSCORE result={score,mg,eg};return result;
+ S_PAWNSCORE result={score,mg,eg,eligiblePassers};return result;
 }
 static unsigned PawnCacheIndex(U64 white,U64 black) {
  U64 key=white^((black<<32)|(black>>32));
@@ -365,7 +359,7 @@ int EvalPosition(const S_BOARD *pos) {
   mg += KingO[SQ64(pos->KingSq[WHITE])] - KingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
-  if(phase<24) eg += PassedKingProximity(pos);
+  if(phase<24) eg += PassedKingProximity(pos,pawns.eligiblePassers);
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
