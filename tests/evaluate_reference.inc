@@ -163,6 +163,27 @@ static int ReferencePassedKings(const S_BOARD *pos) {
  return score;
 }
 
+static int referenceBlockedPassers=TRUE;
+static int ReferenceBlockedPassers(const S_BOARD *pos) {
+ int score=0;
+ for(int sq64=0;sq64<64;sq64++) {
+  int square=SQ120(sq64),piece=pos->pieces[square];
+  if(piece!=wP && piece!=bP) continue;
+  int side=piece==wP?WHITE:BLACK,step=side==WHITE?1:-1;
+  int file=sq64%8,rank=sq64/8,relative=side==WHITE?rank:7-rank;
+  if(relative<3 || relative>6) continue;
+  int blocker=pos->pieces[FR2SQ(file,rank+step)];
+  if(blocker==EMPTY || PieceCol[blocker]==side || blocker==wK || blocker==bK) continue;
+  int passed=TRUE;
+  for(int r=rank+step;r>=0 && r<8;r+=step) for(int f=0;f<8;f++) {
+   int other=pos->pieces[FR2SQ(f,r)];
+   if((f==file && other==piece) || (abs(f-file)<=1 && other==(side==WHITE?bP:wP))) passed=FALSE;
+  }
+  if(passed) score+=(side==WHITE?-1:1)*(ReferencePawnPassed[relative]/4);
+ }
+ return score;
+}
+
 int ReferenceEvalPosition(const S_BOARD *pos) {
 
 	ASSERT(CheckBoard(pos));
@@ -308,6 +329,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
   eg += ReferenceKingE[SQ64(pos->KingSq[WHITE])] - ReferenceKingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += ReferencePawnShield(pos,WHITE)-ReferencePawnShield(pos,BLACK);
   if(referenceKingProximity) eg += ReferencePassedKings(pos);
+  if(referenceBlockedPassers) eg += ReferenceBlockedPassers(pos);
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {

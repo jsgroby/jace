@@ -132,7 +132,7 @@ static int PawnShield(const S_BOARD *pos,int side) {
  return score*attack/12;
 }
 
-/* King-dependent passer support belongs outside the pawn-only cache.
+/* Piece-dependent passer terms belong outside the pawn-only cache.
  * Chebyshev distance counts king steps to the pawn's next square; it is a
  * positional hint, not a proof that a king can catch or escort the pawn. */
 static int KingDistance(int king,int square) {
@@ -140,7 +140,7 @@ static int KingDistance(int king,int square) {
  int rank=abs(RanksBrd[king]-RanksBrd[square]);
  return file>rank?file:rank;
 }
-static int PassedKingProximity(const S_BOARD *pos) {
+static int PassedPawnActivity(const S_BOARD *pos) {
  static const int weight[8]={0,0,0,2,4,6,8,0};
  int score=0;
  for(int side=WHITE;side<=BLACK;side++) {
@@ -158,6 +158,11 @@ static int PassedKingProximity(const S_BOARD *pos) {
    if(!front) continue;
    int next=square+step;
    int value=weight[rank]*(KingDistance(pos->KingSq[side^1],next)-KingDistance(pos->KingSq[side],next));
+   /* A modest endgame discount for direct non-king blockades. King blockades
+    * are already reflected in proximity; friendly pieces are not penalized. */
+   int blocker=pos->pieces[next];
+   if(blocker!=EMPTY && PieceCol[blocker]==(side^1) && !PieceKing[blocker])
+    value-=PawnPassed[rank]/4;
    score+=side==WHITE?value:-value;
   }
  }
@@ -365,7 +370,7 @@ int EvalPosition(const S_BOARD *pos) {
   mg += KingO[SQ64(pos->KingSq[WHITE])] - KingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
-  if(phase<24) eg += PassedKingProximity(pos);
+  if(phase<24) eg += PassedPawnActivity(pos);
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {

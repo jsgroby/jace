@@ -201,6 +201,46 @@ static void TestPassedKings(void) {
  referenceKingProximity=FALSE;assert(EvalPosition(&p)==ReferenceEvalPosition(&p));referenceKingProximity=TRUE;
  puts("PASSED PAWN KING PROXIMITY TESTS PASS");
 }
+static void TestBlockedPassers(void) {
+ const struct {const char *fen;int penalty,phase;} cases[]={
+  {"7k/2n5/2P5/8/8/8/8/K7 w - - 0 1",15,1},
+  {"7k/2b5/2P5/8/8/8/8/K7 w - - 0 1",15,1},
+  {"7k/2r5/2P5/8/8/8/8/K7 w - - 0 1",15,2},
+  {"7k/2q5/2P5/8/8/8/8/K7 w - - 0 1",15,4},
+  {"7k/2N5/2P5/8/8/8/8/K7 w - - 0 1",0,1},
+  {"8/2k5/2P5/8/8/8/8/K7 w - - 0 1",0,0},
+  {"7k/2p5/2P5/8/8/8/8/K7 w - - 0 1",0,0},
+  {"7k/2n5/2P5/2P5/8/8/8/K7 w - - 0 1",15,1},
+  {"7k/8/8/8/2n5/2P5/8/K7 w - - 0 1",0,1},
+  {"n6k/P7/8/8/8/8/8/K7 w - - 0 1",25,1},
+  {"7k/8/8/8/8/8/8/K7 w - - 0 1",0,0}
+ };
+ for(size_t i=0;i<sizeof cases/sizeof cases[0];i++) {
+  S_BOARD p={0};fen(&p,cases[i].fen);EngineOptions->TaperedEval=TRUE;
+  assert(ReferenceBlockedPassers(&p)==-cases[i].penalty);
+  int actual=EvalPosition(&p);assert(actual==ReferenceEvalPosition(&p));
+  referenceBlockedPassers=FALSE;int difference=actual-ReferenceEvalPosition(&p);referenceBlockedPassers=TRUE;
+  int scaled=cases[i].penalty*(24-cases[i].phase);
+  assert(difference>=-(scaled+23)/24 && difference<=-scaled/24);
+  S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==actual);
+  EngineOptions->TaperedEval=FALSE;referenceBlockedPassers=FALSE;
+  assert(EvalPosition(&p)==ReferenceEvalPosition(&p));referenceBlockedPassers=TRUE;
+ }
+ /* Removing a blockader must change the term without changing the pawn key. */
+ S_BOARD p={0};fen(&p,"7k/2n5/2P5/8/8/8/8/K7 b - - 0 1");EngineOptions->TaperedEval=TRUE;
+ int before=EvalPosition(&p);U64 pawns=p.pawns[BOTH];
+ int move=ParseMove("c7b5",&p);assert(MakeMove(&p,move));assert(p.pawns[BOTH]==pawns);
+ assert(ReferenceBlockedPassers(&p)==0);assert(EvalPosition(&p)==ReferenceEvalPosition(&p));
+ TakeMove(&p);assert(EvalPosition(&p)==before);
+ fen(&p,"nr5k/P7/8/8/8/8/8/K7 w - - 0 1");before=EvalPosition(&p);
+ move=ParseMove("a7b8q",&p);assert(MakeMove(&p,move));assert(EvalPosition(&p)==ReferenceEvalPosition(&p));
+ TakeMove(&p);assert(EvalPosition(&p)==before);
+ /* A blockaded passer with full piece material has no endgame adjustment. */
+ fen(&p,"rnbqkb1r/pp3ppp/3n4/3P4/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1");
+ assert(ReferenceBlockedPassers(&p)==-8);referenceBlockedPassers=FALSE;
+ assert(EvalPosition(&p)==ReferenceEvalPosition(&p));referenceBlockedPassers=TRUE;
+ puts("BLOCKED PASSED PAWN TESTS PASS");
+}
 static void TestPawnEvaluation(void) {
  /* Different structures mapping to cache slot 522 at the current table size. */
  S_BOARD collisionA={0},collisionB={0};
@@ -326,7 +366,7 @@ int main(void) {
  ReferenceInitMvvLva();
  setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
+ TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestBlockedPassers();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}
