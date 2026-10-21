@@ -238,14 +238,14 @@ static unsigned PawnCacheIndex(U64 white,U64 black) {
  key^=key>>31;
  return (unsigned)(key&(PAWN_CACHE_SIZE-1u));
 }
-static S_PAWNSCORE PawnScore(const S_BOARD *pos) {
+static const S_PAWNSCORE *PawnScore(const S_BOARD *pos) {
  U64 white=pos->pawns[WHITE],black=pos->pawns[BLACK];
  S_PAWNENTRY *entry=&pawnCache[PawnCacheIndex(white,black)];
  /* Compare both complete bitboards: index collisions cannot change scores. */
- if(entry->valid && entry->white==white && entry->black==black) return entry->score;
+ if(entry->valid && entry->white==white && entry->black==black) return &entry->score;
  S_PAWNSCORE score=CalculatePawnScore(pos);
  entry->white=white;entry->black=black;entry->score=score;entry->valid=TRUE;
- return score;
+ return &entry->score;
 }
 
 int EvalPosition(const S_BOARD *pos) {
@@ -264,9 +264,9 @@ int EvalPosition(const S_BOARD *pos) {
 		return 0;
 	}
 
- S_PAWNSCORE pawns=PawnScore(pos);
- score+=pawns.base;
- if(EngineOptions->TaperedEval) {mg+=pawns.mg;eg+=pawns.eg;}
+ const S_PAWNSCORE *pawns=PawnScore(pos);
+ score+=pawns->base;
+ if(EngineOptions->TaperedEval) {mg+=pawns->mg;eg+=pawns->eg;}
 
 	pce = wN;	
 	for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
@@ -359,7 +359,7 @@ int EvalPosition(const S_BOARD *pos) {
   mg += KingO[SQ64(pos->KingSq[WHITE])] - KingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
-  if(phase<24) eg += PassedKingProximity(pos,pawns.eligiblePassers);
+  if(phase<24) eg += PassedKingProximity(pos,pawns->eligiblePassers);
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
