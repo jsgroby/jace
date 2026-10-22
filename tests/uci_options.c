@@ -58,13 +58,14 @@ int main(void) {
  for(int t=0;t<=120000;t+=137) for(int inc=0;inc<=1000;inc+=500) {
   long long available=t-(t>1000?50:t/20);
   long long soft=t/30+inc*3/4;if(soft>available)soft=available;if(soft<1)soft=1;
-  long long hard=2*soft;if(hard>available)hard=available;if(hard<1)hard=1;
+  long long hard=2*soft;if(hard>available/4)hard=available/4;if(hard<1)hard=1;
   char go[128];snprintf(go,sizeof go,"go wtime %d winc %d",t,inc);
   Go(&pos,&info,go);
   assert(info.adaptiveTime && info.timeset && info.softBudget==soft);
   assert(info.ponderBudget==hard && info.stoptime-info.timeStart==hard);
  }
  Go(&pos,&info,"go wtime 60000 winc 1000");assert(info.softBudget==2750 && info.ponderBudget==5500);
+ Go(&pos,&info,"go wtime 100 winc 100");assert(info.ponderBudget==23);
  Go(&pos,&info,"go wtime 1000 movestogo 1");assert(info.softBudget==950 && info.ponderBudget==950);
  Go(&pos,&info,"go wtime 2147483647 winc 2147483647 movestogo 1");
  assert(info.ponderBudget==2147483597LL);

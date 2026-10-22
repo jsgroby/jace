@@ -137,6 +137,9 @@ static void ParseGo(char *line,S_SEARCHINFO *info,S_BOARD *pos) {
   if(fixed<0 && EngineOptions->MultiPV==1) {
    info->adaptiveTime=TRUE;info->softBudget=budget;
    budget*=2;
+   /* Preserve clock for later moves, especially when the increment dominates
+      the nominal budget. A sudden unstable iteration must not drain it. */
+   if(mtg>1 && budget>available/4) budget=available/4;
    if(budget>available) budget=available;
    if(budget<1) budget=1;
   }

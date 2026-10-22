@@ -2,7 +2,7 @@
 
 Baseline: main 7de35cdfdd99378916d5c299ab8717ec4d7b2af7. This candidate changes clock allocation only; it does not include the rejected history-penalty or blocked-passer experiments.
 
-For single-PV UCI clock searches, retain the old allocation as the nominal soft budget: remaining time / moves to go (default 30) + 75% of increment, capped by remaining time minus the existing overhead reserve. The hard budget is twice nominal, capped by the same available clock. Minimum budgets remain 1ms. Clock polling retains the existing 256-node interval; the deadline is not a real-time operating-system guarantee.
+For single-PV UCI clock searches, retain the old allocation as the nominal soft budget: remaining time / moves to go (default 30) + 75% of increment, capped by remaining time minus the existing overhead reserve. The hard budget is twice nominal, capped at one quarter of available clock when more than one move remains before the time control. With movestogo 1, it is capped by the full available clock. Minimum budgets remain 1ms. Clock polling retains the existing 256-node interval; the deadline is not a real-time operating-system guarantee.
 
 After a fully completed iteration at depth 4 or later:
 
@@ -27,3 +27,5 @@ python3 jace-adaptive-time/tests/time_equivalence.py --baseline-dir jace-passer-
 ## Strength gate
 
 A four-game 5+0.1 pilot precedes a 256-game paired match at 60+1, Hash64, concurrency1, MultiPV1, Book/Ponder off and Move Overhead50. Use 128 fresh unique opening positions, with colors reversed, excluding prior match positions. Review clock forfeits, abnormal endings and legal replay as well as score. A promising result needs a fresh-opening confirmation before promotion. No Elo gain is established and main is unchanged.
+
+The initial 5+0.1 pilot exposed one candidate time forfeit (6ms overrun) after its clock fell to roughly 100ms. The initial twice-nominal cap could spend nearly all of that clock when increment dominated the allocation. The revised quarter-available-clock cap prevents that drain when multiple moves remain. Original pilot artifacts are retained under engine-testing/adaptive-time-20261022/initial-pilot; they are excluded from strength testing. This is a safety correction before the main match, not outcome-based coefficient tuning.
