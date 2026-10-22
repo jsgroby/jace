@@ -153,6 +153,8 @@ typedef struct {
 	int movestogo;
  int pondering, infinite;
  int64_t ponderBudget;
+ int adaptiveTime;
+ int64_t softBudget,timeStart;
  int restricted, searchMoveCount, searchMoves[MAXPOSITIONMOVES];
  int excludedCount, excludedMoves[MAXPOSITIONMOVES];
 

@@ -217,7 +217,8 @@ static void AcceptLine(S_SEARCHINFO *info) {
    if(info->pondering) {
     info->pondering=FALSE;
     if(info->ponderBudget>0 && !info->infinite) {
-     info->timeset=TRUE;info->stoptime=GetTimeMs()+info->ponderBudget;
+     info->timeStart=GetTimeMs();
+     info->timeset=TRUE;info->stoptime=info->timeStart+info->ponderBudget;
     }
    }
   }
