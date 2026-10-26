@@ -104,7 +104,7 @@ static void GoControls(const char *line,S_SEARCHINFO *info,S_BOARD *pos) {
 }
 static void ParseGo(char *line,S_SEARCHINFO *info,S_BOARD *pos) {
  GoControls(line,info,pos);
- info->ponderBudget=0;
+ info->ponderBudget=0;info->adaptiveTime=FALSE;info->softBudget=0;info->timeStart=0;
  long long depth=Number(line,"depth ",MAXDEPTH-1);
  if(depth<1) depth=1;
  if(depth>=MAXDEPTH) depth=MAXDEPTH-1;
@@ -122,16 +122,28 @@ static void ParseGo(char *line,S_SEARCHINFO *info,S_BOARD *pos) {
  if(time>INT_MAX) time=INT_MAX;
  if(fixed>INT_MAX) fixed=INT_MAX;
  if(!info->infinite && (time>=0 || fixed>=0)) {
-  long long budget;
+  long long budget,available=0;
   if(fixed>=0) budget=fixed;
   else {
    /* Preserve the old default reserve; never reserve over 5% of the clock. */
    long long reserve=EngineOptions->MoveOverhead;
    if(reserve>time/20) reserve=time/20;
    budget=time/mtg+inc*3/4;
-   if(budget>time-reserve) budget=time-reserve;
+   available=time-reserve;
+   if(budget>available) budget=available;
   }
   if(budget<1) budget=1;
+  /* Keep fixed movetime and analysis MultiPV allocation unchanged. */
+  if(fixed<0 && EngineOptions->MultiPV==1) {
+   info->adaptiveTime=TRUE;info->softBudget=budget;
+   budget*=2;
+   /* Preserve clock for later moves, especially when the increment dominates
+      the nominal budget. A sudden unstable iteration must not drain it. */
+   if(mtg>1 && budget>available/4) budget=available/4;
+   if(budget>available) budget=available;
+   if(budget<1) budget=1;
+  }
+  info->timeStart=info->starttime;
   info->ponderBudget=budget;
   if(!info->pondering) {info->timeset=TRUE;info->stoptime=info->starttime+budget;}
  }

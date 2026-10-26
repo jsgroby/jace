@@ -252,9 +252,22 @@ static void PrintInfo(S_BOARD *pos,S_SEARCHINFO *info,int depth,int score,
   printf("\n");
  }
 }
+/* Soft targets are checked only after a fully completed iteration. The hard
+   deadline remains enforced by CheckUp, including during aspiration retries. */
+static int SoftTimeReached(const S_SEARCHINFO *info,int depth,int stable,
+                           int changed,int drop,int64_t now) {
+ if(!info->adaptiveTime || !info->timeset || info->pondering || info->infinite ||
+    info->GAME_MODE!=UCIMODE || depth<4) return FALSE;
+ int percent=changed || drop>=35 ? 150 : stable>=3 ? 75 : 100;
+ int64_t target=info->softBudget*percent/100;
+ int64_t hard=info->stoptime-info->timeStart;
+ if(target>hard) target=hard;
+ if(target<1) target=1;
+ return now-info->timeStart>=target;
+}
 void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
  ClearForSearch(pos,info);info->excludedCount=0;
- int bestMove=NOMOVE,bestScore=0,ponderMove=NOMOVE;
+ int bestMove=NOMOVE,bestScore=0,ponderMove=NOMOVE,stable=0;
  int multi=info->GAME_MODE==UCIMODE?EngineOptions->MultiPV:1;
  if(multi<1) multi=1;
  if(multi>16) multi=16;
@@ -293,6 +306,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
    for(int k=0;k<multi;k++) PrintInfo(pos,info,depth,lines[k].score,k+1,lines[k].count,lines[k].pv,lines[k].seldepth);
    continue;
   }
+  int previousMove=bestMove,previousScore=bestScore;
   int a=-INFINITE,b=INFINITE;
   if(depth>1 && abs(bestScore)<ISMATE) {a=bestScore-50;b=bestScore+50;}
   int score=AlphaBeta(a,b,depth,pos,info,TRUE);
@@ -305,6 +319,10 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
   ponderMove=pvCount>1?pos->PvArray[1]:NOMOVE;
   PrintInfo(pos,info,depth,score,EngineOptions->MultiPV>1?1:0,pvCount,pos->PvArray,info->seldepth);
   if(abs(score)>ISMATE) break;
+  int changed=bestMove!=previousMove,drop=previousScore-score;
+  if(depth>1 && !changed && abs(score-previousScore)<=20) stable++;
+  else stable=0;
+  if(SoftTimeReached(info,depth,stable,changed,drop,GetTimeMs())) break;
  }
  if(info->GAME_MODE==UCIMODE) {
   WaitForSearchSignal(info);

@@ -322,11 +322,35 @@ static void TestPvDrawTermination(void) {
  free(p.HashTable->pTable);puts("PV DRAW TERMINATION TESTS PASS");
 }
 
+static void TestAdaptiveTime(void) {
+ S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;info.adaptiveTime=TRUE;
+ info.timeset=TRUE;info.softBudget=1000;info.timeStart=10000;info.stoptime=12000;
+ assert(!SoftTimeReached(&info,4,3,FALSE,0,10749));
+ assert(SoftTimeReached(&info,4,3,FALSE,0,10750));
+ assert(!SoftTimeReached(&info,4,0,FALSE,0,10999));
+ assert(SoftTimeReached(&info,4,0,FALSE,0,11000));
+ assert(!SoftTimeReached(&info,4,0,TRUE,0,11499));
+ assert(SoftTimeReached(&info,4,0,TRUE,0,11500));
+ assert(!SoftTimeReached(&info,4,0,FALSE,35,11499));
+ assert(SoftTimeReached(&info,4,0,FALSE,35,11500));
+ assert(SoftTimeReached(&info,4,0,FALSE,34,11000));
+ /* Clock cap takes priority over the unstable-position extension. */
+ info.stoptime=11100;assert(SoftTimeReached(&info,4,0,TRUE,0,11100));
+ assert(!SoftTimeReached(&info,3,3,FALSE,0,12000));
+ info.pondering=TRUE;assert(!SoftTimeReached(&info,4,3,FALSE,0,12000));
+ info.pondering=FALSE;info.infinite=TRUE;assert(!SoftTimeReached(&info,4,3,FALSE,0,12000));
+ info.infinite=FALSE;info.timeset=FALSE;assert(!SoftTimeReached(&info,4,3,FALSE,0,12000));
+ info.timeset=TRUE;info.adaptiveTime=FALSE;assert(!SoftTimeReached(&info,4,3,FALSE,0,12000));
+ info.adaptiveTime=TRUE;info.GAME_MODE=CONSOLEMODE;
+ assert(!SoftTimeReached(&info,4,3,FALSE,0,12000));
+ puts("ADAPTIVE TIME TARGET TESTS PASS");
+}
+
 int main(void) {
  ReferenceInitMvvLva();
  setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
+ TestAdaptiveTime();TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}

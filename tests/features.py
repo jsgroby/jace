@@ -104,6 +104,16 @@ for mode in ('release','sanitize'):
  position(e);e.send('go ponder movetime 80');silence(e,.20)
  hit=time.monotonic();e.send('ponderhit');finish(e)
  assert .025<time.monotonic()-hit<3
+ # Adaptive pondering also starts its clock budget at ponderhit, not go.
+ position(e);e.send('go ponder wtime 3000 btime 3000');silence(e,.30)
+ hit=time.monotonic();e.send('ponderhit');_,best=finish(e)
+ assert .025<time.monotonic()-hit<3
+ check_pv(e,None,[best.split()[1]])
+ # Tiny clocks must return a legal fallback, including with a large increment.
+ for command in ('go wtime 1 btime 1','go wtime 1 btime 1 winc 10000 binc 10000'):
+  started=time.monotonic();lines,best=search(e,command)
+  assert time.monotonic()-started<3
+  check_pv(e,None,[best.split()[1]])
  position(e);e.send('go ponder nodes 1');silence(e)
  e.send('stop');finish(e)
  # Mate/terminal positions still wait in ponder and infinite modes.
