@@ -48,7 +48,8 @@ static void SetOption(char *line,S_BOARD *pos) {
  }
  if(EqualOption(name,"SyzygyProbeLimit")) {
   long long limit;if(!OptionNumber(value,&limit))return;
-  if(limit<0)limit=0;if(limit>7)limit=7;
+  if(limit<0)limit=0;
+  if(limit>7)limit=7;
   EngineOptions->SyzygyProbeLimit=(int)limit;ClearHashTable(pos->HashTable);return;
  }
  long long n;
