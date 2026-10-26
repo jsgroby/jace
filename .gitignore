@@ -91,3 +91,5 @@ __pycache__/
 
 /jace-windows-arm64.exe
 /jace-windows-x64.exe
+
+tests/syzygy-data/

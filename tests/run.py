@@ -88,6 +88,8 @@ subprocess.run([sys.executable,'tests/features.py'],check=True,env=env,timeout=1
 for mode in ('release','sanitize'):
  subprocess.run([sys.executable,'tests/perft_input.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
  subprocess.run([sys.executable,'tests/portable_smoke.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
+for mode in ('release','sanitize'):
+ subprocess.run([sys.executable,'tests/syzygy_smoke.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
 # Leave the convenient executable as the release build.
 subprocess.run(['make','release'],check=True)
 print('ALL TESTS PASS')

@@ -60,3 +60,5 @@ For example, use `shasum -a 256 archive.tar.gz` on macOS,
 result with the corresponding `.sha256` file.
 
 See BUILDING.md for source builds and the portable UCI smoke test.
+
+Optional endgame tablebases: see [SYZYGY.md](SYZYGY.md). No table files are bundled.

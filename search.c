@@ -48,7 +48,7 @@ static void ClearForSearch(S_BOARD *pos,S_SEARCHINFO *info) {
  pos->HashTable->overWrite=pos->HashTable->hit=pos->HashTable->cut=0;
  pos->HashTable->generation++;
  pos->ply=0;info->stopped=0;info->nodes=0;info->seldepth=0;info->fh=info->fhf=0;info->nullCut=0;
- rootBestMove=NOMOVE;
+ rootBestMove=NOMOVE;info->tbHits=0;
 }
 static int AtLimit(const S_BOARD *pos) {
  return pos->ply>=MAXDEPTH-1 || pos->hisPly>=MAXGAMEMOVES-1;
@@ -158,6 +158,8 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
  if(pos->ply && (IsRepetition(pos) || pos->fiftyMove>=100 || DeadMaterial(pos))) return DrawScore(pos,inCheck);
  if(inCheck && depth<MAXDEPTH-1) depth++;
  if(depth>MAXDEPTH-1) depth=MAXDEPTH-1;
+ int tbScore;
+ if(pos->ply && !inCheck && SyzygyWdl(pos,&tbScore)) {info->tbHits++;return tbScore;}
  int score=-INFINITE,hashMove=NOMOVE;
  int hit=ProbeHashEntry(pos,&hashMove,&score,alpha,beta,depth);
  if(hit && pos->ply) {pos->HashTable->cut++;return score;}
@@ -242,6 +244,7 @@ static void PrintInfo(S_BOARD *pos,S_SEARCHINFO *info,int depth,int score,
   double nps=(double)info->nodes*1000.0/(double)(elapsed>0?elapsed:1);
   printf("depth %d seldepth %d nodes %ld nps %.0f hashfull %d time %" PRId64,
          depth,seldepth,info->nodes,nps,HashFull(pos->HashTable),elapsed);
+  printf(" tbhits %lu",info->tbHits);
   if(rank) printf(" multipv %d",rank);
   printf(" pv");
  } else if(info->POST_THINKING) printf("%d %d %" PRId64 " %ld",depth,score,(GetTimeMs()-info->starttime)/10,info->nodes);
@@ -278,13 +281,32 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
   if(multi==1) break; /* Preserve the normal single-PV search path. */
  }
  if(multi>available && available) multi=available;
- int book=EngineOptions->UseBook && bestMove!=NOMOVE && !info->restricted &&
+ int tbRoot=FALSE;
+ if(bestMove!=NOMOVE && info->GAME_MODE==UCIMODE && !PvDrawReached(pos)) {
+  S_TBROOT roots;
+  if(SyzygyRoot(pos,&roots)) {
+   int count=0;
+   for(int i=0;i<roots.count;i++)if(RootAllowed(info,roots.moves[i])) {
+    roots.moves[count]=roots.moves[i];roots.scores[count]=roots.scores[i];roots.ranks[count++]=roots.ranks[i];
+   }
+   for(int i=1;i<count;i++)for(int j=i;j>0 && roots.ranks[j]>roots.ranks[j-1];j--) {
+    int t=roots.moves[j];roots.moves[j]=roots.moves[j-1];roots.moves[j-1]=t;
+    t=roots.scores[j];roots.scores[j]=roots.scores[j-1];roots.scores[j-1]=t;
+    t=roots.ranks[j];roots.ranks[j]=roots.ranks[j-1];roots.ranks[j-1]=t;
+   }
+   if(count) {
+    tbRoot=TRUE;info->tbHits++;bestMove=roots.moves[0];bestScore=roots.scores[0];
+    for(int k=0;k<multi && k<count;k++)PrintInfo(pos,info,0,roots.scores[k],EngineOptions->MultiPV>1?k+1:0,1,&roots.moves[k],0);
+   }
+  }
+ }
+ int book=!tbRoot && EngineOptions->UseBook && bestMove!=NOMOVE && !info->restricted &&
           EngineOptions->MultiPV<=1 && !info->pondering && !info->infinite ? GetBookMove(pos):NOMOVE;
  if(book!=NOMOVE && MoveExists(pos,book)) bestMove=book;else book=NOMOVE;
  int maxDepth=info->depth;
  if(maxDepth<1) maxDepth=1;
  if(maxDepth>=MAXDEPTH) maxDepth=MAXDEPTH-1;
- if(bestMove!=NOMOVE && book==NOMOVE) for(int depth=1;depth<=maxDepth;depth++) {
+ if(!tbRoot && bestMove!=NOMOVE && book==NOMOVE) for(int depth=1;depth<=maxDepth;depth++) {
   info->seldepth=0;
   if(multi>1) {
    S_ROOTLINE lines[16];int completed=0;info->excludedCount=0;

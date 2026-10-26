@@ -93,5 +93,6 @@ int main(int argc, char *argv[]) {
 	}
 	free(pos->HashTable->pTable);
 	CleanPolyBook();
+ SyzygyFree();
 	return 0;
 }

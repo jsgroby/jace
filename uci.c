@@ -42,6 +42,15 @@ static void SetOption(char *line,S_BOARD *pos) {
  }
  if(EqualOption(name,"Clear Hash")) {ClearHashTable(pos->HashTable);return;}
  if(!value) return;
+ if(EqualOption(name,"SyzygyPath")) {
+  unsigned n=SyzygyInit(value);ClearHashTable(pos->HashTable);
+  printf("info string Syzygy available up to %u pieces\n",n);return;
+ }
+ if(EqualOption(name,"SyzygyProbeLimit")) {
+  long long limit;if(!OptionNumber(value,&limit))return;
+  if(limit<0)limit=0;if(limit>7)limit=7;
+  EngineOptions->SyzygyProbeLimit=(int)limit;ClearHashTable(pos->HashTable);return;
+ }
  long long n;
  if(EqualOption(name,"Hash") || EqualOption(name,"MultiPV") || EqualOption(name,"Move Overhead")) {
   if(!OptionNumber(value,&n)) return;
@@ -171,6 +180,7 @@ static void Identify(void) {
  printf("option name Hash type spin default 64 min 4 max %d\n",MAX_HASH);
  printf("option name Clear Hash type button\n");
  printf("option name Move Overhead type spin default 50 min 0 max 5000\n");
+ printf("option name SyzygyPath type string default <empty>\noption name SyzygyProbeLimit type spin default 5 min 0 max 7\n");
  printf("option name Book type check default true\noption name TaperedEval type check default true\noption name MultiPV type spin default 1 min 1 max 16\noption name Ponder type check default false\nuciok\n");
 }
 void Uci_Loop(S_BOARD *pos,S_SEARCHINFO *info) {

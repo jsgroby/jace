@@ -187,6 +187,7 @@ void AllInit(void) {
  EngineOptions->MultiPV = 1;
  EngineOptions->Ponder = FALSE;
  EngineOptions->MoveOverhead = 50;
+ EngineOptions->SyzygyProbeLimit = 5;
 	InitSq120To64();
 	InitBitMasks();
 	InitHashKeys();
