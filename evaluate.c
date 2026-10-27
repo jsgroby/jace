@@ -246,7 +246,7 @@ static S_PAWNSCORE PawnScore(const S_BOARD *pos,S_PAWNCACHE *cache) {
  return score;
 }
 
-int EvalPositionCached(const S_BOARD *pos,S_PAWNCACHE *cache) {
+int EvalPositionForSearch(const S_BOARD *pos,S_PAWNCACHE *cache,int tapered) {
 
 	ASSERT(CheckBoard(pos));
 
@@ -264,7 +264,7 @@ int EvalPositionCached(const S_BOARD *pos,S_PAWNCACHE *cache) {
 
  S_PAWNSCORE pawns=PawnScore(pos,cache);
  score+=pawns.base;
- if(EngineOptions->TaperedEval) {mg+=pawns.mg;eg+=pawns.eg;}
+ if(tapered) {mg+=pawns.mg;eg+=pawns.eg;}
 
 	pce = wN;	
 	for(pceNum = 0; pceNum < pos->pceNum[pce]; ++pceNum) {
@@ -353,7 +353,7 @@ int EvalPositionCached(const S_BOARD *pos,S_PAWNCACHE *cache) {
 			score -= QueenSemiOpenFile;
 		}
 	}	
- if(EngineOptions->TaperedEval) {
+ if(tapered) {
   mg += KingO[SQ64(pos->KingSq[WHITE])] - KingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
@@ -386,4 +386,7 @@ int EvalPositionCached(const S_BOARD *pos,S_PAWNCACHE *cache) {
 }
 
 /* Diagnostics need no persistent cache. Search supplies its private cache. */
+int EvalPositionCached(const S_BOARD *pos,S_PAWNCACHE *cache) {
+ return EvalPositionForSearch(pos,cache,EngineOptions->TaperedEval);
+}
 int EvalPosition(const S_BOARD *pos) { return EvalPositionCached(pos,NULL); }

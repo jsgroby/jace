@@ -1,7 +1,7 @@
 # SMP design and staged implementation
 
 Reviewed against main b6ea1f9a9556963a197c8d446e989164e7f8636d.
-Status: stage 1 and stage 2a resource isolation. JACE remains single-threaded; no Threads
+Status: stages 1 and 2 (resource isolation, option snapshots and counters). JACE remains single-threaded; no Threads
 option or parallel strength claim is introduced by this change.
 
 ## Goals and architecture
@@ -53,8 +53,19 @@ cannot resize or clear the owner's table; FreeHashTable only detaches them. This
 is a lifetime contract, not reference counting: all borrowers must be detached
 before owner resize/free. Raw board assignments used by diagnostic snapshots are
 not independent owners and must not be freed. TT reads/writes remain unsynchronized;
-this helper must not yet be used to run simultaneous searches. Search request
-snapshots and fixed-width counters remain stage 2b.
+this helper must not yet be used to run simultaneous searches.
+
+Stage 2b snapshots EngineOptions in ClearForSearch. Search, cached evaluation and
+Syzygy eligibility use that snapshot; diagnostic evaluation still uses the current
+configured option. UCI time-budget parsing remains coordinator-only before search.
+Depth, node limit, root restrictions and computed budgets already reside in the
+per-search S_SEARCHINFO. Ponder/stop fields remain mutable coordinator control
+state and must be separated from worker controls when threading is introduced.
+Nodes, node limits, tablebase hits, fail-high/null-cut statistics and TT counters
+now use uint64_t, with portable UCI formatting. The parser accepts nonnegative
+node limits through the existing signed 64-bit input range. Counters are not yet
+atomic: stage 4 will define publication and synchronization. Fathom mappings,
+the TT, input and global option updates still require serialized lifecycle use.
 
 ## Threading and memory model
 

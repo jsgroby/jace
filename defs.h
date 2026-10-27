@@ -91,10 +91,10 @@ typedef struct {
  int borrowed; /* A view may probe/store, but never resize, clear or free storage. */
 	int numEntries;
 	unsigned generation;
-	int newWrite;
-	int overWrite;
-	int hit;
-	int cut;
+	uint64_t newWrite;
+	uint64_t overWrite;
+	uint64_t hit;
+	uint64_t cut;
 } S_HASHTABLE;
 
 typedef struct {
@@ -153,6 +153,14 @@ typedef struct {
 #define PAWN_CACHE_SIZE 4096u
 typedef struct { S_PAWNENTRY entries[PAWN_CACHE_SIZE]; } S_PAWNCACHE;
 
+typedef struct {
+	int UseBook;
+	int TaperedEval;
+ int MultiPV, Ponder;
+ int MoveOverhead;
+ int SyzygyProbeLimit;
+} S_OPTIONS;
+
 /* Mutable search-only state belongs to one search instance. */
 typedef struct {
  int counterMoves[13][BRD_SQ_NUM];
@@ -163,6 +171,7 @@ typedef struct {
 typedef struct {
 
  S_SEARCHSTATE state;
+ S_OPTIONS options; /* Snapshot at search start; read-only during search. */
 	int64_t starttime;
 	int64_t stoptime;
 	int depth;
@@ -171,34 +180,28 @@ typedef struct {
 	int movestogo;
  int pondering, infinite;
  int64_t ponderBudget;
- unsigned long tbHits;
+ uint64_t tbHits;
  int adaptiveTime;
  int64_t softBudget,timeStart;
  int restricted, searchMoveCount, searchMoves[MAXPOSITIONMOVES];
  int excludedCount, excludedMoves[MAXPOSITIONMOVES];
 
-	long nodes;
-	long nodeLimit;
+	uint64_t nodes;
+	uint64_t nodeLimit;
 
 	int quit;
 	int stopped;
 
-	float fh;
-	float fhf;
-	int nullCut;
+	uint64_t fh;
+	uint64_t fhf;
+	uint64_t nullCut;
 
 	int GAME_MODE;
 	int POST_THINKING;
 
 } S_SEARCHINFO;
 
-typedef struct {
-	int UseBook;
-	int TaperedEval;
- int MultiPV, Ponder;
- int MoveOverhead;
- int SyzygyProbeLimit;
-} S_OPTIONS;
+
 
 
 /* GAME MOVE */
@@ -378,6 +381,7 @@ extern void CopyBoardForSearch(S_BOARD *dst, const S_BOARD *src);
 // evaluate.c
 extern int EvalPosition(const S_BOARD *pos);
 extern int EvalPositionCached(const S_BOARD *pos, S_PAWNCACHE *cache);
+extern int EvalPositionForSearch(const S_BOARD *pos, S_PAWNCACHE *cache, int tapered);
 extern void MirrorEvalTest(S_BOARD *pos) ;
 
 // uci.c
@@ -397,7 +401,7 @@ extern void InitPolyBook(void);
 typedef struct {int count,moves[MAXPOSITIONMOVES],scores[MAXPOSITIONMOVES],ranks[MAXPOSITIONMOVES];} S_TBROOT;
 extern unsigned SyzygyInit(const char *path);
 extern void SyzygyFree(void);
-extern int SyzygyWdl(const S_BOARD *pos,int *score);
-extern int SyzygyRoot(S_BOARD *pos,S_TBROOT *out);
+extern int SyzygyWdl(const S_BOARD *pos,int *score,int probeLimit);
+extern int SyzygyRoot(S_BOARD *pos,S_TBROOT *out,int probeLimit);
 
 #endif

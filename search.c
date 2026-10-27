@@ -33,6 +33,7 @@ static int IsRepetition(const S_BOARD *pos) {
  return FALSE;
 }
 static void ClearForSearch(S_BOARD *pos,S_SEARCHINFO *info) {
+ info->options=*EngineOptions;
  /* Keep enough real history for draw claims while reserving search stack space. */
  if(pos->hisPly>=MAXGAMEMOVES-MAXDEPTH) {
   int keep=pos->fiftyMove;if(keep>100) keep=100;if(keep>pos->hisPly) keep=pos->hisPly;
@@ -99,11 +100,11 @@ static int Quiescence(int alpha,int beta,S_BOARD *pos,S_SEARCHINFO *info) {
  if(info->stopped) return 0;
  info->nodes++;
  if(pos->ply>info->seldepth) info->seldepth=pos->ply;
- if(AtLimit(pos)) return EvalPositionCached(pos,&info->state.pawnCache);
+ if(AtLimit(pos)) return EvalPositionForSearch(pos,&info->state.pawnCache,info->options.TaperedEval);
  int inCheck=SqAttacked(pos->KingSq[pos->side],pos->side^1,pos);
  if(IsRepetition(pos) || pos->fiftyMove>=100 || DeadMaterial(pos)) return DrawScore(pos,inCheck);
  if(!inCheck) {
-  int stand=EvalPositionCached(pos,&info->state.pawnCache);
+  int stand=EvalPositionForSearch(pos,&info->state.pawnCache,info->options.TaperedEval);
   /* A stand-pat cutoff still needs an explicit stalemate check. */
   if(stand>=beta) return HasLegalMove(pos) ? beta : 0;
   if(stand>alpha) alpha=stand;
@@ -151,13 +152,13 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
  if(info->stopped) return 0;
  info->nodes++;
  if(pos->ply>info->seldepth) info->seldepth=pos->ply;
- if(AtLimit(pos)) return EvalPositionCached(pos,&info->state.pawnCache);
+ if(AtLimit(pos)) return EvalPositionForSearch(pos,&info->state.pawnCache,info->options.TaperedEval);
  int inCheck=SqAttacked(pos->KingSq[pos->side],pos->side^1,pos);
  if(pos->ply && (IsRepetition(pos) || pos->fiftyMove>=100 || DeadMaterial(pos))) return DrawScore(pos,inCheck);
  if(inCheck && depth<MAXDEPTH-1) depth++;
  if(depth>MAXDEPTH-1) depth=MAXDEPTH-1;
  int tbScore;
- if(pos->ply && !inCheck && SyzygyWdl(pos,&tbScore)) {info->tbHits++;return tbScore;}
+ if(pos->ply && !inCheck && SyzygyWdl(pos,&tbScore,info->options.SyzygyProbeLimit)) {info->tbHits++;return tbScore;}
  int score=-INFINITE,hashMove=NOMOVE;
  int hit=ProbeHashEntry(pos,&hashMove,&score,alpha,beta,depth);
  if(hit && pos->ply) {pos->HashTable->cut++;return score;}
@@ -205,14 +206,14 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
       if(prev!=NOMOVE) info->state.counterMoves[pos->pieces[TOSQ(prev)]][TOSQ(prev)]=move;
      }
     }
-    if(pos->ply || (!info->restricted && EngineOptions->MultiPV<=1)) StoreHashEntry(pos,move,beta,HFBETA,depth);
+    if(pos->ply || (!info->restricted && info->options.MultiPV<=1)) StoreHashEntry(pos,move,beta,HFBETA,depth);
     return beta;
    }
    alpha=score;
   }
  }
  if(!legal) return inCheck ? -MATE+pos->ply : 0;
- if(pos->ply || (!info->restricted && EngineOptions->MultiPV<=1)) StoreHashEntry(pos,bestMove,alpha,alpha>oldAlpha?HFEXACT:HFALPHA,depth);
+ if(pos->ply || (!info->restricted && info->options.MultiPV<=1)) StoreHashEntry(pos,bestMove,alpha,alpha>oldAlpha?HFEXACT:HFALPHA,depth);
  return alpha;
 }
 typedef struct {
@@ -240,12 +241,12 @@ static void PrintInfo(S_BOARD *pos,S_SEARCHINFO *info,int depth,int score,
   else printf("info score cp %d ",score);
   int64_t elapsed=GetTimeMs()-info->starttime;if(elapsed<0) elapsed=0;
   double nps=(double)info->nodes*1000.0/(double)(elapsed>0?elapsed:1);
-  printf("depth %d seldepth %d nodes %ld nps %.0f hashfull %d time %" PRId64,
+  printf("depth %d seldepth %d nodes %" PRIu64 " nps %.0f hashfull %d time %" PRId64,
          depth,seldepth,info->nodes,nps,HashFull(pos->HashTable),elapsed);
-  printf(" tbhits %lu",info->tbHits);
+  printf(" tbhits %" PRIu64,info->tbHits);
   if(rank) printf(" multipv %d",rank);
   printf(" pv");
- } else if(info->POST_THINKING) printf("%d %d %" PRId64 " %ld",depth,score,(GetTimeMs()-info->starttime)/10,info->nodes);
+ } else if(info->POST_THINKING) printf("%d %d %" PRId64 " %" PRIu64,depth,score,(GetTimeMs()-info->starttime)/10,info->nodes);
  if(info->GAME_MODE==UCIMODE || info->POST_THINKING) {
   for(int i=0;i<count;i++) {
    printf(" %s",PrMove(pv[i]));
@@ -269,7 +270,7 @@ static int SoftTimeReached(const S_SEARCHINFO *info,int depth,int stable,
 void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
  ClearForSearch(pos,info);info->excludedCount=0;
  int bestMove=NOMOVE,bestScore=0,ponderMove=NOMOVE,stable=0;
- int multi=info->GAME_MODE==UCIMODE?EngineOptions->MultiPV:1;
+ int multi=info->GAME_MODE==UCIMODE?info->options.MultiPV:1;
  if(multi<1) multi=1;
  if(multi>16) multi=16;
  S_MOVELIST list;GenerateAllMoves(pos,&list);
@@ -282,7 +283,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
  int tbRoot=FALSE;
  if(bestMove!=NOMOVE && info->GAME_MODE==UCIMODE && !PvDrawReached(pos)) {
   S_TBROOT roots;
-  if(SyzygyRoot(pos,&roots)) {
+  if(SyzygyRoot(pos,&roots,info->options.SyzygyProbeLimit)) {
    int count=0;
    for(int i=0;i<roots.count;i++)if(RootAllowed(info,roots.moves[i])) {
     roots.moves[count]=roots.moves[i];roots.scores[count]=roots.scores[i];roots.ranks[count++]=roots.ranks[i];
@@ -294,12 +295,12 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
    }
    if(count) {
     tbRoot=TRUE;info->tbHits++;bestMove=roots.moves[0];bestScore=roots.scores[0];
-    for(int k=0;k<multi && k<count;k++)PrintInfo(pos,info,0,roots.scores[k],EngineOptions->MultiPV>1?k+1:0,1,&roots.moves[k],0);
+    for(int k=0;k<multi && k<count;k++)PrintInfo(pos,info,0,roots.scores[k],info->options.MultiPV>1?k+1:0,1,&roots.moves[k],0);
    }
   }
  }
- int book=!tbRoot && EngineOptions->UseBook && bestMove!=NOMOVE && !info->restricted &&
-          EngineOptions->MultiPV<=1 && !info->pondering && !info->infinite ? GetBookMove(pos):NOMOVE;
+ int book=!tbRoot && info->options.UseBook && bestMove!=NOMOVE && !info->restricted &&
+          info->options.MultiPV<=1 && !info->pondering && !info->infinite ? GetBookMove(pos):NOMOVE;
  if(book!=NOMOVE && MoveExists(pos,book)) bestMove=book;else book=NOMOVE;
  int maxDepth=info->depth;
  if(maxDepth<1) maxDepth=1;
@@ -337,7 +338,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
   int pvCount=info->restricted?RootPV(pos,bestMove,depth,pos->PvArray):GetPvLine(depth,pos);
   if(pvCount==0 || pos->PvArray[0]!=bestMove) {pos->PvArray[0]=bestMove;pvCount=1;}
   ponderMove=pvCount>1?pos->PvArray[1]:NOMOVE;
-  PrintInfo(pos,info,depth,score,EngineOptions->MultiPV>1?1:0,pvCount,pos->PvArray,info->seldepth);
+  PrintInfo(pos,info,depth,score,info->options.MultiPV>1?1:0,pvCount,pos->PvArray,info->seldepth);
   if(abs(score)>ISMATE) break;
   int changed=bestMove!=previousMove,drop=previousScore-score;
   if(depth>1 && !changed && abs(score-previousScore)<=20) stable++;
@@ -348,7 +349,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
   WaitForSearchSignal(info);
   if(!info->quit) {
    printf("bestmove %s",PrMove(bestMove));
-   if(EngineOptions->Ponder && ponderMove!=NOMOVE) printf(" ponder %s",PrMove(ponderMove));
+   if(info->options.Ponder && ponderMove!=NOMOVE) printf(" ponder %s",PrMove(ponderMove));
    printf("\n");
   }
  } else if(bestMove!=NOMOVE) {

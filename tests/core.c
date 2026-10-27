@@ -124,7 +124,7 @@ static void TestQSearchEquivalence(void) {
  };
  for(size_t i=0;i<sizeof positions/sizeof positions[0];i++) {
   for(int window=0;window<5;window++) {
-   S_BOARD reference={0},candidate={0};S_SEARCHINFO ri={0},ci={0};
+   S_BOARD reference={0},candidate={0};S_SEARCHINFO ri={0},ci={0};ri.options=ci.options=*EngineOptions;
    fen(&reference,positions[i]);CompareSee(&reference);candidate=reference;
    int alpha=window==0?-INFINITE:(window-3)*200;
    int beta=window==0?INFINITE:alpha+1;
@@ -151,7 +151,7 @@ static void TestHashFull(void) {
  puts("HASH REPORTING TESTS PASS");
 }
 static void TestRestrictedRoot(void) {
- S_BOARD p={0};S_SEARCHINFO info={0};fen(&p,START_FEN);InitHashTable(p.HashTable,1);
+ S_BOARD p={0};S_SEARCHINFO info={0};info.options=*EngineOptions;fen(&p,START_FEN);InitHashTable(p.HashTable,1);
  S_SEARCHINFO other={0};
  other.state.rootBestMove=ParseMove("h2h3",&p);
  other.state.counterMoves[wP][A3]=other.state.rootBestMove;
@@ -167,7 +167,7 @@ static void TestRestrictedRoot(void) {
  int hm=NOMOVE,score=0;
  assert(!ProbeHashEntry(&p,&hm,&score,-INFINITE,INFINITE,1));
  ClearForSearch(&p,&info);info.restricted=FALSE;info.searchMoveCount=0;
- EngineOptions->MultiPV=3;info.excludedCount=1;info.excludedMoves[0]=move;
+ EngineOptions->MultiPV=3;info.options=*EngineOptions;info.excludedCount=1;info.excludedMoves[0]=move;
  (void)AlphaBeta(-INFINITE,INFINITE,1,&p,&info,TRUE);
  assert(info.state.rootBestMove!=move && info.state.rootBestMove!=NOMOVE && ProbePvMove(&p)==NOMOVE);
  EngineOptions->MultiPV=1;free(p.HashTable->pTable);
@@ -207,6 +207,25 @@ static void TestWorkerResources(void) {
  }
  EngineOptions->TaperedEval=TRUE;free(a);free(b);free(saved);
  puts("WORKER RESOURCE OWNERSHIP TESTS PASS");
+}
+static void TestSearchSnapshot(void) {
+ S_BOARD p={0};S_SEARCHINFO info={0};fen(&p,START_FEN);
+ S_OPTIONS saved=*EngineOptions;
+ ClearForSearch(&p,&info);
+ int expected=EvalPosition(&p);
+ EngineOptions->TaperedEval=!saved.TaperedEval;
+ EngineOptions->MultiPV=7;EngineOptions->SyzygyProbeLimit=0;
+ assert(info.options.TaperedEval==saved.TaperedEval);
+ assert(info.options.MultiPV==saved.MultiPV);
+ assert(info.options.SyzygyProbeLimit==saved.SyzygyProbeLimit);
+ assert(EvalPositionForSearch(&p,&info.state.pawnCache,info.options.TaperedEval)==expected);
+ *EngineOptions=saved;
+ info.nodes=UINT64_C(4294967295);info.nodeLimit=UINT64_C(4294967296);
+ (void)Quiescence(-INFINITE,INFINITE,&p,&info);
+ assert(info.nodes==UINT64_C(4294967296));
+ (void)Quiescence(-INFINITE,INFINITE,&p,&info);
+ assert(info.stopped && info.nodes==info.nodeLimit);
+ puts("SEARCH SNAPSHOT AND 64-BIT COUNTER TESTS PASS");
 }
 static void TestPassedKings(void) {
  const struct {const char *fen;int delta;} cases[]={
@@ -280,7 +299,7 @@ static void TestPawnEvaluation(void) {
  EngineOptions->TaperedEval=TRUE;puts("PAWN EVALUATION DIFFERENTIAL TESTS PASS");
 }
 static void TestDeferredOrdering(void) {
- S_SEARCHINFO info={0};
+ S_SEARCHINFO info={0};info.options=*EngineOptions;
  const char *positions[]={START_FEN,
   "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
   "7k/8/8/3pP3/8/8/K7/3r4 w - d6 0 1",
@@ -308,7 +327,7 @@ static void TestDeferredOrdering(void) {
  puts("DEFERRED ORDERING TESTS PASS");
 }
 static void TestSeeCache(void) {
- S_SEARCHINFO info={0};
+ S_SEARCHINFO info={0};info.options=*EngineOptions;
  const char *positions[]={
   "7k/8/4p3/3p4/8/8/8/K2Q4 w - - 0 1",
   "7k/8/8/3pP3/8/8/K7/3r4 w - d6 0 1",
@@ -333,7 +352,7 @@ static void TestSeeCache(void) {
  int move=ParseMove("d1d5",&p);assert(SEE(&p,move)<0);
  StoreHashEntry(&p,move,0,HFEXACT,1);
  int expected=ReferenceQuiescence(-INFINITE,INFINITE,&p,&info);
- memset(&info,0,sizeof info);assert(Quiescence(-INFINITE,INFINITE,&p,&info)==expected);
+ memset(&info,0,sizeof info);info.options=*EngineOptions;assert(Quiescence(-INFINITE,INFINITE,&p,&info)==expected);
  assert(CheckBoard(&p));free(p.HashTable->pTable);puts("SEE CACHE TESTS PASS");
 }
 static void TestPvDrawTermination(void) {
@@ -361,13 +380,13 @@ static void TestPvDrawTermination(void) {
  fen(&p,"7k/8/8/8/8/8/8/K7 w - - 0 1");assert(PvDrawReached(&p));
  /* Checkmate still overrides the fifty-move threshold in both search paths. */
  fen(&p,"7k/6Q1/5K2/8/8/8/8/8 b - - 100 51");p.ply=1;
- S_SEARCHINFO info={0};assert(Quiescence(-INFINITE,INFINITE,&p,&info)==-MATE+1);
+ S_SEARCHINFO info={0};info.options=*EngineOptions;assert(Quiescence(-INFINITE,INFINITE,&p,&info)==-MATE+1);
  assert(AlphaBeta(-INFINITE,INFINITE,2,&p,&info,TRUE)==-MATE+1);
  free(p.HashTable->pTable);puts("PV DRAW TERMINATION TESTS PASS");
 }
 
 static void TestAdaptiveTime(void) {
- S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;info.adaptiveTime=TRUE;
+ S_SEARCHINFO info={0};info.options=*EngineOptions;info.GAME_MODE=UCIMODE;info.adaptiveTime=TRUE;
  info.timeset=TRUE;info.softBudget=1000;info.timeStart=10000;info.stoptime=12000;
  assert(!SoftTimeReached(&info,4,3,FALSE,0,10749));
  assert(SoftTimeReached(&info,4,3,FALSE,0,10750));
@@ -393,8 +412,8 @@ static void TestAdaptiveTime(void) {
 int main(void) {
  ReferenceInitMvvLva();
  setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
- S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestAdaptiveTime();TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestWorkerResources();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
+ S_BOARD p={0};S_SEARCHINFO info={0};info.options=*EngineOptions;info.GAME_MODE=UCIMODE;
+ TestAdaptiveTime();TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestWorkerResources();TestSearchSnapshot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}
