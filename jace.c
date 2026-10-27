@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 	}
-	free(pos->HashTable->pTable);
+	FreeHashTable(pos->HashTable);
 	CleanPolyBook();
  SyzygyFree();
 	return 0;

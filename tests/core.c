@@ -173,6 +173,41 @@ static void TestRestrictedRoot(void) {
  EngineOptions->MultiPV=1;free(p.HashTable->pTable);
  puts("RESTRICTED ROOT TT TESTS PASS");
 }
+static void TestWorkerResources(void) {
+ S_BOARD owner={0},worker={0};fen(&owner,START_FEN);InitHashTable(owner.HashTable,1);
+ int move=ParseMove("e2e4",&owner);
+ StoreHashEntry(&owner,move,42,HFEXACT,3);
+ CopyBoardForSearch(&worker,&owner);
+ assert(worker.HashTable->borrowed && !owner.HashTable->borrowed);
+ assert(worker.HashTable->pTable==owner.HashTable->pTable);
+ assert(ProbePvMove(&worker)==move);
+ assert(MakeMove(&worker,move));
+ assert(owner.pieces[E2]==wP && owner.pieces[E4]==EMPTY && owner.hisPly==0);
+ TakeMove(&worker);assert(worker.posKey==owner.posKey);
+ ClearHashTable(worker.HashTable);InitHashTable(worker.HashTable,2);
+ assert(ProbePvMove(&owner)==move && worker.HashTable->pTable==owner.HashTable->pTable);
+ FreeHashTable(worker.HashTable);FreeHashTable(worker.HashTable);
+ assert(ProbePvMove(&owner)==move);
+ FreeHashTable(owner.HashTable);FreeHashTable(owner.HashTable);
+ assert(!owner.HashTable->pTable && !worker.HashTable->pTable);
+ S_PAWNCACHE *a=calloc(1,sizeof *a),*b=calloc(1,sizeof *b),*saved=malloc(sizeof *saved);
+ assert(a && b && saved);
+ const char *positions[]={START_FEN,"7k/8/8/3pP3/8/8/K7/8 w - - 0 1",
+  "7k/8/3p4/4P3/8/8/K7/8 b - - 0 1"};
+ for(int mode=0;mode<2;mode++) {
+  EngineOptions->TaperedEval=mode;
+  for(size_t i=0;i<sizeof positions/sizeof positions[0];i++) {
+   fen(&owner,positions[i]);int expected=EvalPosition(&owner);
+   assert(EvalPositionCached(&owner,a)==expected);
+   *saved=*a;
+   assert(EvalPositionCached(&owner,b)==expected);
+   assert(memcmp(a,saved,sizeof *a)==0);
+   assert(EvalPositionCached(&owner,a)==expected);
+  }
+ }
+ EngineOptions->TaperedEval=TRUE;free(a);free(b);free(saved);
+ puts("WORKER RESOURCE OWNERSHIP TESTS PASS");
+}
 static void TestPassedKings(void) {
  const struct {const char *fen;int delta;} cases[]={
   {"7k/8/8/4P3/4K3/8/8/8 w - - 0 1",4},
@@ -359,7 +394,7 @@ int main(void) {
  ReferenceInitMvvLva();
  setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.GAME_MODE=UCIMODE;
- TestAdaptiveTime();TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
+ TestAdaptiveTime();TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestWorkerResources();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
  U64 expected[]={197281,97862,43238,9467};int depths[]={4,3,4,3};
  for(int i=0;i<4;i++){fen(&p,fens[i]);U64 n=perft(&p,depths[i]);printf("perft %d: %llu\n",i,n);assert(n==expected[i]);int ev=EvalPosition(&p);MirrorBoard(&p);assert(EvalPosition(&p)==ev);}
@@ -400,7 +435,7 @@ int main(void) {
   fen(&p,START_FEN);
   for(int turn=0;turn<120;turn++) {
    assert(CheckBoard(&p));assert(GeneratePosKey(&p)==p.posKey);CompareSee(&p);CompareLegalProbe(&p);
-   for(int mode=0;mode<=1;mode++) {EngineOptions->TaperedEval=mode;int eval=EvalPosition(&p);assert(eval==ReferenceEvalPosition(&p));S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==eval);}
+   for(int mode=0;mode<=1;mode++) {EngineOptions->TaperedEval=mode;int eval=EvalPositionCached(&p,&info.state.pawnCache);assert(eval==ReferenceEvalPosition(&p));S_BOARD mirror=p;MirrorBoard(&mirror);assert(EvalPosition(&mirror)==eval);}
    GenerateAllMoves(&p,&list);int legal[256],n=0;
    for(int i=0;i<list.count;i++) if(MakeMove(&p,list.moves[i].move)) {TakeMove(&p);legal[n++]=list.moves[i].move;}
    if(!n) break;

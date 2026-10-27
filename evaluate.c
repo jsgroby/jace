@@ -164,15 +164,6 @@ static int PassedKingProximity(const S_BOARD *pos) {
  return score;
 }
 
-typedef struct { int base,mg,eg; } S_PAWNSCORE;
-typedef struct {
- U64 white,black;
- S_PAWNSCORE score;
- int valid;
-} S_PAWNENTRY;
-#define PAWN_CACHE_SIZE 4096u
-static S_PAWNENTRY pawnCache[PAWN_CACHE_SIZE];
-
 /* Only pawn-dependent terms belong here. King shelter, mobility, material,
    phase and side-to-move remain outside the cache. */
 static S_PAWNSCORE CalculatePawnScore(const S_BOARD *pos) {
@@ -244,9 +235,10 @@ static unsigned PawnCacheIndex(U64 white,U64 black) {
  key^=key>>31;
  return (unsigned)(key&(PAWN_CACHE_SIZE-1u));
 }
-static S_PAWNSCORE PawnScore(const S_BOARD *pos) {
+static S_PAWNSCORE PawnScore(const S_BOARD *pos,S_PAWNCACHE *cache) {
+ if(!cache) return CalculatePawnScore(pos);
  U64 white=pos->pawns[WHITE],black=pos->pawns[BLACK];
- S_PAWNENTRY *entry=&pawnCache[PawnCacheIndex(white,black)];
+ S_PAWNENTRY *entry=&cache->entries[PawnCacheIndex(white,black)];
  /* Compare both complete bitboards: index collisions cannot change scores. */
  if(entry->valid && entry->white==white && entry->black==black) return entry->score;
  S_PAWNSCORE score=CalculatePawnScore(pos);
@@ -254,7 +246,7 @@ static S_PAWNSCORE PawnScore(const S_BOARD *pos) {
  return score;
 }
 
-int EvalPosition(const S_BOARD *pos) {
+int EvalPositionCached(const S_BOARD *pos,S_PAWNCACHE *cache) {
 
 	ASSERT(CheckBoard(pos));
 
@@ -270,7 +262,7 @@ int EvalPosition(const S_BOARD *pos) {
 		return 0;
 	}
 
- S_PAWNSCORE pawns=PawnScore(pos);
+ S_PAWNSCORE pawns=PawnScore(pos,cache);
  score+=pawns.base;
  if(EngineOptions->TaperedEval) {mg+=pawns.mg;eg+=pawns.eg;}
 
@@ -392,3 +384,6 @@ int EvalPosition(const S_BOARD *pos) {
 		return -score;
 	}	
 }
+
+/* Diagnostics need no persistent cache. Search supplies its private cache. */
+int EvalPosition(const S_BOARD *pos) { return EvalPositionCached(pos,NULL); }

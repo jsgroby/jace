@@ -81,6 +81,7 @@ int GetPvLine(const int depth, S_BOARD *pos) {
 }
 
 void ClearHashTable(S_HASHTABLE *table) {
+ if(table->borrowed) return; /* Lifecycle operations belong to the owner. */
 
 	ASSERT(table != NULL);
 
@@ -96,6 +97,7 @@ void ClearHashTable(S_HASHTABLE *table) {
 }
 
 void InitHashTable(S_HASHTABLE *table, const int MB) {
+ if(table->borrowed) return;
 
 	ASSERT(table != NULL);
 
@@ -277,4 +279,22 @@ int ProbePvMove(const S_BOARD *pos) {
 	}
 
 	return NOMOVE;
+}
+
+/* Detaching a borrowed view never releases the owner's allocation. All views
+   must be idle and detached before their owner is resized or destroyed. */
+void FreeHashTable(S_HASHTABLE *table) {
+ if(!table->borrowed) free(table->pTable);
+ memset(table,0,sizeof *table);
+}
+/* Destination must be fresh (zero initialized or already detached). Copies of
+   a live board made with assignment remain diagnostic snapshots, not owners. */
+void CopyBoardForSearch(S_BOARD *dst,const S_BOARD *src) {
+ ASSERT(dst!=src);
+ ASSERT(dst->HashTable->pTable==NULL);
+ if(dst==src || dst->HashTable->pTable!=NULL) return;
+ *dst=*src;
+ dst->HashTable->borrowed=TRUE;
+ dst->HashTable->newWrite=dst->HashTable->overWrite=0;
+ dst->HashTable->hit=dst->HashTable->cut=0;
 }

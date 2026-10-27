@@ -99,11 +99,11 @@ static int Quiescence(int alpha,int beta,S_BOARD *pos,S_SEARCHINFO *info) {
  if(info->stopped) return 0;
  info->nodes++;
  if(pos->ply>info->seldepth) info->seldepth=pos->ply;
- if(AtLimit(pos)) return EvalPosition(pos);
+ if(AtLimit(pos)) return EvalPositionCached(pos,&info->state.pawnCache);
  int inCheck=SqAttacked(pos->KingSq[pos->side],pos->side^1,pos);
  if(IsRepetition(pos) || pos->fiftyMove>=100 || DeadMaterial(pos)) return DrawScore(pos,inCheck);
  if(!inCheck) {
-  int stand=EvalPosition(pos);
+  int stand=EvalPositionCached(pos,&info->state.pawnCache);
   /* A stand-pat cutoff still needs an explicit stalemate check. */
   if(stand>=beta) return HasLegalMove(pos) ? beta : 0;
   if(stand>alpha) alpha=stand;
@@ -151,7 +151,7 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
  if(info->stopped) return 0;
  info->nodes++;
  if(pos->ply>info->seldepth) info->seldepth=pos->ply;
- if(AtLimit(pos)) return EvalPosition(pos);
+ if(AtLimit(pos)) return EvalPositionCached(pos,&info->state.pawnCache);
  int inCheck=SqAttacked(pos->KingSq[pos->side],pos->side^1,pos);
  if(pos->ply && (IsRepetition(pos) || pos->fiftyMove>=100 || DeadMaterial(pos))) return DrawScore(pos,inCheck);
  if(inCheck && depth<MAXDEPTH-1) depth++;

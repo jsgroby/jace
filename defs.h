@@ -88,6 +88,7 @@ typedef struct {
 
 typedef struct {
 	S_HASHENTRY *pTable;
+ int borrowed; /* A view may probe/store, but never resize, clear or free storage. */
 	int numEntries;
 	unsigned generation;
 	int newWrite;
@@ -143,10 +144,20 @@ typedef struct {
 
 } S_BOARD;
 
+typedef struct { int base,mg,eg; } S_PAWNSCORE;
+typedef struct {
+ U64 white,black;
+ S_PAWNSCORE score;
+ int valid;
+} S_PAWNENTRY;
+#define PAWN_CACHE_SIZE 4096u
+typedef struct { S_PAWNENTRY entries[PAWN_CACHE_SIZE]; } S_PAWNCACHE;
+
 /* Mutable search-only state belongs to one search instance. */
 typedef struct {
  int counterMoves[13][BRD_SQ_NUM];
  int rootBestMove;
+ S_PAWNCACHE pawnCache;
 } S_SEARCHSTATE;
 
 typedef struct {
@@ -361,9 +372,12 @@ extern int ProbePvMove(const S_BOARD *pos);
 extern int PvDrawReached(const S_BOARD *pos);
 extern int GetPvLine(const int depth, S_BOARD *pos);
 extern void ClearHashTable(S_HASHTABLE *table);
+extern void FreeHashTable(S_HASHTABLE *table);
+extern void CopyBoardForSearch(S_BOARD *dst, const S_BOARD *src);
 
 // evaluate.c
 extern int EvalPosition(const S_BOARD *pos);
+extern int EvalPositionCached(const S_BOARD *pos, S_PAWNCACHE *cache);
 extern void MirrorEvalTest(S_BOARD *pos) ;
 
 // uci.c
