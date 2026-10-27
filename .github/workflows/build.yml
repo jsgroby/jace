@@ -33,6 +33,7 @@ jobs:
           python-version: '3.12'
       - name: Build and test
         run: |
+          python3 tests/fetch_syzygy.py
           make CFLAGS=-Werror release
           make smoke
           make test
@@ -75,6 +76,7 @@ jobs:
       - name: Build and smoke test
         shell: msys2 {0}
         run: |
+          python tests/fetch_syzygy.py
           make CFLAGS=-Werror LDFLAGS=-static release
           make LDFLAGS=-static PYTHON=python smoke
           python scripts/package.py --platform '${{ matrix.platform }}'

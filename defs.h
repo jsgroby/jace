@@ -153,6 +153,7 @@ typedef struct {
 	int movestogo;
  int pondering, infinite;
  int64_t ponderBudget;
+ unsigned long tbHits;
  int adaptiveTime;
  int64_t softBudget,timeStart;
  int restricted, searchMoveCount, searchMoves[MAXPOSITIONMOVES];
@@ -178,6 +179,7 @@ typedef struct {
 	int TaperedEval;
  int MultiPV, Ponder;
  int MoveOverhead;
+ int SyzygyProbeLimit;
 } S_OPTIONS;
 
 
@@ -368,5 +370,13 @@ extern void Console_Loop(S_BOARD *pos, S_SEARCHINFO *info);
 extern int GetBookMove(S_BOARD *board);
 extern void CleanPolyBook(void);
 extern void InitPolyBook(void);
+
+
+/* Optional Syzygy adapter; unavailable probes always fall back to search. */
+typedef struct {int count,moves[MAXPOSITIONMOVES],scores[MAXPOSITIONMOVES],ranks[MAXPOSITIONMOVES];} S_TBROOT;
+extern unsigned SyzygyInit(const char *path);
+extern void SyzygyFree(void);
+extern int SyzygyWdl(const S_BOARD *pos,int *score);
+extern int SyzygyRoot(S_BOARD *pos,S_TBROOT *out);
 
 #endif

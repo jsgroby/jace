@@ -35,3 +35,15 @@ and Git source archives (via .gitattributes). It remains in repository history
 and checkouts. Its source and redistribution terms have not been established in
 this review; the JACE MIT license is not a license grant for that book.
 Users may supply a book they have permission to use.
+
+## Fathom / Syzygy
+
+Optional tablebase probing uses Fathom by Ronald de Man, basil00 and Jon Dart,
+licensed under MIT. The unmodified pinned source and full notice are retained
+in `vendor/fathom/`; binary packages include `LICENSE-Fathom.txt`.
+Upstream: https://github.com/jdart1/Fathom
+Pinned revision: c9c6fef0dddc05d2e242c183acf5833149ab676d.
+
+Tablebase data files are separate user-supplied resources and are not included
+in JACE source or executable packages. CI downloads checksum-pinned small
+python-chess tablebase fixtures only for validation, never packaging them.

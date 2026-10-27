@@ -32,6 +32,8 @@ exe = f'jace-{a.platform}.exe' if a.platform.startswith('windows') else 'jace-ba
 shutil.copy2(root/exe, stage/exe)
 for doc in ['README.md', 'BUILDING.md', 'CI.md', 'PLAYING.md', 'CREDITS.md', 'RELEASE_NOTES.md', 'LICENSE']:
     shutil.copy2(root/doc, stage/doc)
+shutil.copy2(root/'vendor/fathom/LICENSE', stage/'LICENSE-Fathom.txt')
+shutil.copy2(root/'SYZYGY.md', stage/'SYZYGY.md')
 # Preserve licensing documents if supplied, without inventing a project license.
 for pattern in ['LICENSE*', 'COPYING*', 'NOTICE*']:
     for doc in root.glob(pattern):
