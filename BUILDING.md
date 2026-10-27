@@ -97,3 +97,11 @@ https://www.msys2.org/docs/environments/
 ## Automated builds
 
 See [CI.md](CI.md) for GitHub Actions checks, downloadable packages, and draft releases.
+# Threading-layer checks
+
+`make smoke` includes a bounded native thread lifecycle test on every supported
+platform. It does not enable parallel chess search. `make thread-test` runs that
+test alone; `make MODE=sanitize thread-test` adds ASan/UBSan on supported Unix
+toolchains. `make thread-tsan` uses ThreadSanitizer on a supported native toolchain
+(currently required by macOS ARM64 CI). Windows keeps its usual compiler,
+`LDFLAGS=-static` and `PYTHON=python` arguments. No extra Windows DLL is introduced.

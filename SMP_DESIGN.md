@@ -1,7 +1,7 @@
 # SMP design and staged implementation
 
 Reviewed against main b6ea1f9a9556963a197c8d446e989164e7f8636d.
-Status: stages 1 and 2 (resource isolation, option snapshots and counters). JACE remains single-threaded; no Threads
+Status: stages 1–3 (resource isolation, snapshots, counters and thread primitives). JACE remains single-threaded; no Threads
 option or parallel strength claim is introduced by this change.
 
 ## Goals and architecture
@@ -68,6 +68,23 @@ atomic: stage 4 will define publication and synchronization. Fathom mappings,
 the TT, input and global option updates still require serialized lifecycle use.
 
 ## Threading and memory model
+
+Stage 3 implements threads.h/threads.c: opaque heap-owned thread, mutex and
+condition handles, pthreads on Unix and _beginthreadex/native synchronization on
+Windows. Each worker reserves an explicit 8 MiB stack. Start returns NULL for
+allocation/native-start failure; join consumes the handle only on success. No
+detached threads, forced cancellation, engine worker pool or parallel search is
+introduced. Callers must publish a cooperative stop predicate, wake waiters and
+join before freeing any shared state. Unexpected synchronization errors fail fast.
+
+The standalone lifecycle test runs 100 pool lifetimes, including injected start
+failure before any worker and after 1/2/3 workers. Complete pools process 8000
+tasks across repeated epochs, including notifications with no predicate change.
+Tests join every started worker before freeing its pool. Failure injection is
+compiled only into the test binary; native allocation exhaustion is not induced.
+make smoke runs the bounded native test on all five platforms; make test adds
+ASan/UBSan, and macOS CI runs make thread-tsan for race detection. This checks the
+primitive layer and a test pool, not the future engine search lifecycle.
 
 Provide a small C wrapper around pthreads on macOS/Linux and native Windows
 threads, mutexes and condition variables. Verify it with the existing compilers,
