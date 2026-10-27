@@ -143,8 +143,15 @@ typedef struct {
 
 } S_BOARD;
 
+/* Mutable search-only state belongs to one search instance. */
+typedef struct {
+ int counterMoves[13][BRD_SQ_NUM];
+ int rootBestMove;
+} S_SEARCHSTATE;
+
 typedef struct {
 
+ S_SEARCHSTATE state;
 	int64_t starttime;
 	int64_t stoptime;
 	int depth;

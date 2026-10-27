@@ -2,8 +2,6 @@
 #include <string.h>
 #include <limits.h>
 
-static int counterMoves[13][BRD_SQ_NUM];
-static int rootBestMove;
 
 /* Sample current-search TT entries, reported in UCI permille (0..1000). */
 static int HashFull(const S_HASHTABLE *table) {
@@ -41,14 +39,14 @@ static void ClearForSearch(S_BOARD *pos,S_SEARCHINFO *info) {
   memmove(pos->history,pos->history+pos->hisPly-keep,(size_t)keep*sizeof pos->history[0]);
   pos->hisPly=keep;
  }
- memset(counterMoves,0,sizeof counterMoves);
+ memset(info->state.counterMoves,0,sizeof info->state.counterMoves);
  memset(pos->searchHistory,0,sizeof pos->searchHistory);
  memset(pos->searchKillers,0,sizeof pos->searchKillers);
  memset(pos->PvArray,0,sizeof pos->PvArray);
  pos->HashTable->overWrite=pos->HashTable->hit=pos->HashTable->cut=0;
  pos->HashTable->generation++;
  pos->ply=0;info->stopped=0;info->nodes=0;info->seldepth=0;info->fh=info->fhf=0;info->nullCut=0;
- rootBestMove=NOMOVE;info->tbHits=0;
+ info->state.rootBestMove=NOMOVE;info->tbHits=0;
 }
 static int AtLimit(const S_BOARD *pos) {
  return pos->ply>=MAXDEPTH-1 || pos->hisPly>=MAXGAMEMOVES-1;
@@ -57,8 +55,8 @@ static int DrawScore(S_BOARD *pos,int inCheck) {
  /* Checkmate takes precedence over a draw claim. */
  return inCheck && !HasLegalMove(pos) ? -MATE+pos->ply : 0;
 }
-/* Score quiet moves before searching: descendants may update counterMoves. */
-static int OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove) {
+/* Score quiet moves before searching: descendants may update info->state.counterMoves. */
+static int OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove,const S_SEARCHINFO *info) {
  int deferred=FALSE;
  if(hashMove!=NOMOVE) for(int i=0;i<list->count;i++) {
   if(list->moves[i].move==hashMove) {deferred=TRUE;break;}
@@ -66,7 +64,7 @@ static int OrderMoves(S_BOARD *pos,S_MOVELIST *list,int hashMove) {
  int reply=NOMOVE;
  if(pos->hisPly>0) {
   int prev=pos->history[pos->hisPly-1].move;
-  if(prev!=NOMOVE) reply=counterMoves[pos->pieces[TOSQ(prev)]][TOSQ(prev)];
+  if(prev!=NOMOVE) reply=info->state.counterMoves[pos->pieces[TOSQ(prev)]][TOSQ(prev)];
  }
  for(int i=0;i<list->count;i++) {
   int move=list->moves[i].move;
@@ -113,7 +111,7 @@ static int Quiescence(int alpha,int beta,S_BOARD *pos,S_SEARCHINFO *info) {
  S_MOVELIST list;
  int legal=0;
  if(inCheck) GenerateAllMoves(pos,&list); else GenerateAllCaps(pos,&list);
- int deferred=OrderMoves(pos,&list,ProbePvMove(pos));
+ int deferred=OrderMoves(pos,&list,ProbePvMove(pos),info);
  for(int i=0;i<list.count;i++) {
   if(i==1 && deferred) ScoreRemainingCaptures(pos,&list);
   PickNextMove(i,&list);
@@ -169,7 +167,7 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
   if(score>=beta && abs(score)<ISMATE) {info->nullCut++;return beta;}
  }
  S_MOVELIST list;GenerateAllMoves(pos,&list);
- int deferred=OrderMoves(pos,&list,hashMove);
+ int deferred=OrderMoves(pos,&list,hashMove,info);
  int legal=0,oldAlpha=alpha,best=-INFINITE,bestMove=NOMOVE;
  for(int i=0;i<list.count;i++) {
   if(i==1 && deferred) ScoreRemainingCaptures(pos,&list);
@@ -193,7 +191,7 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
   }
   TakeMove(pos);
   if(info->stopped) return 0;
-  if(score>best) {best=score;bestMove=move;if(!pos->ply) rootBestMove=move;}
+  if(score>best) {best=score;bestMove=move;if(!pos->ply) info->state.rootBestMove=move;}
   if(score>alpha) {
    if(score>=beta) {
     info->fh++;if(legal==1) info->fhf++;
@@ -204,7 +202,7 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
      *history+=bonus-(*history*bonus)/16384;
      if(pos->hisPly>0) {
       int prev=pos->history[pos->hisPly-1].move;
-      if(prev!=NOMOVE) counterMoves[pos->pieces[TOSQ(prev)]][TOSQ(prev)]=move;
+      if(prev!=NOMOVE) info->state.counterMoves[pos->pieces[TOSQ(prev)]][TOSQ(prev)]=move;
      }
     }
     if(pos->ply || (!info->restricted && EngineOptions->MultiPV<=1)) StoreHashEntry(pos,move,beta,HFBETA,depth);
@@ -311,12 +309,12 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
   if(multi>1) {
    S_ROOTLINE lines[16];int completed=0;info->excludedCount=0;
    for(int k=0;k<multi;k++) {
-    info->seldepth=0;rootBestMove=NOMOVE;
+    info->seldepth=0;info->state.rootBestMove=NOMOVE;
     int score=AlphaBeta(-INFINITE,INFINITE,depth,pos,info,TRUE);
-    if(info->stopped || rootBestMove==NOMOVE) break;
+    if(info->stopped || info->state.rootBestMove==NOMOVE) break;
     lines[k].score=score;lines[k].seldepth=info->seldepth;
-    lines[k].count=RootPV(pos,rootBestMove,depth,lines[k].pv);
-    info->excludedMoves[info->excludedCount++]=rootBestMove;completed++;
+    lines[k].count=RootPV(pos,info->state.rootBestMove,depth,lines[k].pv);
+    info->excludedMoves[info->excludedCount++]=info->state.rootBestMove;completed++;
    }
    info->excludedCount=0;
    if(completed!=multi) break; /* Retain the previous complete result on stop. */
@@ -334,7 +332,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
   int score=AlphaBeta(a,b,depth,pos,info,TRUE);
   if(!info->stopped && (score<=a || score>=b) && (a!=-INFINITE || b!=INFINITE)) score=AlphaBeta(-INFINITE,INFINITE,depth,pos,info,TRUE);
   if(info->stopped) break;
-  if(rootBestMove!=NOMOVE) bestMove=rootBestMove;
+  if(info->state.rootBestMove!=NOMOVE) bestMove=info->state.rootBestMove;
   bestScore=score;
   int pvCount=info->restricted?RootPV(pos,bestMove,depth,pos->PvArray):GetPvLine(depth,pos);
   if(pvCount==0 || pos->PvArray[0]!=bestMove) {pos->PvArray[0]=bestMove;pvCount=1;}
