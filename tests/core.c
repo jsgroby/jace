@@ -152,17 +152,24 @@ static void TestHashFull(void) {
 }
 static void TestRestrictedRoot(void) {
  S_BOARD p={0};S_SEARCHINFO info={0};fen(&p,START_FEN);InitHashTable(p.HashTable,1);
+ S_SEARCHINFO other={0};
+ other.state.rootBestMove=ParseMove("h2h3",&p);
+ other.state.counterMoves[wP][A3]=other.state.rootBestMove;
+ S_SEARCHSTATE saved=other.state;
+ info.state.counterMoves[wP][A3]=other.state.rootBestMove;
  ClearForSearch(&p,&info);info.restricted=TRUE;info.searchMoveCount=1;
+ assert(info.state.counterMoves[wP][A3]==NOMOVE);
  int move=ParseMove("a2a3",&p);info.searchMoves[0]=move;
  (void)AlphaBeta(-INFINITE,INFINITE,1,&p,&info,TRUE);
- assert(rootBestMove==move && ProbePvMove(&p)==NOMOVE);
+ assert(info.state.rootBestMove==move && ProbePvMove(&p)==NOMOVE);
+ assert(memcmp(&other.state,&saved,sizeof saved)==0);
  /* No restricted root score may be reused as an unrestricted bound. */
  int hm=NOMOVE,score=0;
  assert(!ProbeHashEntry(&p,&hm,&score,-INFINITE,INFINITE,1));
  ClearForSearch(&p,&info);info.restricted=FALSE;info.searchMoveCount=0;
  EngineOptions->MultiPV=3;info.excludedCount=1;info.excludedMoves[0]=move;
  (void)AlphaBeta(-INFINITE,INFINITE,1,&p,&info,TRUE);
- assert(rootBestMove!=move && rootBestMove!=NOMOVE && ProbePvMove(&p)==NOMOVE);
+ assert(info.state.rootBestMove!=move && info.state.rootBestMove!=NOMOVE && ProbePvMove(&p)==NOMOVE);
  EngineOptions->MultiPV=1;free(p.HashTable->pTable);
  puts("RESTRICTED ROOT TT TESTS PASS");
 }
@@ -238,6 +245,7 @@ static void TestPawnEvaluation(void) {
  EngineOptions->TaperedEval=TRUE;puts("PAWN EVALUATION DIFFERENTIAL TESTS PASS");
 }
 static void TestDeferredOrdering(void) {
+ S_SEARCHINFO info={0};
  const char *positions[]={START_FEN,
   "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
   "7k/8/8/3pP3/8/8/K7/3r4 w - d6 0 1",
@@ -248,9 +256,9 @@ static void TestDeferredOrdering(void) {
   for(int h=-1;h<generated.count;h++) {
    int hash=h<0?0x7fffffff:generated.moves[h].move;
    S_MOVELIST eager=generated,lazy=generated;
-   assert(!OrderMoves(&p,&eager,NOMOVE));
+   assert(!OrderMoves(&p,&eager,NOMOVE,&info));
    if(h>=0) {eager.moves[h].score=2000000;eager.moves[h].see=INT_MAX;}
-   int deferred=OrderMoves(&p,&lazy,hash);
+   int deferred=OrderMoves(&p,&lazy,hash,&info);
    assert(deferred==(h>=0));
    if(deferred) for(int i=0;i<lazy.count;i++) assert(lazy.moves[i].see==INT_MAX);
    for(int i=0;i<generated.count;i++) {
@@ -265,6 +273,7 @@ static void TestDeferredOrdering(void) {
  puts("DEFERRED ORDERING TESTS PASS");
 }
 static void TestSeeCache(void) {
+ S_SEARCHINFO info={0};
  const char *positions[]={
   "7k/8/4p3/3p4/8/8/8/K2Q4 w - - 0 1",
   "7k/8/8/3pP3/8/8/K7/3r4 w - d6 0 1",
@@ -275,7 +284,7 @@ static void TestSeeCache(void) {
   for(int useHash=0;useHash<2;useHash++) {
    GenerateAllCaps(&p,&list);
    int hash=useHash?list.moves[0].move:NOMOVE;
-   int deferred=OrderMoves(&p,&list,hash);
+   int deferred=OrderMoves(&p,&list,hash,&info);
    for(int i=0;i<list.count;i++) {
     if(i==1 && deferred) ScoreRemainingCaptures(&p,&list);
     PickNextMove(i,&list);int move=list.moves[i].move;
@@ -288,7 +297,7 @@ static void TestSeeCache(void) {
  S_BOARD p={0};fen(&p,positions[0]);InitHashTable(p.HashTable,1);
  int move=ParseMove("d1d5",&p);assert(SEE(&p,move)<0);
  StoreHashEntry(&p,move,0,HFEXACT,1);
- S_SEARCHINFO info={0};int expected=ReferenceQuiescence(-INFINITE,INFINITE,&p,&info);
+ int expected=ReferenceQuiescence(-INFINITE,INFINITE,&p,&info);
  memset(&info,0,sizeof info);assert(Quiescence(-INFINITE,INFINITE,&p,&info)==expected);
  assert(CheckBoard(&p));free(p.HashTable->pTable);puts("SEE CACHE TESTS PASS");
 }
@@ -405,7 +414,7 @@ int main(void) {
  fen(&p,START_FEN);ClearHashTable(p.HashTable);m=ParseMove("e2e4",&p);p.ply=5;StoreHashEntry(&p,m,MATE-10,HFEXACT,4);p.ply=2;int probed=0,pm=0;assert(ProbeHashEntry(&p,&pm,&probed,-INFINITE,INFINITE,4));assert(probed==MATE-7);p.ply=0;
  fen(&p,START_FEN);p.hisPly=MAXGAMEMOVES-1;ClearForSearch(&p,&info);assert(p.hisPly==0);assert(HasLegalMove(&p));
  /* A complete search must still select a legal move with no table. */
- free(p.HashTable->pTable);p.HashTable->pTable=NULL;p.HashTable->numEntries=0;info.depth=2;info.starttime=GetTimeMs();SearchPosition(&p,&info);assert(rootBestMove!=NOMOVE && MoveExists(&p,rootBestMove));
+ free(p.HashTable->pTable);p.HashTable->pTable=NULL;p.HashTable->numEntries=0;info.depth=2;info.starttime=GetTimeMs();SearchPosition(&p,&info);assert(info.state.rootBestMove!=NOMOVE && MoveExists(&p,info.state.rootBestMove));
  fen(&p,"7k/6Q1/5K2/8/8/8/8/8 b - - 0 1");SearchPosition(&p,&info);
  printf("SEE differential: %lu captures, %lu attack queries PASS\n",seeComparisons,attackComparisons);CleanPolyBook();printf("Legal probe differential: %lu positions PASS\n",legalComparisons);puts("CORE TESTS PASS");return 0;
 }

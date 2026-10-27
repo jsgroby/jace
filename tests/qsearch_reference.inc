@@ -17,7 +17,7 @@ static int ReferenceQuiescence(int alpha,int beta,S_BOARD *pos,S_SEARCHINFO *inf
  }
  S_MOVELIST list;
  if(inCheck) GenerateAllMoves(pos,&list); else GenerateAllCaps(pos,&list);
- OrderMoves(pos,&list,ProbePvMove(pos));
+ OrderMoves(pos,&list,ProbePvMove(pos),info);
  for(int i=0;i<list.count;i++) {
   PickNextMove(i,&list);
   int move=list.moves[i].move;
