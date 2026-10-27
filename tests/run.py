@@ -16,13 +16,14 @@ root=pathlib.Path(__file__).resolve().parents[1]
 os.chdir(root)
 subprocess.run(['make','release'],check=True)
 subprocess.run(['make','debug-sanitize'],check=True)
+subprocess.run(['make','MODE=sanitize','thread-test'],check=True)
 sources=[str(p) for p in root.glob('*.c') if p.name not in ('jace.c','search.c')]
-cmd=['cc','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I.','tests/core.c',*sources,'-o','build/sanitize/core-tests']
+cmd=['cc','-pthread','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I.','tests/core.c',*sources,'-o','build/sanitize/core-tests']
 subprocess.run(cmd,check=True)
 env=dict(os.environ,UBSAN_OPTIONS='halt_on_error=1',ASAN_OPTIONS='detect_leaks=0')
 subprocess.run(['build/sanitize/core-tests'],check=True,env=env,timeout=120)
 option_sources=[s for s in sources if pathlib.Path(s).name!='uci.c']
-subprocess.run(['cc','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I.','tests/uci_options.c',*option_sources,'-o','build/sanitize/uci-options'],check=True)
+subprocess.run(['cc','-pthread','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I.','tests/uci_options.c',*option_sources,'-o','build/sanitize/uci-options'],check=True)
 subprocess.run(['build/sanitize/uci-options'],check=True,env=env,timeout=30)
 class Engine:
  def __init__(self,path,cwd=None):
