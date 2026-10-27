@@ -1,7 +1,7 @@
 # SMP design and staged implementation
 
 Reviewed against main b6ea1f9a9556963a197c8d446e989164e7f8636d.
-Status: design plus stage 1 only. JACE remains single-threaded; no Threads
+Status: stages 1 and 2 (resource isolation, option snapshots and counters). JACE remains single-threaded; no Threads
 option or parallel strength claim is introduced by this change.
 
 ## Goals and architecture
@@ -26,8 +26,8 @@ parallel root exclusions. Book and root DTZ shortcuts run before helper dispatch
 | --- | --- |
 | search.c counterMoves and rootBestMove | Per-search state (stage 1) |
 | S_BOARD position, history, PV, killers and history scores | Private to each worker; preserve real repetition history when copying |
-| evaluate.c pawnCache[4096] | Private worker cache; retain evaluation semantics and explicit initialization |
-| S_BOARD.HashTable wrapper | Separate ownership from borrowed storage; shallow copies currently alias pTable and cannot be independently freed |
+| Pawn cache | S_SEARCHINFO.state.pawnCache (stage 2a); zero initialize each instance, retain across searches |
+| S_BOARD.HashTable wrapper | CopyBoardForSearch creates a borrowed view; FreeHashTable detaches it without freeing owner storage (stage 2a) |
 | TT entries in pvtable.c | Synchronized access to entire entry including key, draw context, clock, score, move, depth and generation |
 | TT counters / hashfull / PV lookup | Worker-local statistics or synchronized snapshots; all readers must obey the same protection |
 | S_SEARCHINFO limits, nodes, stop and timing | Split immutable request, worker counters/results and shared atomic cancellation |
@@ -40,6 +40,32 @@ parallel root exclusions. Book and root DTZ shortcuts run before helper dispatch
 
 Stage 1 does not make SearchPosition reentrant: the pawn cache, TT, input and
 options remain shared. A separate S_SEARCHINFO is required for each future worker.
+
+Stage 2a removes the global pawn cache. Search uses EvalPositionCached with its
+own cache; EvalPosition remains available for uncached diagnostics. Only pawn
+bitboards determine cache content, so it survives position resets and evaluation
+mode changes. Future workers must heap-allocate S_SEARCHINFO, including this cache,
+before thread dispatch. It is still stack allocated by today's single-thread main.
+
+CopyBoardForSearch requires a fresh/detached destination and makes its board,
+history and heuristics independent while borrowing TT entries. Borrowed views
+cannot resize or clear the owner's table; FreeHashTable only detaches them. This
+is a lifetime contract, not reference counting: all borrowers must be detached
+before owner resize/free. Raw board assignments used by diagnostic snapshots are
+not independent owners and must not be freed. TT reads/writes remain unsynchronized;
+this helper must not yet be used to run simultaneous searches.
+
+Stage 2b snapshots EngineOptions in ClearForSearch. Search, cached evaluation and
+Syzygy eligibility use that snapshot; diagnostic evaluation still uses the current
+configured option. UCI time-budget parsing remains coordinator-only before search.
+Depth, node limit, root restrictions and computed budgets already reside in the
+per-search S_SEARCHINFO. Ponder/stop fields remain mutable coordinator control
+state and must be separated from worker controls when threading is introduced.
+Nodes, node limits, tablebase hits, fail-high/null-cut statistics and TT counters
+now use uint64_t, with portable UCI formatting. The parser accepts nonnegative
+node limits through the existing signed 64-bit input range. Counters are not yet
+atomic: stage 4 will define publication and synchronization. Fathom mappings,
+the TT, input and global option updates still require serialized lifecycle use.
 
 ## Threading and memory model
 

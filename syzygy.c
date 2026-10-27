@@ -11,10 +11,10 @@ unsigned SyzygyInit(const char *path) {
  return largest;
 }
 void SyzygyFree(void) {tb_free();largest=0;}
-static int Eligible(const S_BOARD *p) {
- if(!largest || !EngineOptions->SyzygyProbeLimit || p->castlePerm || p->fiftyMove>=100) return FALSE;
+static int Eligible(const S_BOARD *p,int probeLimit) {
+ if(!largest || !probeLimit || p->castlePerm || p->fiftyMove>=100) return FALSE;
  int count=0;for(int piece=wP;piece<=bK;piece++)count+=p->pceNum[piece];
- return count<=EngineOptions->SyzygyProbeLimit && (unsigned)count<=largest;
+ return count<=probeLimit && (unsigned)count<=largest;
 }
 typedef struct {uint64_t white,black,kings,queens,rooks,bishops,knights,pawns;unsigned ep;} TB_POSITION;
 static TB_POSITION Convert(const S_BOARD *p) {
@@ -31,17 +31,17 @@ static TB_POSITION Convert(const S_BOARD *p) {
  t.ep=p->enPas==NO_SQ?0u:(unsigned)SQ64(p->enPas);return t;
 }
 #define TB_ARGS(t) (t).white,(t).black,(t).kings,(t).queens,(t).rooks,(t).bishops,(t).knights,(t).pawns
-int SyzygyWdl(const S_BOARD *p,int *score) {
+int SyzygyWdl(const S_BOARD *p,int *score,int probeLimit) {
  /* Fathom WDL has no rule50 context. Only exact reset positions are eligible;
     never turn a cursed win or blessed loss into a decisive search score. */
- if(!Eligible(p) || p->fiftyMove) return FALSE;
+ if(!Eligible(p,probeLimit) || p->fiftyMove) return FALSE;
  TB_POSITION t=Convert(p);
  unsigned wdl=tb_probe_wdl(TB_ARGS(t),0,0,t.ep,p->side==WHITE);
  if(wdl==TB_RESULT_FAILED)return FALSE;
  *score=wdl==TB_WIN?20000:wdl==TB_LOSS?-20000:0;return TRUE;
 }
-int SyzygyRoot(S_BOARD *p,S_TBROOT *out) {
- out->count=0;if(!Eligible(p))return FALSE;
+int SyzygyRoot(S_BOARD *p,S_TBROOT *out,int probeLimit) {
+ out->count=0;if(!Eligible(p,probeLimit))return FALSE;
  TB_POSITION t=Convert(p);struct TbRootMoves roots;
  /* Conservative repetition flag ranks wins by progress toward a zeroing move,
     even when a winning line has already appeared in the real game history. */

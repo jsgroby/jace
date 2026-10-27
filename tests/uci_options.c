@@ -76,6 +76,7 @@ int main(void) {
  Go(&pos,&info,"go infinite wtime 60000");assert(!info.adaptiveTime && !info.timeset);
  Go(&pos,&info,"go depth 5");assert(!info.adaptiveTime && !info.timeset);
  Go(&pos,&info,"go nodes 1000");assert(!info.adaptiveTime && !info.timeset);
+ Go(&pos,&info,"go nodes 4294967296");assert(info.nodeLimit==UINT64_C(4294967296));
  pos.side=BLACK;Go(&pos,&info,"go wtime 1 btime 60000 binc 1000");
  assert(info.softBudget==2750 && info.ponderBudget==5500);pos.side=WHITE;
  int move=ParseMove("e2e4",&pos);assert(MakeMove(&pos,move));pos.ply=0;

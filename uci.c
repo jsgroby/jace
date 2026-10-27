@@ -120,8 +120,7 @@ static void ParseGo(char *line,S_SEARCHINFO *info,S_BOARD *pos) {
  if(depth>=MAXDEPTH) depth=MAXDEPTH-1;
  long long nodes=Number(line,"nodes ",0);
  if(nodes<0) nodes=0;
- if(nodes>LONG_MAX) nodes=LONG_MAX;
- info->nodeLimit=(long)nodes;
+ info->nodeLimit=(uint64_t)nodes;
  info->depth=(int)depth;info->timeset=FALSE;info->starttime=GetTimeMs();info->stoptime=0;
  long long time=Number(line,pos->side==WHITE?"wtime ":"btime ",-1);
  long long inc=Number(line,pos->side==WHITE?"winc ":"binc ",0);
