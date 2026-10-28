@@ -185,6 +185,7 @@ static void InitSq120To64(void) {
 void AllInit(void) {
 	EngineOptions->TaperedEval = TRUE;
  EngineOptions->MultiPV = 1;
+ EngineOptions->Threads = 1;
  EngineOptions->Ponder = FALSE;
  EngineOptions->MoveOverhead = 50;
  EngineOptions->SyzygyProbeLimit = 5;

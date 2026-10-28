@@ -46,6 +46,12 @@ static void SetOption(char *line,S_BOARD *pos) {
   unsigned n=SyzygyInit(value);ClearHashTable(pos->HashTable);
   printf("info string Syzygy available up to %u pieces\n",n);return;
  }
+ if(EqualOption(name,"Threads")) {
+  long long count;if(!OptionNumber(value,&count))return;
+  if(count<1) count=1;
+  if(count>4) count=4;
+  EngineOptions->Threads=(int)count;return;
+ }
  if(EqualOption(name,"SyzygyProbeLimit")) {
   long long limit;if(!OptionNumber(value,&limit))return;
   if(limit<0)limit=0;
@@ -178,6 +184,7 @@ static void ParsePosition(char *line,S_BOARD *pos) {
 static void Identify(void) {
  printf("id name %s\nid author %s\n",NAME,ENGINE_AUTHOR);
  printf("option name Hash type spin default 64 min 4 max %d\n",MAX_HASH);
+ printf("option name Threads type spin default 1 min 1 max 4\n");
  printf("option name Clear Hash type button\n");
  printf("option name Move Overhead type spin default 50 min 0 max 5000\n");
  printf("option name SyzygyPath type string default <empty>\noption name SyzygyProbeLimit type spin default 5 min 0 max 7\n");

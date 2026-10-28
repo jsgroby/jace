@@ -37,7 +37,7 @@ jobs:
           make CFLAGS=-Werror release
           make smoke
           make test
-          if [ '${{ matrix.platform }}' = macos-arm64 ]; then make thread-tsan shared-tsan; fi
+          if [ '${{ matrix.platform }}' = macos-arm64 ]; then make thread-tsan shared-tsan smp-tsan; fi
           python3 scripts/package.py --platform '${{ matrix.platform }}'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

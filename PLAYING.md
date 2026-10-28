@@ -62,3 +62,16 @@ result with the corresponding `.sha256` file.
 See BUILDING.md for source builds and the portable UCI smoke test.
 
 Optional endgame tablebases: see [SYZYGY.md](SYZYGY.md). No table files are bundled.
+
+### Experimental parallel search
+
+The UCI `Threads` option accepts 1–4 (default 1). It includes the main search
+thread: 2 uses one helper and 4 uses three helpers. Hash remains the total shared
+hash allocation, not an allocation per thread. Helpers also need private search
+state and an 8 MiB stack reservation each. Use Threads=1 for the established
+baseline until parallel scaling and match validation are complete.
+
+MultiPV analysis greater than 1 and console play currently use one search thread
+regardless of this setting. Book moves and root tablebase answers do not require
+parallel search. UCI node counts include all search workers. Changes to Threads,
+Hash, or tablebase settings are applied only after ongoing workers have stopped.

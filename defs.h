@@ -158,6 +158,7 @@ typedef struct {
 	int UseBook;
 	int TaperedEval;
  int MultiPV, Ponder;
+ int Threads;
  int MoveOverhead;
  int SyzygyProbeLimit;
 } S_OPTIONS;
@@ -172,6 +173,9 @@ typedef struct {
 typedef struct {
 
  S_SEARCHSTATE state;
+ struct S_SEARCHCONTROL *control;
+ int helper;
+ uint64_t publishedNodes,publishedTb;
  S_OPTIONS options; /* Snapshot at search start; read-only during search. */
 	int64_t starttime;
 	int64_t stoptime;
@@ -378,6 +382,7 @@ extern int GetPvLine(const int depth, S_BOARD *pos);
 extern void ClearHashTable(S_HASHTABLE *table);
 extern void FreeHashTable(S_HASHTABLE *table);
 extern int EnableHashSharing(S_HASHTABLE *table);
+extern void DisableHashSharing(S_HASHTABLE *table);
 extern S_HASHENTRY ReadHashEntry(const S_HASHTABLE *table,int index);
 extern void CopyBoardForSearch(S_BOARD *dst, const S_BOARD *src);
 
