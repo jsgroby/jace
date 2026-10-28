@@ -1,7 +1,7 @@
 # SMP design and staged implementation
 
 Reviewed against main b6ea1f9a9556963a197c8d446e989164e7f8636d.
-Status: stages 1–3 (resource isolation, snapshots, counters and thread primitives). JACE remains single-threaded; no Threads
+Status: stages 1–4 (including shared-resource primitives). JACE remains single-threaded; no Threads
 option or parallel strength claim is introduced by this change.
 
 ## Goals and architecture
@@ -63,8 +63,8 @@ per-search S_SEARCHINFO. Ponder/stop fields remain mutable coordinator control
 state and must be separated from worker controls when threading is introduced.
 Nodes, node limits, tablebase hits, fail-high/null-cut statistics and TT counters
 now use uint64_t, with portable UCI formatting. The parser accepts nonnegative
-node limits through the existing signed 64-bit input range. Counters are not yet
-atomic: stage 4 will define publication and synchronization. Fathom mappings,
+node limits through the existing signed 64-bit input range. Worker-local counters
+remain non-atomic; stage 4 adds separate atomic publication. Fathom mappings,
 the TT, input and global option updates still require serialized lifecycle use.
 
 ## Threading and memory model
@@ -108,6 +108,31 @@ on long (32-bit on Windows). Allocation/thread-creation failure must unwind star
 workers and retain a usable one-thread engine, with a protocol-safe diagnostic.
 
 ## Lifecycle
+
+Stage 4 adds opt-in EnableHashSharing before board views are created. A shared
+table has 256 mutex stripes; all production probe/PV/hashfull readers copy an
+entry while locked and stores protect replacement plus the entire write. Serial
+tables keep a NULL synchronization pointer and acquire no locks. View counters
+and generation snapshots are private; only the owner advances generation before
+dispatch. Shared borrower counts prevent owner clear/resize/free until every
+view detaches. These lifecycle calls remain coordinator-only and must not race
+with creation of views. Enable sharing before the first borrowed view; preexisting
+serial views are not tracked. Failed lock allocation leaves a usable serial table.
+
+S_SEARCHCONTROL provides atomic cancellation, node publication and a replaceable
+deadline (zero means none, suitable for pondering). Initialize only while idle;
+the node limit is immutable. Stop/deadline use release/acquire; node totals use
+relaxed atomics and are not a publication mechanism for other state. This layer
+does not yet replace SearchPosition's serial control path: stage 5 wires workers
+to it, handles final node deltas and specifies batching/overshoot. The stress test
+publishes one node per iteration and checks total overshoot <= workers-1.
+
+Fathom's internal threading is enabled. Concurrent real-file WDL tests include
+cold initialization of table mappings; root probing and init/free are still idle
+coordinator operations. Shared-resource tests deliberately collide keys with
+different scores/moves/draw contexts at one TT slot and verify intact snapshots,
+draw-sensitive probes and bounded cancellation. Native tests run on all targets;
+ASan/UBSan and macOS ThreadSanitizer additionally exercise the shared path.
 
 Idle -> prepare request and root copies -> dispatch helpers -> coordinator search
 -> request stop -> join/park all helpers -> publish exactly one bestmove -> Idle.

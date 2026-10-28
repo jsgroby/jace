@@ -88,6 +88,7 @@ typedef struct {
 
 typedef struct {
 	S_HASHENTRY *pTable;
+ struct S_HASHSYNC *sync; /* Optional shared stripes, immutable during dispatch. */
  int borrowed; /* A view may probe/store, but never resize, clear or free storage. */
 	int numEntries;
 	unsigned generation;
@@ -376,6 +377,8 @@ extern int PvDrawReached(const S_BOARD *pos);
 extern int GetPvLine(const int depth, S_BOARD *pos);
 extern void ClearHashTable(S_HASHTABLE *table);
 extern void FreeHashTable(S_HASHTABLE *table);
+extern int EnableHashSharing(S_HASHTABLE *table);
+extern S_HASHENTRY ReadHashEntry(const S_HASHTABLE *table,int index);
 extern void CopyBoardForSearch(S_BOARD *dst, const S_BOARD *src);
 
 // evaluate.c
