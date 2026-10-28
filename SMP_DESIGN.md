@@ -1,8 +1,8 @@
 # SMP design and staged implementation
 
 Reviewed against main b6ea1f9a9556963a197c8d446e989164e7f8636d.
-Status: stages 1–4 (including shared-resource primitives). JACE remains single-threaded; no Threads
-option or parallel strength claim is introduced by this change.
+Status: stages 1–5. Experimental Lazy SMP is available through Threads (1–4),
+defaulting to 1. Parallel strength/scaling acceptance remains stage 6.
 
 ## Goals and architecture
 
@@ -186,3 +186,43 @@ verify default stack sizes; measure striped TT contention; choose helper depth
 diversification; quantify global node-limit overshoot; decide whether MultiPV
 stays single-worker initially. Physical-core count is a starting benchmark point,
 not a universal optimum, especially on mixed performance/efficiency cores.
+
+## Stage 5 implementation
+
+Threads counts the coordinator plus helpers, with an initial cap of four. Each
+helper owns a heap-allocated board, search state and pawn cache, and reserves an
+8 MiB stack through the portable wrapper. Helpers use iterative deepening with
+alternating initial depths 1/2, aspiration windows, and the synchronized shared
+TT; only the coordinator chooses the move. This is an experimental policy.
+
+For this first implementation, each go creates and joins its helper threads.
+There is no persistent pool or search epoch to reuse incorrectly. Measure this
+startup cost in stage 6 before adding a persistent pool. Startup failure stops,
+wakes and joins every already-created helper, detaches borrowed TT views, and
+falls back to serial search with an info string. Tests inject failure before
+worker 1 and after workers 1/2. Shared TT locks are removed after joining, so a
+subsequent Threads=1 search returns to the existing lock-free serial path.
+
+Workers publish node and tablebase-hit deltas every 256 local nodes and at exit.
+Node limits apply to the aggregate; batching can overshoot by at most 256 times
+the configured thread count. Final counters include every worker's final delta.
+Only the coordinator handles input and adaptive soft deadlines; all workers
+observe the atomic hard deadline and stop request. All helpers are joined before
+bestmove, settings changes, or the terminal ponder/infinite wait. EOF and quit
+join without emitting a bestmove. Searchmoves restrictions apply to every worker.
+
+MultiPV greater than 1 and console mode deliberately use serial search. Book,
+terminal positions, and root DTZ shortcuts do not dispatch helpers. Fathom WDL
+probes inside search may run concurrently. Threads defaults to 1, preserving the
+baseline behavior. No parallel Elo or scaling gain is claimed yet.
+
+Validation: portable actual-engine tests cover Threads 1/2/4, restricted roots,
+node limits, timed search, readiness, stop, ponderhit, completed pondering,
+Hash resize, repeated searches, MultiPV, terminal roots, quit and EOF. They run
+on all five CI platforms; macOS additionally runs actual search under TSan.
+Partial startup failures run natively, with ASan/UBSan, and with TSan. Real-table
+protocol tests run with four threads, including root shortcuts and WDL fallback.
+Local one-thread comparison against main 2d42dd3 preserves every iteration's
+score/PV/nodes and final move across 28 opening/tactical/endgame positions,
+13,235,914 nodes per pass, three passes. Timing was not isolated from other
+validation jobs and is not used as performance evidence.

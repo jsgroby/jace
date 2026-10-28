@@ -37,6 +37,13 @@ int EnableHashSharing(S_HASHTABLE *table) {
  table->sync=sync;return TRUE;
 }
 
+/* Coordinator-only, after every borrowed board has detached. */
+void DisableHashSharing(S_HASHTABLE *table) {
+ if(table->borrowed || HasBorrowers(table) || !table->sync) return;
+ for(unsigned i=0;i<HASH_STRIPES;i++) JaceMutexDestroy(table->sync->locks[i]);
+ free(table->sync);table->sync=NULL;
+}
+
 // Return the largest power of two <= n (with a safe minimum of 2).
 static int LargestPow2LEQ(int n) {
 	if (n < 2) return 2;

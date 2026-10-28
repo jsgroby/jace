@@ -26,6 +26,7 @@ def root(lines):return any('depth 0 ' in l and 'tbhits 1' in l for l in lines)
 fen='7k/8/8/8/8/8/8/KQ6 w - - 0 1'
 try:
  send('uci');lines=until('uciok');assert any('SyzygyPath' in l for l in lines);assert any('SyzygyProbeLimit' in l for l in lines)
+ option('Threads',sys.argv[3] if len(sys.argv)>3 else 1)
  option('Book','false');option('SyzygyPath',str(tables/'missing-directory'))
  lines,move=search(fen);assert move!='0000' and hits(lines)==0
  option('SyzygyPath','<empty>');lines,move=search(fen);assert hits(lines)==0

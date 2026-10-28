@@ -61,9 +61,11 @@ test:
 	$(PYTHON) tests/run.py
 smoke: release
 	$(MAKE) thread-test
-	$(MAKE) shared-test
+	$(MAKE) shared-test smp-failure-test
 	$(PYTHON) tests/portable_smoke.py ./$(PROGRAM)
+	$(PYTHON) tests/smp_smoke.py ./$(PROGRAM)
 	$(PYTHON) tests/syzygy_smoke.py ./$(PROGRAM)
+	$(PYTHON) tests/syzygy_smoke.py ./$(PROGRAM) "$(TABLES)" 4
 
 .PHONY: thread-test thread-tsan
 $(BUILDDIR)/thread-tests$(EXE): threads.c threads.h tests/threads.c
@@ -86,3 +88,16 @@ shared-test: $(BUILDDIR)/shared-tests$(EXE)
 	$(PYTHON) tests/thread_smoke.py ./$(BUILDDIR)/shared-tests$(EXE) "$(TABLES)"
 shared-tsan:
 	$(MAKE) MODE=tsan shared-test
+
+.PHONY: smp-tsan
+smp-tsan:
+	$(MAKE) MODE=tsan build-mode smp-failure-test
+	$(PYTHON) tests/smp_smoke.py ./$(BUILDROOT)/tsan/jace$(EXE)
+	$(PYTHON) tests/syzygy_smoke.py ./$(BUILDROOT)/tsan/jace$(EXE) "$(TABLES)" 4
+
+SMP_TEST_OBJECTS = $(filter-out $(BUILDDIR)/jace.o $(BUILDDIR)/search.o $(BUILDDIR)/threads.o,$(OBJS))
+.PHONY: smp-failure-test
+$(BUILDDIR)/smp-failure-tests$(EXE): $(SMP_TEST_OBJECTS) search.c threads.c threads.h tests/smp_failure.c
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -UNDEBUG -DJACE_THREAD_TESTING tests/smp_failure.c threads.c $(SMP_TEST_OBJECTS) $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
+smp-failure-test: $(BUILDDIR)/smp-failure-tests$(EXE)
+	$(PYTHON) tests/thread_smoke.py ./$<

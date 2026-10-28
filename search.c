@@ -1,6 +1,8 @@
 #include "defs.h"
 #include <string.h>
 #include <limits.h>
+#include "threads.h"
+#include "search_control.h"
 
 
 /* Sample current-search TT entries, reported in UCI permille (0..1000). */
@@ -14,9 +16,23 @@ static int HashFull(const S_HASHTABLE *table) {
  }
  return used*1000/samples;
 }
+static void PublishSearch(S_SEARCHINFO *info) {
+ if(!info->control) return;
+ SearchControlPublish(info->control,info->nodes-info->publishedNodes);
+ SearchControlTbPublish(info->control,info->tbHits-info->publishedTb);
+ info->publishedNodes=info->nodes;info->publishedTb=info->tbHits;
+}
 static void CheckUp(S_SEARCHINFO *info) {
- if(info->timeset && GetTimeMs() >= info->stoptime) info->stopped=TRUE;
- ReadInput(info);
+ if(!info->helper) {
+  if(info->timeset && GetTimeMs() >= info->stoptime) info->stopped=TRUE;
+  ReadInput(info);
+ }
+ if(info->control) {
+  PublishSearch(info);
+  if(!info->helper) SearchControlDeadline(info->control,info->timeset?info->stoptime:0);
+  if(info->stopped) SearchControlStop(info->control);
+  if(SearchControlStopped(info->control,GetTimeMs())) info->stopped=TRUE;
+ }
 }
 static void PickNextMove(int n,S_MOVELIST *list) {
  int best=n;
@@ -35,6 +51,7 @@ static int IsRepetition(const S_BOARD *pos) {
 }
 static void ClearForSearch(S_BOARD *pos,S_SEARCHINFO *info) {
  info->options=*EngineOptions;
+ info->control=NULL;info->helper=FALSE;info->publishedNodes=info->publishedTb=0;
  /* Keep enough real history for draw claims while reserving search stack space. */
  if(pos->hisPly>=MAXGAMEMOVES-MAXDEPTH) {
   int keep=pos->fiftyMove;if(keep>100) keep=100;if(keep>pos->hisPly) keep=pos->hisPly;
@@ -97,7 +114,7 @@ static void ScoreRemainingCaptures(S_BOARD *pos,S_MOVELIST *list) {
 static int Quiescence(int alpha,int beta,S_BOARD *pos,S_SEARCHINFO *info) {
  ASSERT(CheckBoard(pos));
  if((info->nodes&255)==0) CheckUp(info);
- if(info->nodeLimit>0 && info->nodes>=info->nodeLimit) info->stopped=TRUE;
+ if(!info->control && info->nodeLimit>0 && info->nodes>=info->nodeLimit) info->stopped=TRUE;
  if(info->stopped) return 0;
  info->nodes++;
  if(pos->ply>info->seldepth) info->seldepth=pos->ply;
@@ -149,7 +166,7 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
  ASSERT(CheckBoard(pos));
  if(depth<=0) return Quiescence(alpha,beta,pos,info);
  if((info->nodes&255)==0) CheckUp(info);
- if(info->nodeLimit>0 && info->nodes>=info->nodeLimit) info->stopped=TRUE;
+ if(!info->control && info->nodeLimit>0 && info->nodes>=info->nodeLimit) info->stopped=TRUE;
  if(info->stopped) return 0;
  info->nodes++;
  if(pos->ply>info->seldepth) info->seldepth=pos->ply;
@@ -217,6 +234,93 @@ static int AlphaBeta(int alpha,int beta,int depth,S_BOARD *pos,S_SEARCHINFO *inf
  if(pos->ply || (!info->restricted && info->options.MultiPV<=1)) StoreHashEntry(pos,bestMove,alpha,alpha>oldAlpha?HFEXACT:HFALPHA,depth);
  return alpha;
 }
+/* Helpers own all mutable position/search data. Only the coordinator performs
+   protocol I/O, root tablebase selection, time allocation and final reporting. */
+typedef struct {
+ S_BOARD board;
+ S_SEARCHINFO info;
+ JaceThread *thread;
+ JaceMutex *gate;
+ JaceCondition *start;
+ int *ready;
+ int id;
+} S_HELPER;
+typedef struct {
+ S_SEARCHCONTROL control;
+ S_HELPER *helpers;
+ JaceMutex *gate;
+ JaceCondition *start;
+ int ready,count;
+} S_SEARCHPOOL;
+static void HelperSearch(void *argument) {
+ S_HELPER *worker=argument;S_SEARCHINFO *info=&worker->info;
+ JaceMutexLock(worker->gate);
+ while(!*worker->ready) JaceConditionWait(worker->start,worker->gate);
+ JaceMutexUnlock(worker->gate);
+ int previous=0;
+ for(int depth=1+worker->id%2;depth<=info->depth && !info->stopped;depth++) {
+  CheckUp(info);if(info->stopped) break;
+  int alpha=-INFINITE,beta=INFINITE;
+  if(depth>2 && abs(previous)<ISMATE) {alpha=previous-50;beta=previous+50;}
+  int score=AlphaBeta(alpha,beta,depth,&worker->board,info,TRUE);
+  if(!info->stopped && (score<=alpha || score>=beta) && (alpha!=-INFINITE || beta!=INFINITE))
+   score=AlphaBeta(-INFINITE,INFINITE,depth,&worker->board,info,TRUE);
+  if(info->stopped) break;
+  previous=score;if(abs(score)>ISMATE) break;
+ }
+ PublishSearch(info);
+}
+static void ReleaseHelpers(S_SEARCHPOOL *pool) {
+ JaceMutexLock(pool->gate);pool->ready=TRUE;
+ JaceConditionBroadcast(pool->start);JaceMutexUnlock(pool->gate);
+}
+static void JoinHelpers(S_SEARCHPOOL *pool) {
+ for(int i=0;i<pool->count;i++) {
+  if(JaceThreadJoin(pool->helpers[i].thread)!=0) abort();
+  FreeHashTable(pool->helpers[i].board.HashTable);
+ }
+}
+static void FreePool(S_SEARCHPOOL *pool) {
+ JaceConditionDestroy(pool->start);JaceMutexDestroy(pool->gate);
+ free(pool->helpers);free(pool);
+}
+static S_SEARCHPOOL *StartHelpers(S_BOARD *pos,S_SEARCHINFO *info,int depth) {
+ int wanted=info->options.Threads-1;
+ if(wanted<1) return NULL;
+ if(wanted>3) wanted=3;
+ S_SEARCHPOOL *pool=calloc(1,sizeof *pool);
+ if(!pool) goto failed;
+ pool->helpers=calloc((size_t)wanted,sizeof *pool->helpers);
+ pool->gate=JaceMutexCreate();pool->start=JaceConditionCreate();
+ if(!pool->helpers || !pool->gate || !pool->start) {FreePool(pool);goto failed;}
+ if(!EnableHashSharing(pos->HashTable)) {FreePool(pool);goto failed;}
+ SearchControlInit(&pool->control,info->nodeLimit,info->timeset?info->stoptime:0);
+ for(int i=0;i<wanted;i++) {
+  S_HELPER *worker=&pool->helpers[i];CopyBoardForSearch(&worker->board,pos);
+  worker->info=*info;worker->info.control=&pool->control;worker->info.helper=TRUE;
+  worker->info.depth=depth;worker->info.timeset=FALSE;
+  worker->id=i;worker->gate=pool->gate;worker->start=pool->start;worker->ready=&pool->ready;
+  worker->thread=JaceThreadStart(HelperSearch,worker);
+  if(!worker->thread) {
+   FreeHashTable(worker->board.HashTable);SearchControlStop(&pool->control);
+   ReleaseHelpers(pool);JoinHelpers(pool);FreePool(pool);DisableHashSharing(pos->HashTable);
+   goto failed;
+  }
+  pool->count++;
+ }
+ info->control=&pool->control;
+ ReleaseHelpers(pool);return pool;
+failed:
+ printf("info string SMP startup failed; using one search thread\n");return NULL;
+}
+static void FinishHelpers(S_SEARCHPOOL *pool,S_BOARD *pos,S_SEARCHINFO *info) {
+ if(!pool) return;
+ SearchControlStop(&pool->control);JoinHelpers(pool);PublishSearch(info);
+ info->nodes=SearchControlNodes(&pool->control);info->tbHits=SearchControlTbHits(&pool->control);
+ info->control=NULL;DisableHashSharing(pos->HashTable);FreePool(pool);
+ printf("info nodes %" PRIu64 " tbhits %" PRIu64 "\n",info->nodes,info->tbHits);
+}
+
 typedef struct {
  int score, count, seldepth;
  int pv[MAXDEPTH];
@@ -241,10 +345,13 @@ static void PrintInfo(S_BOARD *pos,S_SEARCHINFO *info,int depth,int score,
   if(abs(score)>ISMATE) printf("info score mate %d ",score>0?(MATE-score+1)/2:-(MATE+score+1)/2);
   else printf("info score cp %d ",score);
   int64_t elapsed=GetTimeMs()-info->starttime;if(elapsed<0) elapsed=0;
-  double nps=(double)info->nodes*1000.0/(double)(elapsed>0?elapsed:1);
+  PublishSearch(info);
+  uint64_t nodes=info->control?SearchControlNodes(info->control):info->nodes;
+  uint64_t tbHits=info->control?SearchControlTbHits(info->control):info->tbHits;
+  double nps=(double)nodes*1000.0/(double)(elapsed>0?elapsed:1);
   printf("depth %d seldepth %d nodes %" PRIu64 " nps %.0f hashfull %d time %" PRId64,
-         depth,seldepth,info->nodes,nps,HashFull(pos->HashTable),elapsed);
-  printf(" tbhits %" PRIu64,info->tbHits);
+         depth,seldepth,nodes,nps,HashFull(pos->HashTable),elapsed);
+  printf(" tbhits %" PRIu64,tbHits);
   if(rank) printf(" multipv %d",rank);
   printf(" pv");
  } else if(info->POST_THINKING) printf("%d %d %" PRId64 " %" PRIu64,depth,score,(GetTimeMs()-info->starttime)/10,info->nodes);
@@ -306,6 +413,9 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
  int maxDepth=info->depth;
  if(maxDepth<1) maxDepth=1;
  if(maxDepth>=MAXDEPTH) maxDepth=MAXDEPTH-1;
+ S_SEARCHPOOL *pool=NULL;
+ if(!tbRoot && bestMove!=NOMOVE && book==NOMOVE && multi==1 && info->options.MultiPV==1 && info->GAME_MODE==UCIMODE)
+  pool=StartHelpers(pos,info,maxDepth);
  if(!tbRoot && bestMove!=NOMOVE && book==NOMOVE) for(int depth=1;depth<=maxDepth;depth++) {
   info->seldepth=0;
   if(multi>1) {
@@ -346,6 +456,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
   else stable=0;
   if(SoftTimeReached(info,depth,stable,changed,drop,GetTimeMs())) break;
  }
+ FinishHelpers(pool,pos,info);
  if(info->GAME_MODE==UCIMODE) {
   WaitForSearchSignal(info);
   if(!info->quit) {
