@@ -17,6 +17,7 @@ os.chdir(root)
 subprocess.run(['make','release'],check=True)
 subprocess.run(['make','debug-sanitize'],check=True)
 subprocess.run(['make','MODE=sanitize','thread-test'],check=True)
+subprocess.run(['make','MODE=sanitize','shared-test'],check=True)
 sources=[str(p) for p in root.glob('*.c') if p.name not in ('jace.c','search.c')]
 cmd=['cc','-pthread','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I.','tests/core.c',*sources,'-o','build/sanitize/core-tests']
 subprocess.run(cmd,check=True)

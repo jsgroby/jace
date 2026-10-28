@@ -28,6 +28,8 @@ FLAGS_release = -O3 -DNDEBUG
 FLAGS_debug = -O0 -g3 -DDEBUG
 FLAGS_sanitize = -O1 -g3 -DDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer
 LINK_sanitize = -fsanitize=address,undefined
+FLAGS_tsan = -O1 -g3 -DDEBUG -fsanitize=thread
+LINK_tsan = -fsanitize=thread
 SRCS = $(wildcard *.c)
 OBJS = $(patsubst %.c,$(BUILDDIR)/%.o,$(SRCS))
 .PHONY: all release debug debug-sanitize build-mode clean rebuild test smoke
@@ -59,6 +61,7 @@ test:
 	$(PYTHON) tests/run.py
 smoke: release
 	$(MAKE) thread-test
+	$(MAKE) shared-test
 	$(PYTHON) tests/portable_smoke.py ./$(PROGRAM)
 	$(PYTHON) tests/syzygy_smoke.py ./$(PROGRAM)
 
@@ -72,3 +75,14 @@ thread-tsan:
 	@mkdir -p $(BUILDROOT)/tsan
 	$(CC) $(BASE) -O1 -g -UNDEBUG -DJACE_THREAD_TESTING -fsanitize=thread threads.c tests/threads.c $(THREAD_FLAGS) -fsanitize=thread -o $(BUILDROOT)/tsan/thread-tests$(EXE)
 	$(PYTHON) tests/thread_smoke.py ./$(BUILDROOT)/tsan/thread-tests$(EXE)
+
+SHARED_OBJECTS = $(filter-out $(BUILDDIR)/jace.o,$(OBJS))
+TABLES ?= tests/syzygy-data
+.PHONY: shared-test shared-tsan
+$(BUILDDIR)/shared-tests$(EXE): $(SHARED_OBJECTS) $(wildcard *.h) tests/shared.c
+	@mkdir -p $(@D)
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -UNDEBUG tests/shared.c $(SHARED_OBJECTS) $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
+shared-test: $(BUILDDIR)/shared-tests$(EXE)
+	$(PYTHON) tests/thread_smoke.py ./$(BUILDDIR)/shared-tests$(EXE) "$(TABLES)"
+shared-tsan:
+	$(MAKE) MODE=tsan shared-test

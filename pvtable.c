@@ -4,6 +4,38 @@
 #include <stdlib.h>
 #include <string.h>
 #include "defs.h"
+#include "threads.h"
+#include <stdatomic.h>
+
+#define HASH_STRIPES 256u
+struct S_HASHSYNC { JaceMutex *locks[HASH_STRIPES]; atomic_uint borrowers; };
+static JaceMutex *HashLock(const S_HASHTABLE *table,int index) {
+ return table->sync?table->sync->locks[(unsigned)index%HASH_STRIPES]:NULL;
+}
+S_HASHENTRY ReadHashEntry(const S_HASHTABLE *table,int index) {
+ ASSERT(index>=0 && index<table->numEntries);
+ JaceMutex *lock=HashLock(table,index);if(lock) JaceMutexLock(lock);
+ S_HASHENTRY entry=table->pTable[index];
+ if(lock) JaceMutexUnlock(lock);
+ return entry;
+}
+static int HasBorrowers(const S_HASHTABLE *table) {
+ return table->sync && atomic_load_explicit(&table->sync->borrowers,memory_order_acquire)!=0;
+}
+int EnableHashSharing(S_HASHTABLE *table) {
+ if(table->borrowed || !table->pTable) return FALSE;
+ if(table->sync) return TRUE;
+ struct S_HASHSYNC *sync=calloc(1,sizeof *sync);if(!sync) return FALSE;
+ atomic_init(&sync->borrowers,0);
+ for(unsigned i=0;i<HASH_STRIPES;i++) {
+  sync->locks[i]=JaceMutexCreate();
+  if(!sync->locks[i]) {
+   for(unsigned j=0;j<i;j++) JaceMutexDestroy(sync->locks[j]);
+   free(sync);return FALSE;
+  }
+ }
+ table->sync=sync;return TRUE;
+}
 
 // Return the largest power of two <= n (with a safe minimum of 2).
 static int LargestPow2LEQ(int n) {
@@ -81,7 +113,7 @@ int GetPvLine(const int depth, S_BOARD *pos) {
 }
 
 void ClearHashTable(S_HASHTABLE *table) {
- if(table->borrowed) return; /* Lifecycle operations belong to the owner. */
+ if(table->borrowed || HasBorrowers(table)) return; /* Lifecycle operations belong to the owner. */
 
 	ASSERT(table != NULL);
 
@@ -97,15 +129,11 @@ void ClearHashTable(S_HASHTABLE *table) {
 }
 
 void InitHashTable(S_HASHTABLE *table, const int MB) {
- if(table->borrowed) return;
+ if(table->borrowed || HasBorrowers(table)) return;
 
 	ASSERT(table != NULL);
 
-	// free any existing table
-	if (table->pTable != NULL) {
-		free(table->pTable);
-		table->pTable = NULL;
-	}
+ FreeHashTable(table);
 
 	table->numEntries = 0;
 	table->generation = 0;
@@ -167,7 +195,8 @@ int ProbeHashEntry(S_BOARD *pos, int *move, int *score, int alpha, int beta, int
 	int index = HashIndex(pos);
 	ASSERT(index >= 0 && index <= pos->HashTable->numEntries - 1);
 
-	const S_HASHENTRY *entry = &pos->HashTable->pTable[index];
+	S_HASHENTRY snapshot=ReadHashEntry(pos->HashTable,index);
+ const S_HASHENTRY *entry=&snapshot;
 
 	if (entry->posKey == pos->posKey) {
 
@@ -230,15 +259,17 @@ void StoreHashEntry(S_BOARD *pos, const int move, int score, const int flags, co
 	int index = HashIndex(pos);
 	ASSERT(index >= 0 && index <= pos->HashTable->numEntries - 1);
 
+ U64 context=DrawContext(pos);
+ JaceMutex *lock=HashLock(pos->HashTable,index);if(lock) JaceMutexLock(lock);
 	S_HASHENTRY *entry = &pos->HashTable->pTable[index];
-    if(entry->posKey==pos->posKey && entry->generation==pos->HashTable->generation && entry->depth>depth && flags!=HFEXACT && entry->fiftyMove==pos->fiftyMove && entry->context==DrawContext(pos)) return;
+    if(entry->posKey==pos->posKey && entry->generation==pos->HashTable->generation && entry->depth>depth && flags!=HFEXACT && entry->fiftyMove==pos->fiftyMove && entry->context==context) goto done;
 
 	// Simple replacement policy:
 	// - always replace if same key (update)
 	// - otherwise, prefer deeper entries (keep higher depth info)
 	if (entry->posKey != 0ULL && entry->posKey != pos->posKey) {
 		if (entry->generation == pos->HashTable->generation && entry->depth > depth) {
-			return; // keep the deeper entry
+			goto done; // keep the deeper entry
 		}
 	}
 
@@ -253,13 +284,15 @@ void StoreHashEntry(S_BOARD *pos, const int move, int score, const int flags, co
 	else if (score < -ISMATE) score -= pos->ply;
 
 	entry->fiftyMove = pos->fiftyMove;
-	entry->context = DrawContext(pos);
+	entry->context = context;
 	entry->generation = pos->HashTable->generation;
 	entry->move = move;
 	entry->posKey = pos->posKey;
 	entry->flags = flags;
 	entry->score = score;
 	entry->depth = depth;
+done:
+ if(lock) JaceMutexUnlock(lock);
 }
 
 int ProbePvMove(const S_BOARD *pos) {
@@ -274,8 +307,9 @@ int ProbePvMove(const S_BOARD *pos) {
 	int index = (int)(pos->posKey & (U64)(pos->HashTable->numEntries - 1));
 	ASSERT(index >= 0 && index <= pos->HashTable->numEntries - 1);
 
-	if (pos->HashTable->pTable[index].posKey == pos->posKey) {
-		return pos->HashTable->pTable[index].move;
+	S_HASHENTRY entry=ReadHashEntry(pos->HashTable,index);
+	if (entry.posKey == pos->posKey) {
+		return entry.move;
 	}
 
 	return NOMOVE;
@@ -284,7 +318,16 @@ int ProbePvMove(const S_BOARD *pos) {
 /* Detaching a borrowed view never releases the owner's allocation. All views
    must be idle and detached before their owner is resized or destroyed. */
 void FreeHashTable(S_HASHTABLE *table) {
- if(!table->borrowed) free(table->pTable);
+ if(table->borrowed) {
+  if(table->sync) atomic_fetch_sub_explicit(&table->sync->borrowers,1,memory_order_release);
+ } else {
+  if(HasBorrowers(table)) return;
+  if(table->sync) {
+   for(unsigned i=0;i<HASH_STRIPES;i++) JaceMutexDestroy(table->sync->locks[i]);
+   free(table->sync);
+  }
+  free(table->pTable);
+ }
  memset(table,0,sizeof *table);
 }
 /* Destination must be fresh (zero initialized or already detached). Copies of
@@ -295,6 +338,7 @@ void CopyBoardForSearch(S_BOARD *dst,const S_BOARD *src) {
  if(dst==src || dst->HashTable->pTable!=NULL) return;
  *dst=*src;
  dst->HashTable->borrowed=TRUE;
+ if(dst->HashTable->sync) atomic_fetch_add_explicit(&dst->HashTable->sync->borrowers,1,memory_order_relaxed);
  dst->HashTable->newWrite=dst->HashTable->overWrite=0;
  dst->HashTable->hit=dst->HashTable->cut=0;
 }

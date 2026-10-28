@@ -105,3 +105,10 @@ test alone; `make MODE=sanitize thread-test` adds ASan/UBSan on supported Unix
 toolchains. `make thread-tsan` uses ThreadSanitizer on a supported native toolchain
 (currently required by macOS ARM64 CI). Windows keeps its usual compiler,
 `LDFLAGS=-static` and `PYTHON=python` arguments. No extra Windows DLL is introduced.
+
+`make shared-test` stress-tests shared hash entries and atomic search controls.
+Pass `TABLES=/path/to/syzygy` to include concurrent real WDL probes; CI uses its
+downloaded fixtures automatically. `make shared-tsan` runs this test with the
+thread race detector on supported toolchains. `make smoke` includes the native
+shared test and `make test` includes the ASan/UBSan variant. These are standalone
+stress tests; they do not enable multi-worker chess search.

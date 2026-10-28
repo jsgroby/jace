@@ -8,7 +8,8 @@ static int HashFull(const S_HASHTABLE *table) {
  if(!table->pTable || table->numEntries<=0) return 0;
  int samples=table->numEntries<1000?table->numEntries:1000,used=0;
  for(int i=0;i<samples;i++) {
-  const S_HASHENTRY *entry=&table->pTable[i];
+  S_HASHENTRY snapshot=ReadHashEntry(table,i);
+  const S_HASHENTRY *entry=&snapshot;
   if(entry->depth>0 && entry->generation==table->generation) used++;
  }
  return used*1000/samples;
@@ -45,7 +46,7 @@ static void ClearForSearch(S_BOARD *pos,S_SEARCHINFO *info) {
  memset(pos->searchKillers,0,sizeof pos->searchKillers);
  memset(pos->PvArray,0,sizeof pos->PvArray);
  pos->HashTable->overWrite=pos->HashTable->hit=pos->HashTable->cut=0;
- pos->HashTable->generation++;
+ if(!pos->HashTable->borrowed) pos->HashTable->generation++;
  pos->ply=0;info->stopped=0;info->nodes=0;info->seldepth=0;info->fh=info->fhf=0;info->nullCut=0;
  info->state.rootBestMove=NOMOVE;info->tbHits=0;
 }

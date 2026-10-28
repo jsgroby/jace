@@ -2,8 +2,9 @@
 #include <string.h>
 #include "vendor/fathom/tbprobe.h"
 
-/* This adapter owns Fathom. JACE is single-threaded; probe/init/free must remain
-   serialized if SMP is added. Direct probe returns bypass TT insertion; parent search bounds use normal TT rules. */
+/* This adapter owns Fathom. WDL probes may run concurrently after initialization.
+   Init/free and root probes require all workers idle. Direct probe returns bypass
+   TT insertion; parent search bounds use normal TT rules. */
 static unsigned largest;
 unsigned SyzygyInit(const char *path) {
  largest=0;

@@ -51,8 +51,9 @@ to ordinary search. Table files are read locally, never queried online.
 Completed tablebase results still wait for `ponderhit`/`stop` during pondering
 and for `stop` during infinite analysis. Root results need not consume the full
 `movetime` budget. Cold disk reads can add latency, so use local storage for
-clock-sensitive play. JACE remains single-threaded; the Fathom build is configured
-accordingly and must be revisited before SMP.
+clock-sensitive play. JACE still searches single-threaded. Fathom's internal
+threading support is enabled in preparation for SMP; initialization, unloading
+and root probes must remain serialized with workers idle.
 
 ## Validation
 
