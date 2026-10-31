@@ -58,13 +58,13 @@ rebuild:
 	$(MAKE) clean
 	$(MAKE) all
 test:
-	$(PYTHON) tests/run.py
+	$(PYTHON) tests/run.py "$(TABLES)"
 smoke: release
 	$(MAKE) thread-test
 	$(MAKE) shared-test smp-failure-test
 	$(PYTHON) tests/portable_smoke.py ./$(PROGRAM)
 	$(PYTHON) tests/smp_smoke.py ./$(PROGRAM)
-	$(PYTHON) tests/syzygy_smoke.py ./$(PROGRAM)
+	$(PYTHON) tests/syzygy_smoke.py ./$(PROGRAM) "$(TABLES)"
 	$(PYTHON) tests/syzygy_smoke.py ./$(PROGRAM) "$(TABLES)" 4
 
 .PHONY: thread-test thread-tsan
@@ -79,7 +79,7 @@ thread-tsan:
 	$(PYTHON) tests/thread_smoke.py ./$(BUILDROOT)/tsan/thread-tests$(EXE)
 
 SHARED_OBJECTS = $(filter-out $(BUILDDIR)/jace.o,$(OBJS))
-TABLES ?= tests/syzygy-data
+TABLES ?= $(shell $(PYTHON) tests/table_path.py)
 .PHONY: shared-test shared-tsan
 $(BUILDDIR)/shared-tests$(EXE): $(SHARED_OBJECTS) $(wildcard *.h) tests/shared.c
 	@mkdir -p $(@D)

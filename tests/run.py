@@ -14,10 +14,11 @@ if sys.platform.startswith(("win32", "cygwin", "msys")):
 import os, pathlib, subprocess, time, select, struct, tempfile, re
 root=pathlib.Path(__file__).resolve().parents[1]
 os.chdir(root)
+tables=sys.argv[1] if len(sys.argv)>1 else subprocess.check_output([sys.executable,str(root/'tests/table_path.py')],text=True).strip()
 subprocess.run(['make','release'],check=True)
 subprocess.run(['make','debug-sanitize'],check=True)
 subprocess.run(['make','MODE=sanitize','thread-test'],check=True)
-subprocess.run(['make','MODE=sanitize','shared-test','smp-failure-test'],check=True)
+subprocess.run(['make','MODE=sanitize','shared-test','smp-failure-test','TABLES='+tables],check=True)
 sources=[str(p) for p in root.glob('*.c') if p.name not in ('jace.c','search.c')]
 cmd=['cc','-pthread','-std=c11','-D_POSIX_C_SOURCE=200809L','-D_DARWIN_C_SOURCE','-DDEBUG','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I.','tests/core.c',*sources,'-o','build/sanitize/core-tests']
 subprocess.run(cmd,check=True)
@@ -92,7 +93,7 @@ for mode in ('release','sanitize'):
  subprocess.run([sys.executable,'tests/perft_input.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
  subprocess.run([sys.executable,'tests/portable_smoke.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
 for mode in ('release','sanitize'):
- subprocess.run([sys.executable,'tests/syzygy_smoke.py',str(root/'build'/mode/'jace')],check=True,env=env,timeout=120)
+ subprocess.run([sys.executable,'tests/syzygy_smoke.py',str(root/'build'/mode/'jace'),tables],check=True,env=env,timeout=120)
 # Leave the convenient executable as the release build.
 subprocess.run(['make','release'],check=True)
 print('ALL TESTS PASS')
