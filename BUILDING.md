@@ -112,3 +112,17 @@ downloaded fixtures automatically. `make shared-tsan` runs this test with the
 thread race detector on supported toolchains. `make smoke` includes the native
 shared test and `make test` includes the ASan/UBSan variant. These are standalone
 stress tests; they do not enable multi-worker chess search.
+
+### Automatic tablebase test directory
+
+`make smoke`, `make test`, `make shared-test`, and `make smp-tsan` select
+`tests/syzygy-data` when it contains KQvK.rtbw (including CI fixtures). Otherwise
+they try `~/Development/Chess/Tablebases/syzygy`. This includes the existing
+macOS tablebase installation without putting a personal username in the build.
+Both serial and four-thread smoke tests receive the selected directory.
+
+Override discovery on any platform with `make smoke TABLES="/path/to/syzygy"`
+(or the same TABLES argument for the other targets). Paths containing spaces
+are supported. No tables are downloaded or bundled by this selection. If no
+tables are found, missing/disabled checks run and real-table checks explicitly
+report NOT RUN. This test setting does not configure the engine's UCI SyzygyPath.
