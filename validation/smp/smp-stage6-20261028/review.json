@@ -1,0 +1,22 @@
+{
+  "games": 256,
+  "results": {
+    "loss": 54,
+    "draw": 126,
+    "win": 76
+  },
+  "points": 139.0,
+  "terminations": {
+    "normal": 256
+  },
+  "legal_plies": 36005,
+  "pairs": {
+    "0.5": 23,
+    "1.5": 35,
+    "0.0": 6,
+    "1.0": 53,
+    "2.0": 11
+  },
+  "all_pairs_verified": true,
+  "all_final_results_verified": true
+}

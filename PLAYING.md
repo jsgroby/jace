@@ -2,7 +2,7 @@
 
 Download and extract the archive for your operating system and CPU from
 https://github.com/jsgroby/jace/releases. Install the executable as a **UCI**
-engine in your chess GUI. The executable reports `Jace 1.4`, author
+engine in your chess GUI. The executable reports `Jace 1.5`, author
 `Jeffrey S. Groby`. Select it in the GUI to play or analyze.
 
 ## Platform requirements
@@ -31,7 +31,7 @@ Keep the extracted Unix executable permission; if necessary use
   use, supply a permitted Polyglot book named `performance.bin` in the engine's
   working directory and enable Book. The working directory is GUI-dependent.
 
-JACE is single-threaded and has no Threads option. No NNUE file or tablebase
+Threads accepts 1–4; see the parallel-search guidance below. No NNUE file or tablebase
 is required. GUI-managed books are independent of JACE's Book option.
 
 ## UCI conveniences
@@ -63,13 +63,14 @@ See BUILDING.md for source builds and the portable UCI smoke test.
 
 Optional endgame tablebases: see [SYZYGY.md](SYZYGY.md). No table files are bundled.
 
-### Experimental parallel search
+### Parallel search
 
 The UCI `Threads` option accepts 1–4 (default 1). It includes the main search
 thread: 2 uses one helper and 4 uses three helpers. Hash remains the total shared
 hash allocation, not an allocation per thread. Helpers also need private search
-state and an 8 MiB stack reservation each. Use Threads=1 for the established
-baseline until parallel scaling and match validation are complete.
+state and an 8 MiB stack reservation each. The default remains 1. Paired matches on the tested Mac confirmed gains from
+2 over 1 and 4 over 2 at 60+1; use 4 when adequate CPU capacity is available.
+Other hardware/time controls may differ; see validation/smp for evidence.
 
 MultiPV analysis greater than 1 and console play currently use one search thread
 regardless of this setting. Book moves and root tablebase answers do not require

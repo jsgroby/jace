@@ -1,6 +1,6 @@
-# JACE 1.4
+# JACE 1.5 (release candidate)
 
-JACE is a single-threaded UCI chess engine developed by Jeffrey S. Groby,
+JACE is a UCI chess engine developed by Jeffrey S. Groby,
 based on Bluefever Software's VICE tutorial engine. It needs a chess GUI
 (such as HIARCS Chess Explorer) to provide a graphical board.
 
@@ -33,9 +33,12 @@ For automated packages and the release process, see [CI.md](CI.md).
 - Early-exit legal-move probing for terminal-position checks.
 - UCI `searchmoves`, MultiPV (1–16), pondering, adjustable hash,
   Clear Hash, and Move Overhead.
+- Syzygy WDL/DTZ tablebases through Fathom; see [SYZYGY.md](SYZYGY.md).
+- Adaptive time management and Lazy SMP shared-hash search.
 - Optional Polyglot opening books; console mode and perft diagnostics.
 
-JACE searches on one CPU thread. XBoard/WinBoard is not supported.
+JACE supports Lazy SMP with 1–4 search threads (default 1). MultiPV greater
+than 1 and console mode currently use serial search. XBoard/WinBoard is not supported.
 Startup is silent; send `uci` for identification and options, or `jace` to
 enter interactive console mode. Console and perft diagnostics remain available.
 Actual initialization failures are still reported on standard error.
@@ -44,7 +47,7 @@ TaperedEval true, and equal hash allocations for both engines.
 
 ## Release and validation
 
-See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the 1.4 release summary and
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the 1.5 release preparation summary and
 [validation/](validation/) for regression and performance evidence.
 This release packages the accepted baseline; it does not introduce a new
 search or evaluation experiment. Benchmark speedups and short self-play

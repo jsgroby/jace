@@ -1,0 +1,19 @@
+{
+  "commit": "6f6f71b3738d18aab3ef459f04680505d0375f3b",
+  "binary_sha256": "81a8e4e6042b86d1ae1ea80f568fea0c4cdf7db344f3aec2fdfbcf88bfaf7f08",
+  "games": 256,
+  "threads": [
+    4,
+    2
+  ],
+  "hash_mb": 64,
+  "tc": "60+1",
+  "concurrency": 1,
+  "platform": "macOS ARM64",
+  "status": "completed",
+  "benchmark_legal_results": 252,
+  "opening_sha256": "a25a5ebfb58f3d2953a935cc3b50fd0603e24dfcbe111101bdcd3acad89755a0",
+  "purpose": "Threads 4 versus Threads 2 pilot",
+  "current_main": "5d2458739fc3c71822818bbdc990c4b11bd73b7d",
+  "binary_note": "Same validated executable as prior matches; subsequent PR28 only changes test directives/documentation."
+}
