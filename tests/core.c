@@ -93,6 +93,13 @@ static void CompareSee(S_BOARD *p) {
  memcpy(b.pieces,p->pieces,sizeof b.pieces);memcpy(b.king,p->KingSq,sizeof b.king);
  memcpy(ref.pieces,p->pieces,sizeof ref.pieces);memcpy(ref.king,p->KingSq,sizeof ref.king);
  for(int sq=0;sq<64;sq++) for(int side=0;side<2;side++) {
+  U64 expected=0;
+  for(int from=0;from<64;from++) {
+   int piece=ref.pieces[SQ120(from)];
+   if(piece!=EMPTY && PieceCol[piece]==side && ReferenceAttacks(&ref,SQ120(from),SQ120(sq)))
+    SETBIT(expected,from);
+  }
+  assert(Attackers(&b,SQ120(sq),side)==expected);
   assert(Attacked(&b,SQ120(sq),side)==ReferenceAttacked(&ref,SQ120(sq),side));attackComparisons++;
  }
  S_MOVELIST list;GenerateAllCaps(p,&list);
