@@ -318,7 +318,6 @@ static void FinishHelpers(S_SEARCHPOOL *pool,S_BOARD *pos,S_SEARCHINFO *info) {
  SearchControlStop(&pool->control);JoinHelpers(pool);PublishSearch(info);
  info->nodes=SearchControlNodes(&pool->control);info->tbHits=SearchControlTbHits(&pool->control);
  info->control=NULL;DisableHashSharing(pos->HashTable);FreePool(pool);
- printf("info nodes %" PRIu64 " tbhits %" PRIu64 "\n",info->nodes,info->tbHits);
 }
 
 typedef struct {
@@ -460,6 +459,7 @@ void SearchPosition(S_BOARD *pos,S_SEARCHINFO *info) {
  if(info->GAME_MODE==UCIMODE) {
   WaitForSearchSignal(info);
   if(!info->quit) {
+   printf("info nodes %" PRIu64 " tbhits %" PRIu64 "\n",info->nodes,info->tbHits);
    printf("bestmove %s",PrMove(bestMove));
    if(info->options.Ponder && ponderMove!=NOMOVE) printf(" ponder %s",PrMove(ponderMove));
    printf("\n");

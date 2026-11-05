@@ -1,44 +1,42 @@
-# JACE 1.4
+# JACE 1.5 — release preparation
 
-This release gives the accepted main baseline a distinct UCI version and
-packages it for macOS ARM64, Linux ARM64/x64, and Windows ARM64/x64.
-Author: Jeffrey S. Groby. Source foundation: Bluefever Software's VICE.
-License: MIT, with upstream notice retained.
+Author: Jeffrey S. Groby. MIT licensed, based on Bluefever Software's VICE.
+This candidate adds documented parallel-search and tablebase support to the
+published 1.4 baseline. It is not a published release yet.
 
-## Changes included in the baseline
+## Changes since 1.4
 
-- Cached SEE work, deferred capture SEE, and pawn evaluation caching.
-- Early-exit legal-move probing; the accepted benchmark showed about 8–10%
-  less elapsed search time on the measured suites, with matching search results.
-- Improved UCI control handling, Clear Hash and Move Overhead options.
-- searchmoves, MultiPV and pondering support retained.
-- Portable builds, Windows input handling fixes, architecture-specific Windows
-  executable names, automated regression checks and packaged builds.
-- XBoard removed; UCI, console mode and perft retained.
+- Lazy SMP with Threads 1–4, default 1; private search state and synchronized TT.
+- Syzygy WDL/DTZ support through Fathom. Tables are external and optional.
+- Adaptive time management and passed-pawn king-proximity evaluation.
+- Quiet startup while retaining console and perft diagnostics.
+- Automatic discovery of local Syzygy test files, with explicit TABLES override.
+- Consistent final UCI node/tbhits totals immediately before bestmove for both
+  serial and parallel search, including work from interrupted iterations.
 
-The release-preparation changes themselves affect version identification,
-documentation and packaging, not search or evaluation.
+Only the final reporting placement and version identification change engine code
+in this release-preparation PR; search decisions and default Threads stay intact.
+MultiPV >1 and console mode use one search thread. Hash is shared across workers.
 
 ## Evidence and limits
 
-The last accepted legal-probe match completed 256 paired games at 60+1 with
-77 wins, 112 draws and 67 losses: 51.95%, estimated +13.58 ±30.12 Elo.
-That interval does not establish a playing-strength gain. The merge was
-supported by repeatable speed measurements and correctness checks.
-See validation/legal-probe and other validation reports for details.
-No official CCRL rating is claimed for JACE 1.4.
-
-Before publishing, all five platform jobs must pass on the release tag.
-Windows runs portable smoke tests; Unix also runs ASan/UBSan regressions.
-Packages include instructions, credits, license, build provenance and checksums.
-No opening book is bundled in binary packages or Git source archives. macOS is unsigned; Linux builds target Ubuntu 24.04.
+The independent 512-game confirmations at 60+1, 64MB hash on macOS ARM64 gave
+Threads 2 vs 1: 185 wins, 74 losses, 253 draws (60.84%, +76.54 ±22.05 Elo);
+Threads 4 vs 2: 172 wins, 101 losses, 239 draws (56.93%, +48.49 ±21.44 Elo).
+All games, moves and color-reversed pairs were verified. See validation/smp.
+Use Threads=4 on the tested Mac with available CPU capacity. Default 1 remains
+portable. Physical x64 scaling and other time controls remain to be measured.
+No absolute CCRL rating or universal speedup is claimed.
 
 ## Publication checklist
 
-1. Review and merge the release-preparation PR after its CI checks pass.
-2. Create the immutable tag v1.4 on the approved merge commit.
-3. Wait for all five tag builds and the aggregate CI check to pass.
-4. Inspect the draft release assets and test extracted packages.
-5. Publish the draft release, then send its stable link to interested testers.
+1. Review and merge this preparation PR after all five platform jobs and CI pass.
+2. Tag the approved merge commit v1.5 when authorized.
+3. Wait for all five tag builds and aggregate CI; inspect the draft release.
+4. Verify five platform archives, checksums, version/provenance and extracted
+   executable smoke tests before publishing with approval.
 
-CCRL testing is voluntary; a release does not guarantee inclusion or a rating.
+Targets: macOS ARM64, Linux ARM64/x64, Windows ARM64/x64. Packages include
+instructions, MIT notices (including Fathom), provenance and checksums. No books
+or tablebase files are bundled. macOS binaries are unsigned; Linux targets
+Ubuntu 24.04. GUI SyzygyPath is separate from build-test table discovery.

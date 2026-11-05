@@ -1,0 +1,9 @@
+Results of Jace Threads 2 vs Jace Threads 1 (60+1, 2t - 1t, 64MB, openings.pgn):
+Elo: 76.54 +/- 22.05, nElo: 108.04 +/- 30.09
+LOS: 100.00 %, DrawRatio: 33.20 %, PairsRatio: 2.72
+Games: 512, Wins: 185, Losses: 74, Draws: 253, Points: 311.5 (60.84 %)
+Ptnml(0-2): [5, 41, 85, 88, 37], WL/DD Ratio: 0.37
+--------------------------------------------------
+Finished match
+Total Time: 34:16:31 (hours:minutes:seconds)
+

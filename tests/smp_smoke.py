@@ -28,6 +28,10 @@ def ready():
 def search(command, move=None):
     send('position startpos'); send(command); rows=until('bestmove ')
     assert rows[-1].split()[1] != '0000', rows
+    assert rows[-2].startswith('info nodes '), rows
+    assert sum(x.startswith('info nodes ') for x in rows)==1, rows
+    total=int(rows[-2].split()[2])
+    assert all(int(x.split()[x.split().index('nodes')+1])<=total for x in rows if x.startswith('info score ')), rows
     if move: assert rows[-1].split()[1] == move, rows
     ready() # catches a duplicate bestmove before the readiness fence
     return rows
@@ -38,9 +42,8 @@ try:
         send(f'setoption name Threads value {n}')
         for unused in range(3): search('go depth 4 searchmoves e2e4', 'e2e4')
         rows=search('go nodes 20000')
-        if n>1:
-            totals=[int(x.split()[2]) for x in rows if x.startswith('info nodes ')]
-            assert len(totals)==1 and 20000<=totals[0]<=20000+n*256, totals
+        totals=[int(x.split()[2]) for x in rows if x.startswith('info nodes ')]
+        assert len(totals)==1 and 20000<=totals[0]<=20000+n*256, totals
         start=time.monotonic(); search('go movetime 100')
         assert time.monotonic()-start<5
         for command, finish in [('go infinite','stop'),('go ponder wtime 1000 btime 1000','ponderhit'),
@@ -55,7 +58,7 @@ try:
     send('setoption name MultiPV value 3')
     rows=search('go depth 3')
     assert {int(x.split('multipv ')[1].split()[0]) for x in rows if 'depth 3 ' in x and 'multipv ' in x}=={1,2,3}
-    assert not any(x.startswith('info nodes ') for x in rows) # serial analysis fallback
+    assert sum(x.startswith('info nodes ') for x in rows)==1 # serial analysis also reports totals
     send('setoption name MultiPV value 1')
     send('position startpos');send('go infinite');until('info score ');send('quit')
     p.wait(timeout=5);t.join();e.join()

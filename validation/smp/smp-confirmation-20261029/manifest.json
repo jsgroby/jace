@@ -1,0 +1,17 @@
+{
+  "commit": "6f6f71b3738d18aab3ef459f04680505d0375f3b",
+  "binary_sha256": "81a8e4e6042b86d1ae1ea80f568fea0c4cdf7db344f3aec2fdfbcf88bfaf7f08",
+  "games": 512,
+  "threads": [
+    2,
+    1
+  ],
+  "hash_mb": 64,
+  "tc": "60+1",
+  "concurrency": 1,
+  "platform": "macOS ARM64",
+  "status": "completed",
+  "benchmark_legal_results": 252,
+  "opening_sha256": "2386c18fe4f6ba00c2264ccb1fe1e9bf857fa1727d1ea904d749b5629edd7d0b",
+  "purpose": "Independent confirmation of Threads 2 versus Threads 1"
+}

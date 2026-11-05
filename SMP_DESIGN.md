@@ -226,3 +226,10 @@ Local one-thread comparison against main 2d42dd3 preserves every iteration's
 score/PV/nodes and final move across 28 opening/tactical/endgame positions,
 13,235,914 nodes per pass, three passes. Timing was not isolated from other
 validation jobs and is not used as performance evidence.
+
+## Stage 6 measured status
+
+macOS ARM64 paired confirmations support 2 over 1 and 4 over 2; see
+[validation/smp](validation/smp/README.md). Physical x64 scaling, isolated
+throughput measurements and other time controls remain outstanding. The portable
+default remains 1. Version 1.5 reports final nodes consistently before bestmove.
