@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import zipfile
 
@@ -29,7 +30,12 @@ name = f'jace-{label}-{a.platform}'
 stage = root/'build'/'package'/name
 stage.mkdir(parents=True, exist_ok=False)
 exe = f'jace-{a.platform}.exe' if a.platform.startswith('windows') else 'jace-baseline'
-shutil.copy2(root/exe, stage/exe)
+buildroot = root/'build'/(a.platform if a.platform.startswith('windows') else '')
+release_exe = buildroot/'release'/('jace.exe' if a.platform.startswith('windows') else 'jace')
+shutil.copy2(release_exe, stage/exe)
+# Test the exact staged executable, not whichever mode was copied to the root.
+subprocess.run([sys.executable, str(root/'tests/portable_smoke.py'), str(stage/exe)], check=True, timeout=120)
+subprocess.run([sys.executable, str(root/'tests/smp_smoke.py'), str(stage/exe)], check=True, timeout=120)
 for doc in ['README.md', 'BUILDING.md', 'CI.md', 'PLAYING.md', 'CREDITS.md', 'RELEASE_NOTES.md', 'LICENSE']:
     shutil.copy2(root/doc, stage/doc)
 shutil.copy2(root/'vendor/fathom/LICENSE', stage/'LICENSE-Fathom.txt')

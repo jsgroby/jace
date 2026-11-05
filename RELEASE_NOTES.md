@@ -1,8 +1,12 @@
-# JACE 1.5 — release preparation
+# JACE 1.5.1 — release preparation
 
 Author: Jeffrey S. Groby. MIT licensed, based on Bluefever Software's VICE.
 This candidate adds documented parallel-search and tablebase support to the
 published 1.4 baseline. It is not a published release yet.
+
+Version 1.5 was withheld after package verification found a sanitizer binary in
+the Mac archive. Version 1.5.1 explicitly packages and smoke-tests the staged
+release executable on every platform.
 
 ## Changes since 1.4
 
@@ -31,7 +35,7 @@ No absolute CCRL rating or universal speedup is claimed.
 ## Publication checklist
 
 1. Review and merge this preparation PR after all five platform jobs and CI pass.
-2. Tag the approved merge commit v1.5 when authorized.
+2. Tag the approved merge commit v1.5.1 when authorized.
 3. Wait for all five tag builds and aggregate CI; inspect the draft release.
 4. Verify five platform archives, checksums, version/provenance and extracted
    executable smoke tests before publishing with approval.

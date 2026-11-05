@@ -2,7 +2,7 @@
 
 Download and extract the archive for your operating system and CPU from
 https://github.com/jsgroby/jace/releases. Install the executable as a **UCI**
-engine in your chess GUI. The executable reports `Jace 1.5`, author
+engine in your chess GUI. The executable reports `Jace 1.5.1`, author
 `Jeffrey S. Groby`. Select it in the GUI to play or analyze.
 
 ## Platform requirements
