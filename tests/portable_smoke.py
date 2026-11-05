@@ -45,7 +45,7 @@ def silence():
         assert line is not None and not line.startswith('bestmove'), line
 try:
     send('uci'); ids=until('uciok')
-    assert 'id name Jace 1.5' in ids
+    assert 'id name Jace 1.5.1' in ids
     assert 'option name Clear Hash type button' in ids
     assert 'option name Move Overhead type spin default 50 min 0 max 5000' in ids
     for option in ('Book value false','MultiPV value 1','Ponder value false'):

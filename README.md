@@ -1,4 +1,4 @@
-# JACE 1.5 (release candidate)
+# JACE 1.5.1 (release candidate)
 
 JACE is a UCI chess engine developed by Jeffrey S. Groby,
 based on Bluefever Software's VICE tutorial engine. It needs a chess GUI
@@ -47,7 +47,7 @@ TaperedEval true, and equal hash allocations for both engines.
 
 ## Release and validation
 
-See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the 1.5 release preparation summary and
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the 1.5.1 release preparation summary and
 [validation/](validation/) for regression and performance evidence.
 This release packages the accepted baseline; it does not introduce a new
 search or evaluation experiment. Benchmark speedups and short self-play
