@@ -3,21 +3,30 @@
 
 /* SEE uses only a mailbox and king squares; no history/search-table copies. */
 typedef struct {int pieces[120];int king[2];} ExchangeBoard;
-static int Attacks(const ExchangeBoard *b,int from,int to) {
- int p=b->pieces[from],delta=to-from;
- if(p==wP) return delta==9 || delta==11;
- if(p==bP) return delta==-9 || delta==-11;
- if(IsKn(p)) {for(int i=0;i<8;i++) if(delta==KnDir[i]) return TRUE;return FALSE;}
- if(IsKi(p)) {for(int i=0;i<8;i++) if(delta==KiDir[i]) return TRUE;return FALSE;}
+/* Enumerate from the exchange square, then visit ascending board squares.
+   The order preserves the existing choice between equal-value attackers. */
+static U64 Attackers(const ExchangeBoard *b,int to,int side) {
+ U64 attackers=0;
+ int pawn=side==WHITE?wP:bP,back=side==WHITE?-10:10;
+ for(int offset=-1;offset<=1;offset+=2) {
+  int from=to+back+offset;
+  if(b->pieces[from]==pawn) SETBIT(attackers,Sq120ToSq64[from]);
+ }
+ int knight=side==WHITE?wN:bN,king=side==WHITE?wK:bK;
  for(int i=0;i<8;i++) {
-  int d=KiDir[i];
-  if(i<4 ? !IsRQ(p) : !IsBQ(p)) continue;
-  for(int sq=from+d;b->pieces[sq]!=OFFBOARD;sq+=d) {
-   if(sq==to) return TRUE;
-   if(b->pieces[sq]!=EMPTY) break;
+  int from=to+KnDir[i];
+  if(b->pieces[from]==knight) SETBIT(attackers,Sq120ToSq64[from]);
+  from=to+KiDir[i];
+  if(b->pieces[from]==king) SETBIT(attackers,Sq120ToSq64[from]);
+  for(from=to+KiDir[i];b->pieces[from]!=OFFBOARD;from+=KiDir[i]) {
+   int p=b->pieces[from];
+   if(p==EMPTY) continue;
+   if(PieceCol[p]==side && (i<4?IsRQ(p):IsBQ(p)))
+    SETBIT(attackers,Sq120ToSq64[from]);
+   break;
   }
  }
- return FALSE;
+ return attackers;
 }
 static int Attacked(const ExchangeBoard *b,int sq,int side) {
  /* Query attacks from the target square; preserve pseudo-attack semantics
@@ -43,9 +52,10 @@ static int Attacked(const ExchangeBoard *b,int sq,int side) {
 static int Reply(ExchangeBoard *b,int to,int side,int depth) {
  if(depth>=30 || IsKi(b->pieces[to])) return 0;
  int bestFrom=NO_SQ,bestValue=100000,bestPiece=EMPTY;
- for(int i=0;i<64;i++) {
-  int from=SQ120(i),p=b->pieces[from];
-  if(p==EMPTY || PieceCol[p]!=side || PieceVal[p]>=bestValue || !Attacks(b,from,to)) continue;
+ U64 attackers=Attackers(b,to,side);
+ while(attackers) {
+  int from=SQ120(POP(&attackers)),p=b->pieces[from];
+  if(PieceVal[p]>=bestValue) continue;
   int victim=b->pieces[to],king=b->king[side];
   int placed=PiecePawn[p] && (RanksBrd[to]==RANK_1 || RanksBrd[to]==RANK_8) ? (side==WHITE?wQ:bQ):p;
   b->pieces[from]=EMPTY;b->pieces[to]=placed;if(IsKi(p)) b->king[side]=to;
