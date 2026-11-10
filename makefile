@@ -61,7 +61,7 @@ test:
 	$(PYTHON) tests/run.py "$(TABLES)"
 smoke: release
 	$(MAKE) thread-test
-	$(MAKE) shared-test smp-failure-test
+	$(MAKE) shared-test smp-failure-test trywrite-test
 	$(PYTHON) tests/portable_smoke.py ./$(PROGRAM)
 	$(PYTHON) tests/smp_smoke.py ./$(PROGRAM)
 	$(PYTHON) tests/syzygy_smoke.py ./$(PROGRAM) "$(TABLES)"
@@ -91,7 +91,7 @@ shared-tsan:
 
 .PHONY: smp-tsan
 smp-tsan:
-	$(MAKE) MODE=tsan build-mode smp-failure-test
+	$(MAKE) MODE=tsan build-mode smp-failure-test trywrite-test
 	$(PYTHON) tests/smp_smoke.py ./$(BUILDROOT)/tsan/jace$(EXE)
 	$(PYTHON) tests/syzygy_smoke.py ./$(BUILDROOT)/tsan/jace$(EXE) "$(TABLES)" 4
 
@@ -100,4 +100,10 @@ SMP_TEST_OBJECTS = $(filter-out $(BUILDDIR)/jace.o $(BUILDDIR)/search.o $(BUILDD
 $(BUILDDIR)/smp-failure-tests$(EXE): $(SMP_TEST_OBJECTS) search.c threads.c threads.h tests/smp_failure.c
 	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -UNDEBUG -DJACE_THREAD_TESTING tests/smp_failure.c threads.c $(SMP_TEST_OBJECTS) $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
 smp-failure-test: $(BUILDDIR)/smp-failure-tests$(EXE)
+	$(PYTHON) tests/thread_smoke.py ./$<
+
+.PHONY: trywrite-test
+$(BUILDDIR)/trywrite-tests$(EXE): $(filter-out $(BUILDDIR)/pvtable.o,$(SHARED_OBJECTS)) tests/trywrite.c pvtable.c
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -UNDEBUG tests/trywrite.c $(filter-out $(BUILDDIR)/pvtable.o,$(SHARED_OBJECTS)) $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
+trywrite-test: $(BUILDDIR)/trywrite-tests$(EXE)
 	$(PYTHON) tests/thread_smoke.py ./$<

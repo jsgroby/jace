@@ -9,6 +9,7 @@ struct JaceCondition { CONDITION_VARIABLE native; };
 struct JaceThread { HANDLE native; JaceThreadFunction function; void *argument; };
 #else
 #include <pthread.h>
+#include <errno.h>
 struct JaceMutex { pthread_mutex_t native; };
 struct JaceCondition { pthread_cond_t native; };
 struct JaceThread { pthread_t native; JaceThreadFunction function; void *argument; };
@@ -86,6 +87,14 @@ void JaceMutexDestroy(JaceMutex *mutex) {
  Require(pthread_mutex_destroy(&mutex->native)==0);
 #endif
  free(mutex);
+}
+int JaceMutexTryLock(JaceMutex *mutex) {
+#ifdef _WIN32
+ return TryEnterCriticalSection(&mutex->native)!=0;
+#else
+ int result=pthread_mutex_trylock(&mutex->native);
+ Require(result==0 || result==EBUSY);return result==0;
+#endif
 }
 void JaceMutexLock(JaceMutex *mutex) {
 #ifdef _WIN32

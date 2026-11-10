@@ -63,6 +63,8 @@ int main(int argc,char **argv) {
   /* Outstanding views prohibit owner lifecycle operations even when idle. */
   InitHashTable(owner.HashTable,2);FreeHashTable(owner.HashTable);
   assert(owner.HashTable->pTable==allocation);
+  /* Establish a valid entry before workers race: a busy store may be skipped. */
+  StoreHashEntry(&workers[0].position,moves[0],100,HFEXACT,5);
   for(int i=0;i<4;i++) {threads[i]=JaceThreadStart(Run,&workers[i]);assert(threads[i]);}
   JaceMutexLock(gate);go=1;JaceConditionBroadcast(start);JaceMutexUnlock(gate);
   uint64_t total=0;

@@ -14,6 +14,8 @@ JaceThread *JaceThreadStart(JaceThreadFunction function,void *argument);
 int JaceThreadJoin(JaceThread *thread);
 JaceMutex *JaceMutexCreate(void);
 void JaceMutexDestroy(JaceMutex *mutex);
+/* Nonblocking acquisition: true means the caller owns the mutex. */
+int JaceMutexTryLock(JaceMutex *mutex);
 void JaceMutexLock(JaceMutex *mutex);
 void JaceMutexUnlock(JaceMutex *mutex);
 JaceCondition *JaceConditionCreate(void);

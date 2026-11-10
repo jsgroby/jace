@@ -267,7 +267,10 @@ void StoreHashEntry(S_BOARD *pos, const int move, int score, const int flags, co
 	ASSERT(index >= 0 && index <= pos->HashTable->numEntries - 1);
 
  U64 context=DrawContext(pos);
- JaceMutex *lock=HashLock(pos->HashTable,index);if(lock) JaceMutexLock(lock);
+ /* Shared stores are optional cache updates; never wait behind another
+    worker. Reads remain protected, and serial stores are unchanged. */
+ JaceMutex *lock=HashLock(pos->HashTable,index);
+ if(lock && !JaceMutexTryLock(lock)) return;
 	S_HASHENTRY *entry = &pos->HashTable->pTable[index];
     if(entry->posKey==pos->posKey && entry->generation==pos->HashTable->generation && entry->depth>depth && flags!=HFEXACT && entry->fiftyMove==pos->fiftyMove && entry->context==context) goto done;
 
