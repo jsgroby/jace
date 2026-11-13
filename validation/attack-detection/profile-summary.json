@@ -1,0 +1,32 @@
+[
+  {
+    "position": "baseline-0",
+    "samples": 14392,
+    "raw_attack_samples": 2111,
+    "pct": 14.66787103946637
+  },
+  {
+    "position": "baseline-12",
+    "samples": 14248,
+    "raw_attack_samples": 1968,
+    "pct": 13.812464907355418
+  },
+  {
+    "position": "baseline-20",
+    "samples": 13296,
+    "raw_attack_samples": 3577,
+    "pct": 26.90282791817088
+  },
+  {
+    "position": "baseline-24",
+    "samples": 13424,
+    "raw_attack_samples": 3957,
+    "pct": 29.47705601907032
+  },
+  {
+    "position": "baseline-26",
+    "samples": 12016,
+    "raw_attack_samples": 3189,
+    "pct": 26.539613848202396
+  }
+]
