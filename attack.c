@@ -12,6 +12,11 @@ const int KiDir[8] = { -1, -10,	1, 10, -9, -11, 11, 9 };
 static int RawSqAttacked(const int sq, const int side, const int *pieces) {
 
 	int pce,index,t_sq,dir;
+	/* Select exact attacker codes once, avoiding piece-property/color lookups
+	   for every mailbox occupant. OFFBOARD and EMPTY cannot match these. */
+	const int knight=side==WHITE?wN:bN,rook=side==WHITE?wR:bR;
+	const int bishop=side==WHITE?wB:bB,queen=side==WHITE?wQ:bQ;
+	const int king=side==WHITE?wK:bK;
 	
 	ASSERT(SqOnBoard(sq));
 	ASSERT(SideValid(side));
@@ -32,7 +37,7 @@ static int RawSqAttacked(const int sq, const int side, const int *pieces) {
 	for(index = 0; index < 8; ++index) {		
 		pce = pieces[sq + KnDir[index]];
 		ASSERT(PceValidEmptyOffbrd(pce));
-		if(pce != OFFBOARD && IsKn(pce) && PieceCol[pce] == side) {
+		if(pce == knight) {
 			return TRUE;
 		}
 	}
@@ -46,7 +51,7 @@ static int RawSqAttacked(const int sq, const int side, const int *pieces) {
 		ASSERT(PceValidEmptyOffbrd(pce));
 		while(pce != OFFBOARD) {
 			if(pce != EMPTY) {
-				if(IsRQ(pce) && PieceCol[pce] == side) {
+				if(pce == rook || pce == queen) {
 					return TRUE;
 				}
 				break;
@@ -66,7 +71,7 @@ static int RawSqAttacked(const int sq, const int side, const int *pieces) {
 		ASSERT(PceValidEmptyOffbrd(pce));
 		while(pce != OFFBOARD) {
 			if(pce != EMPTY) {
-				if(IsBQ(pce) && PieceCol[pce] == side) {
+				if(pce == bishop || pce == queen) {
 					return TRUE;
 				}
 				break;
@@ -81,7 +86,7 @@ static int RawSqAttacked(const int sq, const int side, const int *pieces) {
 	for(index = 0; index < 8; ++index) {		
 		pce = pieces[sq + KiDir[index]];
 		ASSERT(PceValidEmptyOffbrd(pce));
-		if(pce != OFFBOARD && IsKi(pce) && PieceCol[pce]==side) {
+		if(pce == king) {
 			return TRUE;
 		}
 	}

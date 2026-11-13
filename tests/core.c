@@ -8,6 +8,38 @@ static void TestInput(S_SEARCHINFO *info) {(void)info;}
 #include "qsearch_reference.inc"
 #include "evaluate_reference.inc"
 #undef ReadInput
+/* Exercise the raw production query on ordinary and scratch mailboxes. */
+#define KnDir IncludedKnDir
+#define RkDir IncludedRkDir
+#define BiDir IncludedBiDir
+#define KiDir IncludedKiDir
+#define SqAttacked IncludedSqAttacked
+#define RepetitionKey IncludedRepetitionKey
+#include "attack.c"
+#undef KnDir
+#undef RkDir
+#undef BiDir
+#undef KiDir
+#undef SqAttacked
+#undef RepetitionKey
+#include "attack_reference.inc"
+static unsigned long rawAttackComparisons;
+static void CompareRawAttacks(const int *pieces) {
+ for(int sq=0;sq<64;sq++) for(int side=0;side<2;side++) {
+  assert(RawSqAttacked(SQ120(sq),side,pieces)==ReferenceRawSqAttacked(SQ120(sq),side,pieces));
+  rawAttackComparisons++;
+ }
+}
+static void TestScratchAttacks(void) {
+ S_BOARD p={0};assert(ParseFen(START_FEN,&p)==0);unsigned seed=1729;
+ for(int trial=0;trial<1000;trial++) {
+  for(int sq=0;sq<64;sq++) {
+   seed=seed*1664525u+1013904223u;
+   p.pieces[SQ120(sq)]=((seed>>24)&3u)?EMPTY:(int)((seed>>8)%13u);
+  }
+  CompareRawAttacks(p.pieces);
+ }
+}
 /* Keep the prior SEE implementation as a differential oracle. */
 #define ExchangeBoard ReferenceExchangeBoard
 #define Attacks ReferenceAttacks
@@ -89,6 +121,7 @@ static void TestLegalProbe(void) {
 }
 static unsigned long seeComparisons,attackComparisons;
 static void CompareSee(S_BOARD *p) {
+ CompareRawAttacks(p->pieces);
  ExchangeBoard b;ReferenceExchangeBoard ref;
  memcpy(b.pieces,p->pieces,sizeof b.pieces);memcpy(b.king,p->KingSq,sizeof b.king);
  memcpy(ref.pieces,p->pieces,sizeof ref.pieces);memcpy(ref.king,p->KingSq,sizeof ref.king);
@@ -418,7 +451,7 @@ static void TestAdaptiveTime(void) {
 
 int main(void) {
  ReferenceInitMvvLva();
- setbuf(stdout,NULL);AllInit();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
+ setbuf(stdout,NULL);AllInit();TestScratchAttacks();TestLegalProbe();TestPvDrawTermination();EngineOptions->UseBook=FALSE;
  S_BOARD p={0};S_SEARCHINFO info={0};info.options=*EngineOptions;info.GAME_MODE=UCIMODE;
  TestAdaptiveTime();TestQSearchEquivalence();TestHashFull();TestRestrictedRoot();TestWorkerResources();TestSearchSnapshot();TestPassedKings();TestPawnEvaluation();TestDeferredOrdering();TestSeeCache();
  const char *fens[]={START_FEN,"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1","8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1","r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"};
@@ -477,5 +510,5 @@ int main(void) {
  /* A complete search must still select a legal move with no table. */
  free(p.HashTable->pTable);p.HashTable->pTable=NULL;p.HashTable->numEntries=0;info.depth=2;info.starttime=GetTimeMs();SearchPosition(&p,&info);assert(info.state.rootBestMove!=NOMOVE && MoveExists(&p,info.state.rootBestMove));
  fen(&p,"7k/6Q1/5K2/8/8/8/8/8 b - - 0 1");SearchPosition(&p,&info);
- printf("SEE differential: %lu captures, %lu attack queries PASS\n",seeComparisons,attackComparisons);CleanPolyBook();printf("Legal probe differential: %lu positions PASS\n",legalComparisons);puts("CORE TESTS PASS");return 0;
+ printf("SEE differential: %lu captures, %lu attack queries PASS\n",seeComparisons,attackComparisons);CleanPolyBook();printf("Legal probe differential: %lu positions PASS\n",legalComparisons);printf("RAW ATTACK DIFFERENTIAL: %lu queries PASS\n",rawAttackComparisons);puts("CORE TESTS PASS");return 0;
 }
