@@ -2,7 +2,9 @@
 
 ## JACE
 
-Development and maintenance: Jeffrey S. Groby.
+Development and maintenance: Jeffrey S. Groby (United States).
+Development is AI-assisted, using OpenAI ChatGPT/Codex for code review,
+implementation, debugging, testing and optimization.
 JACE began from Bluefever Software's VICE tutorial engine. Jeffrey confirmed
 this origin and reported no code copied from other engines during the release
 review on 2026-10-15. JACE contains subsequent changes to search, evaluation,
