@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Check score orientation, runtime/compiled agreement and parameter isolation."""
-import math, pathlib, re, subprocess, tempfile
+import math, pathlib, re, subprocess, tempfile, sys
+bindir = pathlib.Path(sys.argv[1]).resolve() if len(sys.argv)>1 else pathlib.Path("build/release").resolve()
+suffix = ".exe" if (bindir/"eval-fixed.exe").exists() else ""
 root = pathlib.Path(__file__).resolve().parents[2]
 params = re.findall(r'PARAM\((\w+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)\)', (root/'eval_params.def').read_text())
 weights = [int(p[1]) for p in params]
@@ -13,7 +15,7 @@ with tempfile.TemporaryDirectory() as tmp:
     dataset = pathlib.Path(tmp)/'sample.tsv'
     dataset.write_text(''.join(f'{[0,0.5,1][i%3]}\t{fen}\n' for i,fen in enumerate(paired)))
     def run(name, requests):
-        return subprocess.check_output([str(root/'build/release'/name), str(dataset)], input=requests, text=True).splitlines()
+        return subprocess.check_output([str(bindir/(name+suffix)), str(dataset)], input=requests, text=True).splitlines()
     fixed = list(map(int, run('eval-fixed', '0\n')))
     request = ' '.join(map(str, [0,*weights]))+'\n'
     actual = list(map(int, run('eval-tune', request)))

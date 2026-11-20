@@ -113,3 +113,7 @@ $(BUILDDIR)/eval-tune$(EXE): tools/tuning/evaluator.c eval_params.def $(TUNE_OBJ
 $(BUILDDIR)/eval-fixed$(EXE): tools/tuning/evaluator.c $(SHARED_OBJECTS)
 	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) $< $(SHARED_OBJECTS) $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -lm -o $@
 tuning-tools: $(BUILDDIR)/eval-tune$(EXE) $(BUILDDIR)/eval-fixed$(EXE)
+
+.PHONY: tuning-test
+tuning-test: tuning-tools
+	$(PYTHON) tools/tuning/test.py ./$(BUILDDIR)
