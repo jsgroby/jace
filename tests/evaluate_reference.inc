@@ -1,16 +1,20 @@
-/* Frozen pre-cache evaluator for differential tests. */
+/* Independent pre-cache implementation for differential tests.
+ * Shares weights, not evaluation/cache logic, with the current evaluator. */
 // evaluate.c
 
 #include "stdio.h"
 #include "defs.h"
+#define PARAM(name, value, low, high) static const int Reference##name = value;
+#include "eval_params.def"
+#undef PARAM
 
-const int ReferencePawnIsolated = -10;
+
 const int ReferencePawnPassed[8] = { 0, 5, 10, 20, 35, 60, 100, 200 };
-const int ReferenceRookOpenFile = 10;
-const int ReferenceRookSemiOpenFile = 5;
-const int ReferenceQueenOpenFile = 5;
-const int ReferenceQueenSemiOpenFile = 3;
-const int ReferenceBishopPair = 30;
+
+
+
+
+
 
 const int ReferencePawnTable[64] = {
 0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,
@@ -121,10 +125,10 @@ static int ReferencePawnShield(const S_BOARD *pos,int side) {
  int ownPawn=side==WHITE?wP:bP,score=0;
  for(int f=file-1;f<=file+1;f++) {
   if(f<0 || f>7) continue;
-  if(!(pos->pawns[side]&FileBBMask[f])) score-=12;
+  if(!(pos->pawns[side]&FileBBMask[f])) score-=ReferenceShieldMissing;
   int near=rank+step,far=rank+2*step;
-  if(near>=0 && near<8 && pos->pieces[FR2SQ(f,near)]==ownPawn) score+=10;
-  else if(far>=0 && far<8 && pos->pieces[FR2SQ(f,far)]==ownPawn) score+=5;
+  if(near>=0 && near<8 && pos->pieces[FR2SQ(f,near)]==ownPawn) score+=ReferenceShieldNear;
+  else if(far>=0 && far<8 && pos->pieces[FR2SQ(f,far)]==ownPawn) score+=ReferenceShieldFar;
  }
  /* King cover matters in proportion to the opponent's attacking material. */
  int enemy=side^1,offset=enemy==WHITE?0:6;
@@ -312,8 +316,8 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
     int count=ReferenceMobility(pos,pos->pList[piece+offset][i],piece+offset,side);
-    int mgWeight=piece==wN?4:piece==wB?4:piece==wR?2:1;
-    int egWeight=piece==wN?3:piece==wB?4:piece==wR?3:2;
+    int mgWeight=piece==wN?ReferenceMobilityKnightMG:piece==wB?ReferenceMobilityBishopMG:piece==wR?ReferenceMobilityRookMG:ReferenceMobilityQueenMG;
+    int egWeight=piece==wN?ReferenceMobilityKnightEG:piece==wB?ReferenceMobilityBishopEG:piece==wR?ReferenceMobilityRookEG:ReferenceMobilityQueenEG;
     mg+=sign*count*mgWeight;eg+=sign*count*egWeight;
    }
    int pawn=wP+offset;
@@ -325,12 +329,12 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
     int behind=side==WHITE?-10:10;
     int supported=pos->pieces[square+behind-1]==pawn || pos->pieces[square+behind+1]==pawn;
     int connected=pos->pieces[square-1]==pawn || pos->pieces[square+1]==pawn;
-    if(supported || connected) {mg+=sign*5;eg+=sign*8;}
+    if(supported || connected) {mg+=sign*ReferenceConnectedMG;eg+=sign*ReferenceConnectedEG;}
     /* Penalize the rear pawn on a doubled file; avoid double-counting pairs. */
     int ahead=FALSE,step=side==WHITE?10:-10;
     for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
     if(ahead) {
-     mg-=sign*10;eg-=sign*15;
+     mg-=sign*ReferenceDoubledMG;eg-=sign*ReferenceDoubledEG;
      if(!(passed&pos->pawns[side^1])) {mg-=sign*(ReferencePawnPassed[relative]-ReferencePawnPassed[relative]/2);eg-=sign*ReferencePawnPassed[relative];}
     }
    }

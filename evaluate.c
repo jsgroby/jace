@@ -3,13 +3,21 @@
 #include "stdio.h"
 #include "defs.h"
 
-const int PawnIsolated = -10;
+#ifdef JACE_TUNING
+#define PARAM(name, value, low, high) int name = value;
+#else
+#define PARAM(name, value, low, high) static const int name = value;
+#endif
+#include "eval_params.def"
+#undef PARAM
+
+
 const int PawnPassed[8] = { 0, 5, 10, 20, 35, 60, 100, 200 }; 
-const int RookOpenFile = 10;
-const int RookSemiOpenFile = 5;
-const int QueenOpenFile = 5;
-const int QueenSemiOpenFile = 3;
-const int BishopPair = 30;
+
+
+
+
+
 
 const int PawnTable[64] = {
 0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,
@@ -120,10 +128,10 @@ static int PawnShield(const S_BOARD *pos,int side) {
  int ownPawn=side==WHITE?wP:bP,score=0;
  for(int f=file-1;f<=file+1;f++) {
   if(f<0 || f>7) continue;
-  if(!(pos->pawns[side]&FileBBMask[f])) score-=12;
+  if(!(pos->pawns[side]&FileBBMask[f])) score-=ShieldMissing;
   int near=rank+step,far=rank+2*step;
-  if(near>=0 && near<8 && pos->pieces[FR2SQ(f,near)]==ownPawn) score+=10;
-  else if(far>=0 && far<8 && pos->pieces[FR2SQ(f,far)]==ownPawn) score+=5;
+  if(near>=0 && near<8 && pos->pieces[FR2SQ(f,near)]==ownPawn) score+=ShieldNear;
+  else if(far>=0 && far<8 && pos->pieces[FR2SQ(f,far)]==ownPawn) score+=ShieldFar;
  }
  /* King cover matters in proportion to the opponent's attacking material. */
  int enemy=side^1,offset=enemy==WHITE?0:6;
@@ -216,12 +224,12 @@ static S_PAWNSCORE CalculatePawnScore(const S_BOARD *pos) {
     int behind=side==WHITE?-10:10;
     int supported=pos->pieces[square+behind-1]==pawn || pos->pieces[square+behind+1]==pawn;
     int connected=pos->pieces[square-1]==pawn || pos->pieces[square+1]==pawn;
-    if(supported || connected) {mg+=sign*5;eg+=sign*8;}
+    if(supported || connected) {mg+=sign*ConnectedMG;eg+=sign*ConnectedEG;}
     /* Penalize the rear pawn on a doubled file; avoid double-counting pairs. */
     int ahead=FALSE,step=side==WHITE?10:-10;
     for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
     if(ahead) {
-     mg-=sign*10;eg-=sign*15;
+     mg-=sign*DoubledMG;eg-=sign*DoubledEG;
      if(!(passed&pos->pawns[side^1])) {mg-=sign*(PawnPassed[relative]-PawnPassed[relative]/2);eg-=sign*PawnPassed[relative];}
     }
    }
@@ -362,8 +370,8 @@ int EvalPositionForSearch(const S_BOARD *pos,S_PAWNCACHE *cache,int tapered) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
     int count=Mobility(pos,pos->pList[piece+offset][i],piece+offset,side);
-    int mgWeight=piece==wN?4:piece==wB?4:piece==wR?2:1;
-    int egWeight=piece==wN?3:piece==wB?4:piece==wR?3:2;
+    int mgWeight=piece==wN?MobilityKnightMG:piece==wB?MobilityBishopMG:piece==wR?MobilityRookMG:MobilityQueenMG;
+    int egWeight=piece==wN?MobilityKnightEG:piece==wB?MobilityBishopEG:piece==wR?MobilityRookEG:MobilityQueenEG;
     mg+=sign*count*mgWeight;eg+=sign*count*egWeight;
    }
 
