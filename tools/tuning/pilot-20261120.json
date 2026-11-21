@@ -1,0 +1,307 @@
+{
+  "baseline": "v1.5.2 (51fb9c5d2de22fdb9bf3635f762c007a1a496f6c)",
+  "data": {
+    "sources": [
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/adaptive-time-20261022/games.pgn",
+        "sha256": "37177cc1a3699218c696481539060b5bbdd33a4ccd0681c684f90074836c3fb4"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/adaptive-time-confirmation-20261023/games.pgn",
+        "sha256": "607cfeceb626dc8faee621b46b3859329d714b0a6dffaf6a82268140777007de"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/attack-detection-20261113/games.pgn",
+        "sha256": "925201a0908c6800b33812e80c8f7de6e4c3bb175a294882f9131c4e7b7d017e"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/attack-detection-confirmation-20261114/games.pgn",
+        "sha256": "71a3af7f49b75cef89c718632ec721edb3d4ab5c77d8ba99f3e2a1c6a645146b"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/hash-trywrite-20261110/games.pgn",
+        "sha256": "3f802fedbe0702beffc1bcfc198b0b70388ebba56d1caba44cf6c9c17acc0e4f"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/hash-trywrite-confirmation-20261111/games.pgn",
+        "sha256": "c012991b1cb3dbaed34879f3d5d00a54f634307e8c300a0d2cede19b14440fdb"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/passer-kings-20261018/games.pgn",
+        "sha256": "7f9f07c7db9b40c46a99d82feff8f48658394650ccf5ddfe5880d6afae8052fb"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/passer-kings-confirmation-20261019/games.pgn",
+        "sha256": "848c2fab2caa5464c4ce3a2594085af799276db7cef52bd06ced4e660cdbdfc7"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/see-enumeration-20261105/games.pgn",
+        "sha256": "b2381938b97280119142c14ebb9cb327dba101c9d9ba2a8100f52c4b24046dd4"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/smp-four-v-two-20261102/games.pgn",
+        "sha256": "5ddf20a233d05a2a0545e11db90b8c109e911f967a672e452584cd78580885fc"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/smp-four-v-two-confirmation-20261103/games.pgn",
+        "sha256": "8e63fb4029899f5b01c09a523560c764bdd841408b98e6cdb5a999a5cc4a6656"
+      }
+    ],
+    "statistics": {
+      "games_read": 4096,
+      "games_accepted": 4093,
+      "duplicate_games": 3
+    },
+    "split": "opening SHA256, 80/10/10",
+    "filters": "normal games; ply>=24; >6 pieces; no check, captures or promotions available; max8/game, >=8 ply apart",
+    "datasets": {
+      "train": {
+        "positions": 15820,
+        "opening_groups": 1641,
+        "outcomes": {
+          "0.5": 6773,
+          "1.0": 4823,
+          "0.0": 4224
+        },
+        "sha256": "bfbc559f617c45a920e42fceb055866e60a83bb98b2a3948373522be476c4c7d"
+      },
+      "validation": {
+        "positions": 1908,
+        "opening_groups": 196,
+        "outcomes": {
+          "0.0": 495,
+          "0.5": 854,
+          "1.0": 559
+        },
+        "sha256": "6bd7fb36ef39ebb243141100a55e6d8d9e4a85ff1b580b0df61f9e928fbd084e"
+      },
+      "test": {
+        "positions": 1898,
+        "opening_groups": 196,
+        "outcomes": {
+          "1.0": 618,
+          "0.0": 522,
+          "0.5": 758
+        },
+        "sha256": "78a76f51aa25016dda404c67ffc9f1f8b0a2b7f2e94a021fb085066eacb7ce3d"
+      }
+    },
+    "cross_split_positions_removed": 1
+  },
+  "fit": {
+    "k": 1.4,
+    "baseline_mse": {
+      "train": 0.06711772598652106,
+      "validation": 0.06240965494920605,
+      "test": 0.0750907776936348
+    },
+    "candidate_mse": {
+      "train": 0.06649080591734205,
+      "validation": 0.0617403958335785,
+      "test": 0.0741871683710793
+    },
+    "history": [
+      {
+        "step": 4,
+        "train": 0.0666275003733931,
+        "validation": 0.06192985244131687,
+        "weights": {
+          "PawnIsolated": -10,
+          "RookOpenFile": 6,
+          "RookSemiOpenFile": 9,
+          "QueenOpenFile": 9,
+          "QueenSemiOpenFile": 3,
+          "BishopPair": 34,
+          "ShieldMissing": 16,
+          "ShieldNear": 6,
+          "ShieldFar": 9,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 4,
+          "MobilityBishopMG": 4,
+          "MobilityRookMG": 2,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 3,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6
+        }
+      },
+      {
+        "step": 2,
+        "train": 0.06653270676460743,
+        "validation": 0.06174086390743251,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 8,
+          "RookSemiOpenFile": 11,
+          "QueenOpenFile": 7,
+          "QueenSemiOpenFile": 3,
+          "BishopPair": 34,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 11,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 4,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 4,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 3,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.06649080591734205,
+        "validation": 0.0617403958335785,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 9,
+          "RookSemiOpenFile": 12,
+          "QueenOpenFile": 6,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 12,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 5,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.06646433987704417,
+        "validation": 0.06180831716774734,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 10,
+          "RookSemiOpenFile": 13,
+          "QueenOpenFile": 5,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 32,
+          "ShieldMissing": 19,
+          "ShieldNear": 6,
+          "ShieldFar": 13,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 9,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 6,
+          "MobilityBishopMG": 5,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.06644046694921461,
+        "validation": 0.06182026808263078,
+        "weights": {
+          "PawnIsolated": -11,
+          "RookOpenFile": 10,
+          "RookSemiOpenFile": 14,
+          "QueenOpenFile": 4,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 20,
+          "ShieldNear": 6,
+          "ShieldFar": 13,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 9,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 6,
+          "MobilityBishopMG": 5,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.06642644402636148,
+        "validation": 0.06176123746412306,
+        "weights": {
+          "PawnIsolated": -11,
+          "RookOpenFile": 11,
+          "RookSemiOpenFile": 15,
+          "QueenOpenFile": 3,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 34,
+          "ShieldMissing": 20,
+          "ShieldNear": 6,
+          "ShieldFar": 13,
+          "ConnectedMG": 2,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 6,
+          "MobilityBishopMG": 5,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 5,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6
+        }
+      }
+    ],
+    "weights": {
+      "PawnIsolated": -12,
+      "RookOpenFile": 9,
+      "RookSemiOpenFile": 12,
+      "QueenOpenFile": 6,
+      "QueenSemiOpenFile": 2,
+      "BishopPair": 33,
+      "ShieldMissing": 18,
+      "ShieldNear": 6,
+      "ShieldFar": 12,
+      "ConnectedMG": 1,
+      "ConnectedEG": 4,
+      "DoubledMG": 10,
+      "DoubledEG": 15,
+      "MobilityKnightMG": 5,
+      "MobilityBishopMG": 6,
+      "MobilityRookMG": 3,
+      "MobilityQueenMG": 5,
+      "MobilityKnightEG": 2,
+      "MobilityBishopEG": 4,
+      "MobilityRookEG": 3,
+      "MobilityQueenEG": 6
+    },
+    "data_manifest_sha256": "682d1f5402b2bb9117c857f82b2766e5071f7ddeb270bfc934680d7017bef2c9",
+    "evaluator_sha256": "304ac215e943e92ac610960bf161b230621b478a6436a087c26da6b463a27f0a",
+    "parameters_sha256": "505ffab470596ad7179742eb97fb80ae075affa34a6a0cfaed54a65267066bad",
+    "strength_claim": "None. Held-out prediction loss is not match Elo."
+  },
+  "local_checks": [
+    "Unchanged defaults: 68-position depth-5 scores/nodes/PV/bestmove identical to published v1.5.2",
+    "Tuned defaults: make CFLAGS=-Werror test passed, including ASan/UBSan, SMP, real Syzygy",
+    "70-position tuning helper checks passed"
+  ],
+  "match_status": "Pending; do not promote on prediction loss alone."
+}

@@ -101,3 +101,19 @@ $(BUILDDIR)/smp-failure-tests$(EXE): $(SMP_TEST_OBJECTS) search.c threads.c thre
 	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -UNDEBUG -DJACE_THREAD_TESTING tests/smp_failure.c threads.c $(SMP_TEST_OBJECTS) $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
 smp-failure-test: $(BUILDDIR)/smp-failure-tests$(EXE)
 	$(PYTHON) tests/thread_smoke.py ./$<
+
+# Offline tuning uses the actual evaluation with private mutable weights.
+# Production objects and UCI options are unaffected.
+TUNE_OBJECTS = $(filter-out $(BUILDDIR)/jace.o $(BUILDDIR)/evaluate.o,$(OBJS))
+.PHONY: tuning-tools
+$(BUILDDIR)/evaluate-tune.o: evaluate.c eval_params.def
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -DJACE_TUNING -c $< -o $@
+$(BUILDDIR)/eval-tune$(EXE): tools/tuning/evaluator.c eval_params.def $(TUNE_OBJECTS) $(BUILDDIR)/evaluate-tune.o
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -DJACE_TUNING $< $(TUNE_OBJECTS) $(BUILDDIR)/evaluate-tune.o $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -lm -o $@
+$(BUILDDIR)/eval-fixed$(EXE): tools/tuning/evaluator.c $(SHARED_OBJECTS)
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) $< $(SHARED_OBJECTS) $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -lm -o $@
+tuning-tools: $(BUILDDIR)/eval-tune$(EXE) $(BUILDDIR)/eval-fixed$(EXE)
+
+.PHONY: tuning-test
+tuning-test: tuning-tools
+	$(PYTHON) tools/tuning/test.py ./$(BUILDDIR)
