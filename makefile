@@ -117,3 +117,13 @@ tuning-tools: $(BUILDDIR)/eval-tune$(EXE) $(BUILDDIR)/eval-fixed$(EXE)
 .PHONY: tuning-test
 tuning-test: tuning-tools
 	$(PYTHON) tools/tuning/test.py ./$(BUILDDIR)
+
+$(BUILDDIR)/king-safety-tests$(EXE): tests/king_safety.c tests/evaluate_reference.inc eval_params.def $(TUNE_OBJECTS) $(BUILDDIR)/evaluate-tune.o
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -UNDEBUG -DJACE_TUNING $< $(TUNE_OBJECTS) $(BUILDDIR)/evaluate-tune.o $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
+.PHONY: king-safety-test
+king-safety-test: $(BUILDDIR)/king-safety-tests$(EXE)
+	./$<
+
+$(BUILDDIR)/eval-stability$(EXE): tools/tuning/stability.c search.c $(filter-out $(BUILDDIR)/search.o,$(TUNE_OBJECTS)) $(BUILDDIR)/evaluate-tune.o
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -DJACE_TUNING $< $(filter-out $(BUILDDIR)/search.o,$(TUNE_OBJECTS)) $(BUILDDIR)/evaluate-tune.o $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
+tuning-tools: $(BUILDDIR)/eval-stability$(EXE)

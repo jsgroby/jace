@@ -109,7 +109,7 @@ int DeadMaterial(const S_BOARD *pos) {
 static int PawnAttacked(const S_BOARD *pos,int sq,int enemy) {
  return enemy==WHITE ? pos->pieces[sq-9]==wP || pos->pieces[sq-11]==wP : pos->pieces[sq+9]==bP || pos->pieces[sq+11]==bP;
 }
-static int Mobility(const S_BOARD *pos,int sq,int piece,int side) {
+static int Mobility(const S_BOARD *pos,int sq,int piece,int side,const unsigned char *kingZone,int *kingHits) {
  int n=0;
  for(int i=0;i<8;i++) {
   int dir=IsKn(piece)?KnDir[i]:KiDir[i];
@@ -117,12 +117,27 @@ static int Mobility(const S_BOARD *pos,int sq,int piece,int side) {
   for(int to=sq+dir;pos->pieces[to]!=OFFBOARD;to+=dir) {
    int victim=pos->pieces[to];
    if(victim!=EMPTY && PieceCol[victim]==side) break;
+   if(kingHits && kingZone[to]) (*kingHits)++;
    if(!PawnAttacked(pos,to,side^1)) n++;
    if(victim!=EMPTY || IsKn(piece)) break;
   }
  }
  return n;
 }
+/* Attacks on the king's 3x3 neighborhood, collected with mobility's rays.
+ * Count N/B/R/Q attacks, including defended squares; this is pressure, not SEE.
+ * Require at least two attackers. Bound coordination and halve queenless danger.
+ * No shelter term here: PawnShield already accounts for pawn cover. */
+static int KingPressure(const S_BOARD *pos,int side,const int hits[4],int attackers) {
+ if(attackers<2) return 0;
+ if(attackers>4) attackers=4;
+ int score=hits[0]*KingKnightAttack+hits[1]*KingBishopAttack
+          +hits[2]*KingRookAttack+hits[3]*KingQueenAttack
+          +(attackers-1)*(attackers-1)*KingCoordination;
+ if(!pos->pceNum[side==WHITE?wQ:bQ]) score/=2;
+ return score;
+}
+
 static int PawnShield(const S_BOARD *pos,int side) {
  int king=pos->KingSq[side],file=FilesBrd[king],rank=RanksBrd[king],step=side==WHITE?1:-1;
  int ownPawn=side==WHITE?wP:bP,score=0;
@@ -366,15 +381,27 @@ int EvalPositionForSearch(const S_BOARD *pos,S_PAWNCACHE *cache,int tapered) {
   eg += KingE[SQ64(pos->KingSq[WHITE])] - KingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += PawnShield(pos,WHITE)-PawnShield(pos,BLACK);
   if(phase<24) eg += PassedKingProximity(pos);
+  int dangerEnabled=(KingKnightAttack+KingBishopAttack+KingRookAttack+KingQueenAttack+KingCoordination)>0;
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
+   int attacks[4]={0},attackers=0;
+   unsigned char kingZone[BRD_SQ_NUM]={0};
+   if(dangerEnabled) {
+    int king=pos->KingSq[side^1];kingZone[king]=1;
+    for(int direction=0;direction<8;direction++) {
+     int target=king+KiDir[direction];
+     if(pos->pieces[target]!=OFFBOARD) kingZone[target]=1;
+    }
+   }
    for(int piece=wN;piece<=wQ;piece++) for(int i=0;i<pos->pceNum[piece+offset];i++) {
-    int count=Mobility(pos,pos->pList[piece+offset][i],piece+offset,side);
+    int hits=0;
+    int count=Mobility(pos,pos->pList[piece+offset][i],piece+offset,side,kingZone,dangerEnabled?&hits:NULL);
+    if(hits) {attacks[piece-wN]+=hits;attackers++;}
     int mgWeight=piece==wN?MobilityKnightMG:piece==wB?MobilityBishopMG:piece==wR?MobilityRookMG:MobilityQueenMG;
     int egWeight=piece==wN?MobilityKnightEG:piece==wB?MobilityBishopEG:piece==wR?MobilityRookEG:MobilityQueenEG;
     mg+=sign*count*mgWeight;eg+=sign*count*egWeight;
    }
-
+   if(dangerEnabled) mg+=sign*KingPressure(pos,side,attacks,attackers);
   }
   score+=(mg*phase+eg*(24-phase))/24;
  } else {

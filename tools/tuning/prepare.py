@@ -14,7 +14,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--output', type=pathlib.Path, required=True)
     ap.add_argument('pgn', nargs='+', type=pathlib.Path)
+    ap.add_argument('--allow-captures', action='store_true', help='Requires subsequent tactical-stability filtering')
+    ap.add_argument('--test-source', type=pathlib.Path, action='append', default=[], help='Only these PGNs may supply test games')
     args = ap.parse_args()
+    fresh = {p.resolve() for p in args.test_source}
     if args.output.exists():
         raise SystemExit('Output directory already exists; use a fresh destination.')
     rows = {name: {} for name in ('train', 'validation', 'test')}
@@ -41,13 +44,15 @@ def main():
                     opening = key(prefix)
                 bucket = int(digest(opening)[:8], 16) % 10
                 split = 'test' if bucket == 0 else 'validation' if bucket == 1 else 'train'
+                if split == 'test' and fresh and path.resolve() not in fresh:
+                    stats['old_test_games_excluded'] += 1; continue
                 candidates = []
                 for move in moves:
                     capture = board.is_capture(move)
                     board.push(move)
                     if (board.ply() < 24 or capture or move.promotion or board.is_check()
                             or board.is_game_over() or len(board.piece_map()) <= 6
-                            or any(board.generate_legal_captures())
+                            or (not args.allow_captures and any(board.generate_legal_captures()))
                             or any(m.promotion for m in board.legal_moves)):
                         continue
                     candidates.append((board.ply(), board.fen()))
@@ -64,7 +69,8 @@ def main():
                 stats['games_accepted'] += 1
     args.output.mkdir(parents=True)
     manifest = {'sources': sources, 'statistics': dict(stats), 'split': 'opening SHA256, 80/10/10',
-                'filters': 'normal games; ply>=24; >6 pieces; no check, captures or promotions available; max8/game, >=8 ply apart', 'datasets': {}}
+                'allow_captures': args.allow_captures, 'test_sources': sorted(map(str,fresh)),
+                'filters': 'normal games; ply>=24; >6 pieces; no check or promotions available; captures controlled by allow_captures; max8/game, >=8 ply apart', 'datasets': {}}
     for split, positions in rows.items():
         output = []; groups = set(); labels = collections.Counter()
         for position, observations in sorted(positions.items()):

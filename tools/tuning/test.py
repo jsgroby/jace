@@ -30,3 +30,11 @@ with tempfile.TemporaryDirectory() as tmp:
     expected = sum((1/(1+10**(-score/400))-[0,0.5,1][i%3])**2 for i,score in enumerate(actual))/len(actual)
     assert math.isclose(mse,expected,rel_tol=1e-12)
 print(f'PASS: {len(actual)} scores; compiled/runtime equality, White orientation, reset/cache isolation, exact MSE')
+
+# The tactical filter must reject hanging material and keep quiet starts.
+quiet='0.5\trnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\n'
+tactical='1.0\t6k1/8/8/4p3/3Q4/8/8/6K1 b - - 0 1\n'
+filtered=subprocess.run([str(bindir/('eval-stability'+suffix))],input=quiet+tactical,
+                        text=True,capture_output=True,check=True)
+assert filtered.stdout==quiet,filtered
+print('PASS: baseline stability filter keeps quiet positions and rejects hanging material')

@@ -68,3 +68,51 @@ hash, tuning output, candidate hash and match command together.
 
 The earlier Sjeng loss review found search-horizon sensitivity as well as king
 exposure. King safety remains an experiment, not a proven cure for those losses.
+
+## King-pressure experiment (2026-11-22)
+
+The accepted starting point is main ad0a3c5 (PR #35). This experiment freezes all
+21 accepted scalar weights and fits only the five names beginning with `King`:
+knight, bishop, rook and queen attacks into the enemy king's clipped 3x3 zone,
+and coordinated attackers. Hits are collected on the existing mobility rays,
+independently of the pawn-safe mobility count. Friendly occupied target squares
+and squares beyond blockers are excluded. Pinned attackers still count as
+positional pressure; this is not a legal-move or tactical proof.
+
+At least two distinct pieces must attack the zone. Coordination uses
+`(min(attackers,4)-1)^2`. Queenless pressure is halved with integer rounding.
+The result enters only the middlegame side of tapered evaluation. Existing pawn
+shelter is untouched. Zero weights reproduce the accepted evaluation.
+
+`make king-safety-test` compares the implementation against an independent
+zone-to-piece ray tracer with zero and nonzero weights, mirrored colors, legacy
+evaluation, blockers, board edges, queenless positions and extra attackers.
+The test also runs on 4,713 targeted/random legal positions. CI runs it on all
+five platforms. Local sanitizer runs use `make MODE=sanitize king-safety-test`.
+
+For broader training samples, prepare.py supports `--allow-captures` and repeated
+`--test-source FILE` options. The latter restricts test data to fresh PGN sources;
+older test-opening groups are excluded, not reassigned to training. Grouping and
+cross-split deduplication remain in effect. Then filter all three partitions:
+
+```sh
+make release tuning-tools
+python3 tools/tuning/filter_stability.py --input /path/to/raw \
+  --output /path/to/filtered --exe build/release/eval-stability
+python3 tools/tuning/tune.py --only-prefix King \
+  --data /path/to/filtered --output /path/to/fit
+```
+
+The stability helper runs baseline quiescence with the five pressure terms
+explicitly disabled, keeping samples within 25 cp of baseline static evaluation.
+It rejects searches reaching the 10,000-node cap. It does not label positions with
+candidate scores or change game outcomes. A node cap is a filtering guard, not a
+search setting for the match. Data is still drawn from local engine games and is
+not a broad independent chess corpus.
+
+The pilot retains 25,208 training, 3,223 validation, and 605 fresh test positions.
+The selected weights are 2/2/2/4 for N/B/R/Q hits and 6 for coordination. Relative
+MSE reductions are only about 0.15% validation and 0.03% held out: weak evidence,
+not a strength claim. The direct-evaluator benchmark costs about 6.2% more than
+the accepted baseline; this is not an estimate of whole-search slowdown.
+A fresh paired 60+1 match is required before any promotion.

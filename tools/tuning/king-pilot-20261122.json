@@ -1,0 +1,414 @@
+{
+  "baseline_commit": "ad0a3c571901f65eee9bcf20c994ab8ad5c166ab",
+  "fit": {
+    "active_parameters": [
+      "KingKnightAttack",
+      "KingBishopAttack",
+      "KingRookAttack",
+      "KingQueenAttack",
+      "KingCoordination"
+    ],
+    "k": 1.35,
+    "baseline_mse": {
+      "train": 0.08731718633140635,
+      "validation": 0.0847845374545626,
+      "test": 0.10198186197892878
+    },
+    "candidate_mse": {
+      "train": 0.08715825901061015,
+      "validation": 0.08466157216974479,
+      "test": 0.10195028911044253
+    },
+    "history": [
+      {
+        "step": 4,
+        "train": 0.08715302489125187,
+        "validation": 0.08466317387984122,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 9,
+          "RookSemiOpenFile": 12,
+          "QueenOpenFile": 6,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 12,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 5,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6,
+          "KingKnightAttack": 4,
+          "KingBishopAttack": 4,
+          "KingRookAttack": 4,
+          "KingQueenAttack": 4,
+          "KingCoordination": 4
+        }
+      },
+      {
+        "step": 2,
+        "train": 0.08715825901061015,
+        "validation": 0.08466157216974479,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 9,
+          "RookSemiOpenFile": 12,
+          "QueenOpenFile": 6,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 12,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 5,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6,
+          "KingKnightAttack": 2,
+          "KingBishopAttack": 2,
+          "KingRookAttack": 2,
+          "KingQueenAttack": 4,
+          "KingCoordination": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.08715825901061015,
+        "validation": 0.08466157216974479,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 9,
+          "RookSemiOpenFile": 12,
+          "QueenOpenFile": 6,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 12,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 5,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6,
+          "KingKnightAttack": 2,
+          "KingBishopAttack": 2,
+          "KingRookAttack": 2,
+          "KingQueenAttack": 4,
+          "KingCoordination": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.08715825901061015,
+        "validation": 0.08466157216974479,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 9,
+          "RookSemiOpenFile": 12,
+          "QueenOpenFile": 6,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 12,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 5,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6,
+          "KingKnightAttack": 2,
+          "KingBishopAttack": 2,
+          "KingRookAttack": 2,
+          "KingQueenAttack": 4,
+          "KingCoordination": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.08715825901061015,
+        "validation": 0.08466157216974479,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 9,
+          "RookSemiOpenFile": 12,
+          "QueenOpenFile": 6,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 12,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 5,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6,
+          "KingKnightAttack": 2,
+          "KingBishopAttack": 2,
+          "KingRookAttack": 2,
+          "KingQueenAttack": 4,
+          "KingCoordination": 6
+        }
+      },
+      {
+        "step": 1,
+        "train": 0.08715825901061015,
+        "validation": 0.08466157216974479,
+        "weights": {
+          "PawnIsolated": -12,
+          "RookOpenFile": 9,
+          "RookSemiOpenFile": 12,
+          "QueenOpenFile": 6,
+          "QueenSemiOpenFile": 2,
+          "BishopPair": 33,
+          "ShieldMissing": 18,
+          "ShieldNear": 6,
+          "ShieldFar": 12,
+          "ConnectedMG": 1,
+          "ConnectedEG": 4,
+          "DoubledMG": 10,
+          "DoubledEG": 15,
+          "MobilityKnightMG": 5,
+          "MobilityBishopMG": 6,
+          "MobilityRookMG": 3,
+          "MobilityQueenMG": 5,
+          "MobilityKnightEG": 2,
+          "MobilityBishopEG": 4,
+          "MobilityRookEG": 3,
+          "MobilityQueenEG": 6,
+          "KingKnightAttack": 2,
+          "KingBishopAttack": 2,
+          "KingRookAttack": 2,
+          "KingQueenAttack": 4,
+          "KingCoordination": 6
+        }
+      }
+    ],
+    "weights": {
+      "PawnIsolated": -12,
+      "RookOpenFile": 9,
+      "RookSemiOpenFile": 12,
+      "QueenOpenFile": 6,
+      "QueenSemiOpenFile": 2,
+      "BishopPair": 33,
+      "ShieldMissing": 18,
+      "ShieldNear": 6,
+      "ShieldFar": 12,
+      "ConnectedMG": 1,
+      "ConnectedEG": 4,
+      "DoubledMG": 10,
+      "DoubledEG": 15,
+      "MobilityKnightMG": 5,
+      "MobilityBishopMG": 6,
+      "MobilityRookMG": 3,
+      "MobilityQueenMG": 5,
+      "MobilityKnightEG": 2,
+      "MobilityBishopEG": 4,
+      "MobilityRookEG": 3,
+      "MobilityQueenEG": 6,
+      "KingKnightAttack": 2,
+      "KingBishopAttack": 2,
+      "KingRookAttack": 2,
+      "KingQueenAttack": 4,
+      "KingCoordination": 6
+    },
+    "data_manifest_sha256": "e2820422231450134abbc6123d69f7313db812741d9ee19463b148bc46ba3b34",
+    "evaluator_sha256": "df30ff45a52dc86822e5f0ecc10e9f8d4d9049952cf0112442d70f959dae8157",
+    "parameters_sha256": "78327f36deef4b2ca4f1e571a724888e42ac6f7b667ffa8d866089af5e9c0586",
+    "strength_claim": "None. Held-out prediction loss is not match Elo."
+  },
+  "data_manifest": {
+    "sources": [
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/adaptive-time-20261022/games.pgn",
+        "sha256": "37177cc1a3699218c696481539060b5bbdd33a4ccd0681c684f90074836c3fb4"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/adaptive-time-confirmation-20261023/games.pgn",
+        "sha256": "607cfeceb626dc8faee621b46b3859329d714b0a6dffaf6a82268140777007de"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/attack-detection-20261113/games.pgn",
+        "sha256": "925201a0908c6800b33812e80c8f7de6e4c3bb175a294882f9131c4e7b7d017e"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/attack-detection-confirmation-20261114/games.pgn",
+        "sha256": "71a3af7f49b75cef89c718632ec721edb3d4ab5c77d8ba99f3e2a1c6a645146b"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/hash-trywrite-20261110/games.pgn",
+        "sha256": "3f802fedbe0702beffc1bcfc198b0b70388ebba56d1caba44cf6c9c17acc0e4f"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/hash-trywrite-confirmation-20261111/games.pgn",
+        "sha256": "c012991b1cb3dbaed34879f3d5d00a54f634307e8c300a0d2cede19b14440fdb"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/passer-kings-20261018/games.pgn",
+        "sha256": "7f9f07c7db9b40c46a99d82feff8f48658394650ccf5ddfe5880d6afae8052fb"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/passer-kings-confirmation-20261019/games.pgn",
+        "sha256": "848c2fab2caa5464c4ce3a2594085af799276db7cef52bd06ced4e660cdbdfc7"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/see-enumeration-20261105/games.pgn",
+        "sha256": "b2381938b97280119142c14ebb9cb327dba101c9d9ba2a8100f52c4b24046dd4"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/smp-four-v-two-20261102/games.pgn",
+        "sha256": "5ddf20a233d05a2a0545e11db90b8c109e911f967a672e452584cd78580885fc"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/smp-four-v-two-confirmation-20261103/games.pgn",
+        "sha256": "8e63fb4029899f5b01c09a523560c764bdd841408b98e6cdb5a999a5cc4a6656"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/eval-tuning-20261120/games.pgn",
+        "sha256": "9cc0ce569a8e6d613e74c3bfb882843839a95d8546e77c9ddea238789939e8ea"
+      },
+      {
+        "path": "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/eval-tuning-confirmation-20261120/games.pgn",
+        "sha256": "3c773937d46a120c785cb2753da0c453df4ba90c6c5ec5f89185489408706a13"
+      }
+    ],
+    "statistics": {
+      "games_read": 4864,
+      "games_accepted": 4467,
+      "old_test_games_excluded": 394,
+      "duplicate_games": 3
+    },
+    "split": "opening SHA256, 80/10/10",
+    "allow_captures": true,
+    "test_sources": [
+      "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/eval-tuning-20261120/games.pgn",
+      "/Users/angerisagift/.codex/.chatgpt-projects/g-p-69a5a9f6b4288191ae811b09791e10db/engine-testing/eval-tuning-confirmation-20261120/games.pgn"
+    ],
+    "filters": "normal games; ply>=24; >6 pieces; no check or promotions available; captures controlled by allow_captures; max8/game, >=8 ply apart",
+    "datasets": {
+      "train": {
+        "positions": 25208,
+        "sha256": "7b33f0c7a1a7eca933cd13f7f2557a3877ad3561fced56239d8f0ea49e1502cc",
+        "raw_positions": 29049,
+        "filter_log": "Stability: 25208/29049 kept, 0 node-limited; abs(static-qsearch)<=25 cp",
+        "raw_outcomes": {
+          "0.5": 12715,
+          "0.0": 7705,
+          "1.0": 8629
+        },
+        "raw_opening_groups": 1941,
+        "outcomes": {
+          "0.0": 6485,
+          "0.5": 11473,
+          "1.0": 7250
+        }
+      },
+      "validation": {
+        "positions": 3223,
+        "sha256": "3d01834dcf6069cde36c5e110511f1c33f158ca4e3e0ad3d52184332a287926e",
+        "raw_positions": 3727,
+        "filter_log": "Stability: 3223/3727 kept, 0 node-limited; abs(static-qsearch)<=25 cp",
+        "raw_outcomes": {
+          "0.5": 1647,
+          "1.0": 1108,
+          "0.0": 972
+        },
+        "raw_opening_groups": 248,
+        "outcomes": {
+          "0.0": 818,
+          "0.5": 1490,
+          "1.0": 915
+        }
+      },
+      "test": {
+        "positions": 605,
+        "sha256": "49b8d6af4262313ca352d9faabca591d0e0f777662fd919a3e530b120657ecd3",
+        "raw_positions": 710,
+        "filter_log": "Stability: 605/710 kept, 0 node-limited; abs(static-qsearch)<=25 cp",
+        "raw_outcomes": {
+          "1.0": 241,
+          "0.5": 258,
+          "0.0": 211
+        },
+        "raw_opening_groups": 46,
+        "outcomes": {
+          "0.0": 173,
+          "0.5": 230,
+          "1.0": 202
+        }
+      }
+    },
+    "cross_split_positions_removed": 0,
+    "stability_filter": {
+      "executable_sha256": "9f7aa95834f95e157be2251f68b5670bd98a0c25ec3383b1f5447eadf50514c0",
+      "threshold_cp": 25,
+      "node_limit": 10000,
+      "source_manifest_sha256": "67bb4e8ada04b458c2330de6ac709f8e2b997e714c405fbb635967a30d4a0aa4"
+    }
+  },
+  "evaluation_cost": {
+    "rounds_seconds": {
+      "baseline": [
+        0.5150688329886179,
+        0.5112776669993764,
+        0.5112610420037527,
+        0.5145307080092607,
+        0.5064079169969773
+      ],
+      "candidate": [
+        0.5428759589995025,
+        0.539830499998061,
+        0.575211165996734,
+        0.5529860829992685,
+        0.5380776660022093
+      ]
+    },
+    "median_seconds": {
+      "baseline": 0.5112776669993764,
+      "candidate": 0.5428759589995025
+    },
+    "positions_per_round": 1008320,
+    "candidate_time_change_percent": 6.18026055891947
+  },
+  "checks": [
+    "Zero weights: depth-5 scores/nodes/PV/best moves match accepted baseline at 68 positions",
+    "4,713 positions: independent king-pressure oracle, mirrors, zero/nonzero weights and legacy evaluation",
+    "Strict-warning full regression suite with ASan/UBSan, SMP and real Syzygy passed"
+  ],
+  "match_status": "Not yet evaluated; do not promote based on prediction loss."
+}

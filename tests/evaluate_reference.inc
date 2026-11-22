@@ -4,7 +4,11 @@
 
 #include "stdio.h"
 #include "defs.h"
+#ifdef JACE_TUNING
+#define PARAM(name, value, low, high) static int Reference##name = value;
+#else
 #define PARAM(name, value, low, high) static const int Reference##name = value;
+#endif
 #include "eval_params.def"
 #undef PARAM
 
@@ -120,6 +124,38 @@ static int ReferenceMobility(const S_BOARD *pos,int sq,int piece,int side) {
  }
  return n;
 }
+static int ReferenceKingPressure(const S_BOARD *pos,int side) {
+ int king=pos->KingSq[side^1],counts[4]={0},attackers=0,offset=side==WHITE?0:6;
+ for(int kind=wN;kind<=wQ;kind++) for(int i=0;i<pos->pceNum[kind+offset];i++) {
+  int from=pos->pList[kind+offset][i],hits=0;
+  for(int file=FilesBrd[king]-1;file<=FilesBrd[king]+1;file++)
+   for(int rank=RanksBrd[king]-1;rank<=RanksBrd[king]+1;rank++) {
+    if(file<0 || file>7 || rank<0 || rank>7) continue;
+    int target=FR2SQ(file,rank),victim=pos->pieces[target];
+    if(victim!=EMPTY && PieceCol[victim]==side) continue;
+    int df=FilesBrd[from]-file,dr=RanksBrd[from]-rank;
+    if(kind==wN) {if(abs(df)*abs(dr)==2) hits++;continue;}
+    if(!df && !dr) continue;
+    int diagonal=abs(df)==abs(dr),straight=!df || !dr;
+    if(kind==wB && !diagonal) continue;
+    if(kind==wR && !straight) continue;
+    if(kind==wQ && !diagonal && !straight) continue;
+    int step=(df>0?1:df<0?-1:0)+10*(dr>0?1:dr<0?-1:0);
+    int square=target+step;
+    while(square!=from && pos->pieces[square]==EMPTY) square+=step;
+    if(square==from) hits++;
+   }
+  if(hits) {counts[kind-wN]+=hits;attackers++;}
+ }
+ if(attackers<2) return 0;
+ if(attackers>4) attackers=4;
+ int pressure=counts[0]*ReferenceKingKnightAttack+counts[1]*ReferenceKingBishopAttack
+  +counts[2]*ReferenceKingRookAttack+counts[3]*ReferenceKingQueenAttack
+  +(attackers-1)*(attackers-1)*ReferenceKingCoordination;
+ if(!pos->pceNum[wQ+offset]) pressure/=2;
+ return pressure;
+}
+
 static int ReferencePawnShield(const S_BOARD *pos,int side) {
  int king=pos->KingSq[side],file=FilesBrd[king],rank=RanksBrd[king],step=side==WHITE?1:-1;
  int ownPawn=side==WHITE?wP:bP,score=0;
@@ -311,6 +347,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
   mg += ReferenceKingO[SQ64(pos->KingSq[WHITE])] - ReferenceKingO[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   eg += ReferenceKingE[SQ64(pos->KingSq[WHITE])] - ReferenceKingE[MIRROR64(SQ64(pos->KingSq[BLACK]))];
   mg += ReferencePawnShield(pos,WHITE)-ReferencePawnShield(pos,BLACK);
+  mg += ReferenceKingPressure(pos,WHITE)-ReferenceKingPressure(pos,BLACK);
   if(referenceKingProximity) eg += ReferencePassedKings(pos);
   for(int side=WHITE;side<=BLACK;side++) {
    int sign=side==WHITE?1:-1,offset=side==WHITE?0:6;
