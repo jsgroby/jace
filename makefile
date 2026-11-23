@@ -117,3 +117,9 @@ tuning-tools: $(BUILDDIR)/eval-tune$(EXE) $(BUILDDIR)/eval-fixed$(EXE)
 .PHONY: tuning-test
 tuning-test: tuning-tools
 	$(PYTHON) tools/tuning/test.py ./$(BUILDDIR)
+	$(PYTHON) tools/tuning/test_placement.py ./$(BUILDDIR)
+
+$(BUILDDIR)/evaluate-tune.o: piece_square.def
+$(BUILDDIR)/eval-stability$(EXE): tools/tuning/stability.c search.c $(filter-out $(BUILDDIR)/search.o,$(TUNE_OBJECTS)) $(BUILDDIR)/evaluate-tune.o
+	$(CC) $(BASE) $(FLAGS_$(MODE)) $(CPPFLAGS) $(CFLAGS) -DJACE_TUNING $< $(filter-out $(BUILDDIR)/search.o,$(TUNE_OBJECTS)) $(BUILDDIR)/evaluate-tune.o $(THREAD_FLAGS) $(LDFLAGS) $(LINK_$(MODE)) -o $@
+tuning-tools: $(BUILDDIR)/eval-stability$(EXE)

@@ -82,6 +82,16 @@ const int ReferenceKingO[64] = {
 	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70
 };
 
+static int ReferenceKnightPlacement(int square) {
+ const int regions[16]={ReferencePstKnightR0F0,ReferencePstKnightR0F1,ReferencePstKnightR0F2,ReferencePstKnightR0F3,ReferencePstKnightR1F0,ReferencePstKnightR1F1,ReferencePstKnightR1F2,ReferencePstKnightR1F3,ReferencePstKnightR2F0,ReferencePstKnightR2F1,ReferencePstKnightR2F2,ReferencePstKnightR2F3,ReferencePstKnightR3F0,ReferencePstKnightR3F1,ReferencePstKnightR3F2,ReferencePstKnightR3F3};
+ int file=square%8;if(file>3) file=7-file;
+ return ReferenceKnightTable[square]+regions[(square/16)*4+file];
+}
+static int ReferenceBishopPlacement(int square) {
+ const int regions[16]={ReferencePstBishopR0F0,ReferencePstBishopR0F1,ReferencePstBishopR0F2,ReferencePstBishopR0F3,ReferencePstBishopR1F0,ReferencePstBishopR1F1,ReferencePstBishopR1F2,ReferencePstBishopR1F3,ReferencePstBishopR2F0,ReferencePstBishopR2F1,ReferencePstBishopR2F2,ReferencePstBishopR2F3,ReferencePstBishopR3F0,ReferencePstBishopR3F1,ReferencePstBishopR3F2,ReferencePstBishopR3F3};
+ int file=square%8;if(file>3) file=7-file;
+ return ReferenceBishopTable[square]+regions[(square/16)*4+file];
+}
 // sjeng 11.2
 //8/6R1/2k5/6P1/8/8/4nP2/6K1 w - - 1 41
 int ReferenceDeadMaterial(const S_BOARD *pos) {
@@ -225,7 +235,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(SQ64(sq)>=0 && SQ64(sq)<=63);
-		score += ReferenceKnightTable[SQ64(sq)];
+		score += ReferenceKnightPlacement(SQ64(sq));
 	}
 
 	pce = bN;
@@ -233,7 +243,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(MIRROR64(SQ64(sq))>=0 && MIRROR64(SQ64(sq))<=63);
-		score -= ReferenceKnightTable[MIRROR64(SQ64(sq))];
+		score -= ReferenceKnightPlacement(MIRROR64(SQ64(sq)));
 	}
 
 	pce = wB;
@@ -241,7 +251,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(SQ64(sq)>=0 && SQ64(sq)<=63);
-		score += ReferenceBishopTable[SQ64(sq)];
+		score += ReferenceBishopPlacement(SQ64(sq));
 	}
 
 	pce = bB;
@@ -249,7 +259,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(MIRROR64(SQ64(sq))>=0 && MIRROR64(SQ64(sq))<=63);
-		score -= ReferenceBishopTable[MIRROR64(SQ64(sq))];
+		score -= ReferenceBishopPlacement(MIRROR64(SQ64(sq)));
 	}
 
 	pce = wR;

@@ -21,16 +21,19 @@ def main():
     ap.add_argument('--output', type=pathlib.Path, required=True)
     ap.add_argument('--exe', type=pathlib.Path, default=pathlib.Path('build/release/eval-tune'))
     ap.add_argument('--params', type=pathlib.Path, default=pathlib.Path('eval_params.def'))
+    ap.add_argument('--only-prefix', default='', help='Fit only matching parameters; freeze all others')
     args = ap.parse_args()
     if args.output.exists(): raise SystemExit('Output already exists')
     params = [(n, int(v), int(lo), int(hi)) for n,v,lo,hi in re.findall(
         r'PARAM\((\w+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)\)', args.params.read_text())]
     initial = [p[1] for p in params]; weights = initial.copy()
+    active = [i for i,p in enumerate(params) if p[0].startswith(args.only_prefix) and p[2]<p[3]]
+    if not active: raise SystemExit('No matching parameters')
     train = Evaluator(args.exe, args.data / 'train.tsv')
     valid = Evaluator(args.exe, args.data / 'validation.tsv')
     # Calibrate score/result scale on training only, then freeze it.
     k = min((i / 20 for i in range(2, 61)), key=lambda x: train.loss(x, initial))
-    regularization = lambda w: 0.002 * sum(((a-b)/20)**2 for a,b in zip(w,initial))/len(w)
+    regularization = lambda w: 0.002 * sum(((w[i]-initial[i])/20)**2 for i in active)/len(active)
     baseline = {'train': train.loss(k, initial), 'validation': valid.loss(k, initial)}
     best = initial.copy(); best_validation = baseline['validation']; history = []
     print('Baseline', k, baseline, flush=True)
@@ -38,6 +41,7 @@ def main():
     for step in (4, 2, 1, 1, 1, 1):
         objective = train.loss(k, weights) + regularization(weights)
         for i, (name, default, low, high) in enumerate(params):
+            if i not in active: continue
             winner = weights.copy(); value = objective
             for delta in (-step, step):
                 trial = weights.copy(); trial[i] += delta
@@ -55,7 +59,7 @@ def main():
     # Open held-out test only after selecting and freezing the candidate.
     test = Evaluator(args.exe, args.data / 'test.tsv')
     baseline['test'] = test.loss(k, initial); final['test'] = test.loss(k, best); test.close()
-    report = {'k': k, 'baseline_mse': baseline, 'candidate_mse': final, 'history': history,
+    report = {'active_parameters': [params[i][0] for i in active], 'k': k, 'baseline_mse': baseline, 'candidate_mse': final, 'history': history,
               'weights': dict(zip((p[0] for p in params), best)),
               'data_manifest_sha256': hashlib.sha256((args.data/'manifest.json').read_bytes()).hexdigest(),
               'evaluator_sha256': hashlib.sha256(args.exe.read_bytes()).hexdigest(),

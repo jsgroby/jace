@@ -68,3 +68,47 @@ hash, tuning output, candidate hash and match command together.
 
 The earlier Sjeng loss review found search-horizon sensitivity as well as king
 exposure. King safety remains an experiment, not a proven cure for those losses.
+
+## Regional knight/bishop placement experiment
+
+The accepted 21 evaluation weights remain fixed. Each minor piece has a 4x4 grid
+of adjustments: four two-rank bands and four mirrored-file groups (a/h, b/g, c/f,
+d/e). The back-rank corner group is fixed at zero for each piece, leaving 30
+adjustable offsets with bounds [-20,20] cp. These anchors constrain global shifts
+that could otherwise act like changing piece values. Existing asymmetric table
+entries are retained; only corrections are horizontally symmetric. Phase-specific
+placement and passed-pawn terms are separate future experiments.
+
+Normal builds use integer constant expressions to fold the offsets directly into
+the existing tables. The standalone tuning build computes base+offset dynamically.
+The independent reference evaluator retains its original tables and calculates
+region indices separately. test_placement.py checks each offset on every eligible
+square and its color mirror (224 cases), with exact expected score changes.
+
+`--only-prefix Pst` freezes other weights during tuning. The data preparer now
+supports `--allow-captures` followed by baseline tactical-stability filtering.
+Repeated `--holdout-pgn FILE` arguments reserve all opening groups from those
+files for test, rather than only a hashed subset. Combined with `--test-source
+FILE`, older sources cannot contribute test samples, and matching opening groups
+cannot enter training. Ordinary older test groups are excluded, not reassigned.
+
+The stability executable disables every Pst offset and uses the accepted scalar
+weights when applying a 25 cp static-versus-quiescence threshold, with a 10,000-node
+cap. It is an offline filter, not a change to engine search.
+
+```sh
+make CFLAGS=-Werror release tuning-test
+# Use the pinned python-chess environment to prepare PGNs.
+.venv-tuning/bin/python tools/tuning/prepare.py --allow-captures \
+  --holdout-pgn /path/to/fresh.pgn --test-source /path/to/fresh.pgn \
+  --output /path/to/raw /path/to/training.pgn /path/to/fresh.pgn
+python3 tools/tuning/filter_stability.py --input /path/to/raw \
+  --output /path/to/data --exe build/release/eval-stability
+python3 tools/tuning/tune.py --only-prefix Pst \
+  --data /path/to/data --output /path/to/fit
+```
+
+These data are still local engine-game outcomes, with uneven opponent strengths
+and limited coverage. Broader data reduce some limitations but do not establish
+an Elo gain. Match against the frozen accepted baseline on fresh paired openings.
+See ROADMAP.md for the requested experiment order.

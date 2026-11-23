@@ -6,10 +6,11 @@
 #ifdef JACE_TUNING
 #define PARAM(name, value, low, high) int name = value;
 #else
-#define PARAM(name, value, low, high) static const int name = value;
+#define PARAM(name, value, low, high) enum { name = value };
 #endif
 #include "eval_params.def"
 #undef PARAM
+#include "piece_square.def"
 
 
 const int PawnPassed[8] = { 0, 5, 10, 20, 35, 60, 100, 200 }; 
@@ -30,27 +31,45 @@ const int PawnTable[64] = {
 0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	
 };
 
-const int KnightTable[64] = {
-0	,	-10	,	0	,	0	,	0	,	0	,	-10	,	0	,
-0	,	0	,	0	,	5	,	5	,	0	,	0	,	0	,
-0	,	0	,	10	,	10	,	10	,	10	,	0	,	0	,
-0	,	0	,	10	,	20	,	20	,	10	,	5	,	0	,
-5	,	10	,	15	,	20	,	20	,	15	,	10	,	5	,
-5	,	10	,	10	,	20	,	20	,	10	,	10	,	5	,
-0	,	0	,	5	,	10	,	10	,	5	,	0	,	0	,
-0	,	0	,	0	,	0	,	0	,	0	,	0	,	0		
-};
+#ifdef JACE_TUNING
+#define SQUARE(base, adjustment) base,
+const int KnightTable[64] = { KNIGHT_SQUARES(SQUARE) };
+#undef SQUARE
+#define SQUARE(base, adjustment) &adjustment,
+static int *const KnightOffsets[64] = { KNIGHT_SQUARES(SQUARE) };
+#undef SQUARE
+#else
+#define SQUARE(base, adjustment) (base)+(adjustment),
+const int KnightTable[64] = { KNIGHT_SQUARES(SQUARE) };
+#undef SQUARE
+#endif
+static int KnightPlacement(int square) {
+#ifdef JACE_TUNING
+ return KnightTable[square]+*KnightOffsets[square];
+#else
+ return KnightTable[square];
+#endif
+}
 
-const int BishopTable[64] = {
-0	,	0	,	-10	,	0	,	0	,	-10	,	0	,	0	,
-0	,	0	,	0	,	10	,	10	,	0	,	0	,	0	,
-0	,	0	,	10	,	15	,	15	,	10	,	0	,	0	,
-0	,	10	,	15	,	20	,	20	,	15	,	10	,	0	,
-0	,	10	,	15	,	20	,	20	,	15	,	10	,	0	,
-0	,	0	,	10	,	15	,	15	,	10	,	0	,	0	,
-0	,	0	,	0	,	10	,	10	,	0	,	0	,	0	,
-0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	
-};
+#ifdef JACE_TUNING
+#define SQUARE(base, adjustment) base,
+const int BishopTable[64] = { BISHOP_SQUARES(SQUARE) };
+#undef SQUARE
+#define SQUARE(base, adjustment) &adjustment,
+static int *const BishopOffsets[64] = { BISHOP_SQUARES(SQUARE) };
+#undef SQUARE
+#else
+#define SQUARE(base, adjustment) (base)+(adjustment),
+const int BishopTable[64] = { BISHOP_SQUARES(SQUARE) };
+#undef SQUARE
+#endif
+static int BishopPlacement(int square) {
+#ifdef JACE_TUNING
+ return BishopTable[square]+*BishopOffsets[square];
+#else
+ return BishopTable[square];
+#endif
+}
 
 const int RookTable[64] = {
 0	,	0	,	5	,	10	,	10	,	5	,	0	,	0	,
@@ -279,7 +298,7 @@ int EvalPositionForSearch(const S_BOARD *pos,S_PAWNCACHE *cache,int tapered) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(SQ64(sq)>=0 && SQ64(sq)<=63);
-		score += KnightTable[SQ64(sq)];
+		score += KnightPlacement(SQ64(sq));
 	}	
 
 	pce = bN;	
@@ -287,7 +306,7 @@ int EvalPositionForSearch(const S_BOARD *pos,S_PAWNCACHE *cache,int tapered) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(MIRROR64(SQ64(sq))>=0 && MIRROR64(SQ64(sq))<=63);
-		score -= KnightTable[MIRROR64(SQ64(sq))];
+		score -= KnightPlacement(MIRROR64(SQ64(sq)));
 	}			
 
 	pce = wB;	
@@ -295,7 +314,7 @@ int EvalPositionForSearch(const S_BOARD *pos,S_PAWNCACHE *cache,int tapered) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(SQ64(sq)>=0 && SQ64(sq)<=63);
-		score += BishopTable[SQ64(sq)];
+		score += BishopPlacement(SQ64(sq));
 	}	
 
 	pce = bB;	
@@ -303,7 +322,7 @@ int EvalPositionForSearch(const S_BOARD *pos,S_PAWNCACHE *cache,int tapered) {
 		sq = pos->pList[pce][pceNum];
 		ASSERT(SqOnBoard(sq));
 		ASSERT(MIRROR64(SQ64(sq))>=0 && MIRROR64(SQ64(sq))<=63);
-		score -= BishopTable[MIRROR64(SQ64(sq))];
+		score -= BishopPlacement(MIRROR64(SQ64(sq)));
 	}	
 
 	pce = wR;	
