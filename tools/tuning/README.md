@@ -54,20 +54,12 @@ matches against the frozen release. Do not change main or replace a release
 based only on fitted loss. Archive dataset manifest, starting weights, evaluator
 hash, tuning output, candidate hash and match command together.
 
-## Staged follow-up
+## Current experiment sequence
 
-1. Test existing-weight tuning against v1.5.2.
-2. Add an explicit king-ring attack/coordination feature separately, with zero
-   default contribution and independent tests for mirrors, blockers and phase.
-   Preserve the existing shelter term and avoid counting it twice.
-3. Use training/validation for fitting the new feature; reserve fresh held-out
-   data for its final assessment. The present quiet-only dataset needs broader
-   king-attack coverage before making claims about that feature.
-4. Match the king-safety candidate against the accepted result of stage 1, then
-   confirm any gain on fresh openings and against other opponents.
-
-The earlier Sjeng loss review found search-horizon sensitivity as well as king
-exposure. King safety remains an experiment, not a proven cure for those losses.
+Existing-weight tuning was accepted in PR #35. The separate king-pressure
+experiment (PR #36) was closed without merging after failing to demonstrate a
+match gain. The current order is placement, passed-pawn bonuses, then evidence-led
+search diagnostics; see ROADMAP.md. No king-pressure engine code is included here.
 
 ## Regional knight/bishop placement experiment
 
@@ -112,3 +104,9 @@ These data are still local engine-game outcomes, with uneven opponent strengths
 and limited coverage. Broader data reduce some limitations but do not establish
 an Elo gain. Match against the frozen accepted baseline on fresh paired openings.
 See ROADMAP.md for the requested experiment order.
+
+Older opponent PGNs without a Termination tag can be admitted with
+`--verify-missing-termination`, but only when legal replay of the final board
+confirms the recorded result (including a claimable draw). Explicit abnormal
+terminations remain excluded. Run `tools/tuning/test_prepare.py` using the pinned
+python-chess environment to check holdout/duplicate handling and this validation.

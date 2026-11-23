@@ -37,6 +37,9 @@ with tempfile.TemporaryDirectory() as tmp:
         engine.stdin.write(' '.join(map(str,[0,*w]))+'\n');engine.stdin.flush()
         return [int(engine.stdout.readline()) for _ in positions]
     base=scores(weights);count=0
+    compiled=list(map(int,subprocess.check_output([str(bindir/('eval-fixed'+suffix)),str(path)],input='0\n',text=True).splitlines()))
+    defaults={n:int(v) for n,v,lo,hi in params}
+    assert compiled==[v+sign*defaults[group] for v,(group,sign) in zip(base,identities)], 'Compiled table differs from independent regional mapping'
     for i,(name,value,low,high) in enumerate(params):
         if not name.startswith('Pst') or int(high)==0:continue
         trial=weights.copy();trial[i]=7;actual=scores(trial)
