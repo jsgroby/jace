@@ -82,6 +82,12 @@ const int ReferenceKingO[64] = {
 	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70	,	-70
 };
 
+static int ReferencePassedMG(int rank) {
+ const int weights[8]={0,ReferencePassMG2,ReferencePassMG3,ReferencePassMG4,ReferencePassMG5,ReferencePassMG6,ReferencePassMG7,0};return weights[rank];
+}
+static int ReferencePassedEG(int rank) {
+ const int weights[8]={0,ReferencePassEG2,ReferencePassEG3,ReferencePassEG4,ReferencePassEG5,ReferencePassEG6,ReferencePassEG7,0};return weights[rank];
+}
 // sjeng 11.2
 //8/6R1/2k5/6P1/8/8/4nP2/6K1 w - - 1 41
 int ReferenceDeadMaterial(const S_BOARD *pos) {
@@ -325,7 +331,10 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
     int square=pos->pList[pawn][i],rank=RanksBrd[square];
     int relative=side==WHITE?rank:7-rank;
     U64 passed=side==WHITE?WhitePassedMask[SQ64(square)]:BlackPassedMask[SQ64(square)];
-    if(!(passed&pos->pawns[side^1])) mg-=sign*(ReferencePawnPassed[relative]/2);
+    if(!(passed&pos->pawns[side^1])) {
+     mg+=sign*(ReferencePassedMG(relative)-ReferencePawnPassed[relative]);
+     eg+=sign*(ReferencePassedEG(relative)-ReferencePawnPassed[relative]);
+    }
     int behind=side==WHITE?-10:10;
     int supported=pos->pieces[square+behind-1]==pawn || pos->pieces[square+behind+1]==pawn;
     int connected=pos->pieces[square-1]==pawn || pos->pieces[square+1]==pawn;
@@ -335,7 +344,7 @@ int ReferenceEvalPosition(const S_BOARD *pos) {
     for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
     if(ahead) {
      mg-=sign*ReferenceDoubledMG;eg-=sign*ReferenceDoubledEG;
-     if(!(passed&pos->pawns[side^1])) {mg-=sign*(ReferencePawnPassed[relative]-ReferencePawnPassed[relative]/2);eg-=sign*ReferencePawnPassed[relative];}
+     if(!(passed&pos->pawns[side^1])) {mg-=sign*ReferencePassedMG(relative);eg-=sign*ReferencePassedEG(relative);}
     }
    }
   }

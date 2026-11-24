@@ -6,7 +6,7 @@
 #ifdef JACE_TUNING
 #define PARAM(name, value, low, high) int name = value;
 #else
-#define PARAM(name, value, low, high) static const int name = value;
+#define PARAM(name, value, low, high) enum { name = value };
 #endif
 #include "eval_params.def"
 #undef PARAM
@@ -18,6 +18,26 @@ const int PawnPassed[8] = { 0, 5, 10, 20, 35, 60, 100, 200 };
 
 
 
+
+/* Frontmost passed-pawn bonuses; classical evaluation keeps PawnPassed. */
+static int PassedMG(int rank) {
+#ifdef JACE_TUNING
+ static int *const weights[8]={NULL,&PassMG2,&PassMG3,&PassMG4,&PassMG5,&PassMG6,&PassMG7,NULL};
+ return rank>0 && rank<7?*weights[rank]:0;
+#else
+ static const int weights[8]={0,PassMG2,PassMG3,PassMG4,PassMG5,PassMG6,PassMG7,0};
+ return weights[rank];
+#endif
+}
+static int PassedEG(int rank) {
+#ifdef JACE_TUNING
+ static int *const weights[8]={NULL,&PassEG2,&PassEG3,&PassEG4,&PassEG5,&PassEG6,&PassEG7,NULL};
+ return rank>0 && rank<7?*weights[rank]:0;
+#else
+ static const int weights[8]={0,PassEG2,PassEG3,PassEG4,PassEG5,PassEG6,PassEG7,0};
+ return weights[rank];
+#endif
+}
 
 const int PawnTable[64] = {
 0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,
@@ -220,7 +240,10 @@ static S_PAWNSCORE CalculatePawnScore(const S_BOARD *pos) {
     int square=pos->pList[pawn][i],rank=RanksBrd[square];
     int relative=side==WHITE?rank:7-rank;
     U64 passed=side==WHITE?WhitePassedMask[SQ64(square)]:BlackPassedMask[SQ64(square)];
-    if(!(passed&pos->pawns[side^1])) mg-=sign*(PawnPassed[relative]/2);
+    if(!(passed&pos->pawns[side^1])) {
+     mg+=sign*(PassedMG(relative)-PawnPassed[relative]);
+     eg+=sign*(PassedEG(relative)-PawnPassed[relative]);
+    }
     int behind=side==WHITE?-10:10;
     int supported=pos->pieces[square+behind-1]==pawn || pos->pieces[square+behind+1]==pawn;
     int connected=pos->pieces[square-1]==pawn || pos->pieces[square+1]==pawn;
@@ -230,7 +253,7 @@ static S_PAWNSCORE CalculatePawnScore(const S_BOARD *pos) {
     for(int to=square+step;pos->pieces[to]!=OFFBOARD;to+=step) if(pos->pieces[to]==pawn) {ahead=TRUE;break;}
     if(ahead) {
      mg-=sign*DoubledMG;eg-=sign*DoubledEG;
-     if(!(passed&pos->pawns[side^1])) {mg-=sign*(PawnPassed[relative]-PawnPassed[relative]/2);eg-=sign*PawnPassed[relative];}
+     if(!(passed&pos->pawns[side^1])) {mg-=sign*PassedMG(relative);eg-=sign*PassedEG(relative);}
     }
    }
  }
